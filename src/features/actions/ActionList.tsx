@@ -35,7 +35,7 @@ const ActionList: React.FC = () => {
     const { t } = useTranslation('actions');
     const navigate = useNavigate();
     const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
-    const [statusFilter, setStatusFilter] = useState<string>('');
+    const [statusFilter, setStatusFilter] = useState<string[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>('');
 
     const offset = (pagination.current - 1) * pagination.pageSize;
@@ -43,8 +43,9 @@ const ActionList: React.FC = () => {
     // Build query filter
     const buildQuery = () => {
         const filters: string[] = [];
-        if (statusFilter) {
-            filters.push(`status==${statusFilter}`);
+        if (statusFilter.length > 0) {
+            // Multiple status filter: status=in=(pending,running)
+            filters.push(`status=in=(${statusFilter.join(',')})`);
         }
         if (searchQuery) {
             filters.push(`target.name==*${searchQuery}*`);
@@ -52,11 +53,24 @@ const ActionList: React.FC = () => {
         return filters.length > 0 ? filters.join(';') : undefined;
     };
 
-    const { data, isLoading, refetch } = useGetActions({
-        offset,
-        limit: pagination.pageSize,
-        q: buildQuery(),
-    });
+    // Check if any running actions exist for auto-refresh
+    const hasRunningActions = (content?: MgmtAction[]) =>
+        content?.some((a) => ['running', 'pending', 'canceling'].includes(a.status || ''));
+
+    const { data, isLoading, refetch } = useGetActions(
+        {
+            offset,
+            limit: pagination.pageSize,
+            q: buildQuery(),
+        },
+        {
+            query: {
+                refetchInterval: (query) => {
+                    return hasRunningActions(query.state.data?.content) ? 5000 : false;
+                },
+            },
+        }
+    );
 
     const columns: TableProps<MgmtAction>['columns'] = [
         {
@@ -151,11 +165,12 @@ const ActionList: React.FC = () => {
                             style={{ width: 200 }}
                         />
                         <Select
+                            mode="multiple"
                             placeholder={t('filter.statusPlaceholder')}
-                            value={statusFilter || undefined}
+                            value={statusFilter}
                             onChange={setStatusFilter}
                             allowClear
-                            style={{ width: 180 }}
+                            style={{ minWidth: 200 }}
                         >
                             <Option value="pending">{t('filter.pending')}</Option>
                             <Option value="running">{t('filter.running')}</Option>
@@ -166,7 +181,7 @@ const ActionList: React.FC = () => {
                         </Select>
                         <Button onClick={() => {
                             setSearchQuery('');
-                            setStatusFilter('');
+                            setStatusFilter([]);
                         }}>
                             {t('filter.clearFilters')}
                         </Button>

@@ -40,6 +40,7 @@
         "controlsTitle": "액션 제어",
         "statusHistoryTitle": "상태 이력",
         "noStatusHistory": "상태 이력이 없습니다",
+        "errorBannerTitle": "오류 발생",
         "noActions": "현재 상태에서 사용 가능한 액션이 없습니다",
         "labels": {
             "id": "ID",
@@ -51,7 +52,9 @@
             "detailStatus": "상세 상태",
             "rollout": "롤아웃",
             "rolloutName": "롤아웃 이름",
-            "weight": "가중치"
+            "weight": "가중치",
+            "target": "타겟",
+            "distributionSet": "배포 세트"
         },
         "controls": {
             "cancel": "취소",

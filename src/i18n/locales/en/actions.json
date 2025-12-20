@@ -40,6 +40,7 @@
         "controlsTitle": "Action Controls",
         "statusHistoryTitle": "Status History",
         "noStatusHistory": "No status history available",
+        "errorBannerTitle": "Error Occurred",
         "noActions": "No actions available for this status",
         "labels": {
             "id": "ID",
@@ -51,7 +52,9 @@
             "detailStatus": "Detail Status",
             "rollout": "Rollout",
             "rolloutName": "Rollout Name",
-            "weight": "Weight"
+            "weight": "Weight",
+            "target": "Target",
+            "distributionSet": "Distribution Set"
         },
         "controls": {
             "cancel": "Cancel",

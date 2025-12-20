@@ -20,6 +20,7 @@ import {
     CheckCircleOutlined,
     CloseCircleOutlined,
 } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
 import { useGetAction1 } from '@/api/generated/actions/actions';
 import {
     useGetActionStatusList,
@@ -67,19 +68,36 @@ const ActionDetail: React.FC = () => {
     const actionIdNum = parseInt(actionId || '0', 10);
 
     // Fetch action details
+    // Auto-refresh for running actions
+    const isRunning = (status?: string) => ['running', 'pending', 'canceling'].includes(status || '');
+
     const { data: actionData, isLoading, error } = useGetAction1(actionIdNum, {
-        query: { enabled: !!actionIdNum },
+        query: {
+            enabled: !!actionIdNum,
+            refetchInterval: (query) => {
+                const data = query.state.data;
+                return isRunning(data?.status) ? 5000 : false;
+            },
+        },
     });
 
     // Fetch action status history
     // Note: This requires targetId which we may need to extract from actionData
     const targetId = actionData?._links?.target?.href?.split('/').pop() || '';
+    const targetName = actionData?._links?.target?.name || targetId;
+    const dsId = actionData?._links?.distributionset?.href?.split('/').pop() || '';
+    const dsName = actionData?._links?.distributionset?.name || '';
 
     const { data: statusData, isLoading: statusLoading } = useGetActionStatusList(
         targetId,
         actionIdNum,
         { limit: 100 },
-        { query: { enabled: !!targetId && !!actionIdNum } }
+        {
+            query: {
+                enabled: !!targetId && !!actionIdNum,
+                refetchInterval: isRunning(actionData?.status) ? 5000 : false,
+            },
+        }
     );
 
     // Mutations
@@ -184,6 +202,10 @@ const ActionDetail: React.FC = () => {
     const canForce = actionData.status === 'running' && actionData.forceType !== 'forced';
     const canConfirm = actionData.status === 'wait_for_confirmation';
 
+    // Find latest error message from status history
+    const latestError = statusData?.content?.find((s: MgmtActionStatus) => s.type === 'error');
+    const errorMessages = latestError?.messages || [];
+
     return (
         <div style={{ padding: 24 }}>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -201,6 +223,9 @@ const ActionDetail: React.FC = () => {
                     <Tag color={getStatusColor(actionData.status)} style={{ fontSize: 14 }}>
                         {actionData.status?.toUpperCase()}
                     </Tag>
+                    {isRunning(actionData.status) && (
+                        <Tag color="blue">LIVE</Tag>
+                    )}
                 </Space>
 
                 {/* Action Controls (Admin Only) */}
@@ -263,6 +288,22 @@ const ActionDetail: React.FC = () => {
                     </Card>
                 )}
 
+                {/* Error Banner */}
+                {actionData.status === 'error' && errorMessages.length > 0 && (
+                    <Alert
+                        type="error"
+                        message={t('detail.errorBannerTitle')}
+                        description={
+                            <ul style={{ margin: 0, paddingLeft: 20 }}>
+                                {errorMessages.map((msg: string, idx: number) => (
+                                    <li key={idx}>{msg}</li>
+                                ))}
+                            </ul>
+                        }
+                        showIcon
+                    />
+                )}
+
                 {/* Overview */}
                 <Card title={t('detail.overviewTitle')}>
                     <Descriptions bordered column={2}>
@@ -289,6 +330,16 @@ const ActionDetail: React.FC = () => {
                             {actionData.lastModifiedAt
                                 ? format(actionData.lastModifiedAt, 'yyyy-MM-dd HH:mm:ss')
                                 : '-'}
+                        </Descriptions.Item>
+                        <Descriptions.Item label={t('detail.labels.target')}>
+                            {targetId ? (
+                                <Link to={`/targets/${targetId}`}>{targetName}</Link>
+                            ) : '-'}
+                        </Descriptions.Item>
+                        <Descriptions.Item label={t('detail.labels.distributionSet')}>
+                            {dsId ? (
+                                <Link to={`/distributions/sets/${dsId}`}>{dsName}</Link>
+                            ) : '-'}
                         </Descriptions.Item>
                     </Descriptions>
                 </Card>
