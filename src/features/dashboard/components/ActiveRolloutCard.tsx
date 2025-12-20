@@ -12,7 +12,7 @@ const STATUS_ORDER = ['scheduled', 'waiting_for_approval', 'running', 'finished'
 export const ActiveRolloutCard: React.FC = () => {
     const { t } = useTranslation('dashboard');
     const { data, isLoading } = useGetRollouts(
-        { limit: 5, sort: 'lastModifiedAt,desc' },
+        { limit: 5 },
         { query: { refetchInterval: 30000 } }
     );
 

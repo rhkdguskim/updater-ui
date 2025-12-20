@@ -249,11 +249,12 @@ const SoftwareModuleDetail: React.FC = () => {
                                     />
                                 </Tooltip>
                                 {isAdmin && record.id && (
-                                    <Tooltip title={t('actions.delete')}>
+                                    <Tooltip title={moduleData?.locked ? t('detail.lockedHint') : t('actions.delete')}>
                                         <Button
                                             icon={<DeleteOutlined />}
                                             danger
                                             type="text"
+                                            disabled={moduleData?.locked}
                                             onClick={() => handleDeleteArtifact(record.id!)}
                                         />
                                     </Tooltip>

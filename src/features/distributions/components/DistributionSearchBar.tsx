@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Input, Button, Space, Select } from 'antd';
 import { SearchOutlined, ReloadOutlined, PlusOutlined } from '@ant-design/icons';
+import { buildWildcardSearch } from '@/utils/fiql';
 
 interface DistributionSearchBarProps {
     onSearch: (query: string) => void;
@@ -36,8 +37,8 @@ const DistributionSearchBar: React.FC<DistributionSearchBarProps> = ({
             return;
         }
 
-        // Simple FIQL construction
-        const query = `${searchField}==*${searchText}*`;
+        // Use centralized FIQL utility
+        const query = buildWildcardSearch(searchField, searchText);
         onSearch(query);
     };
 

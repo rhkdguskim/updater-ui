@@ -32,7 +32,9 @@
     },
     "actions": {
         "viewDetails": "상세 보기",
-        "delete": "삭제"
+        "delete": "삭제",
+        "clone": "복제",
+        "invalidate": "무효화"
     },
     "messages": {
         "deleteSetSuccess": "배포 세트가 성공적으로 삭제되었습니다.",
@@ -71,6 +73,8 @@
         "metadata": "메타데이터",
         "tags": "태그",
         "artifacts": "아티팩트",
+        "statistics": "통계",
+        "targets": "대상",
         "assignModule": "모듈 할당",
         "assignModuleTitle": "소프트웨어 모듈 할당",
         "selectModuleWarning": "최소 하나의 모듈을 선택해주세요.",

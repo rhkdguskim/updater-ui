@@ -32,7 +32,9 @@
     },
     "actions": {
         "viewDetails": "View Details",
-        "delete": "Delete"
+        "delete": "Delete",
+        "clone": "Clone",
+        "invalidate": "Invalidate"
     },
     "messages": {
         "deleteSetSuccess": "Distribution Set deleted successfully",
@@ -71,6 +73,8 @@
         "metadata": "Metadata",
         "tags": "Tags",
         "artifacts": "Artifacts",
+        "statistics": "Statistics",
+        "targets": "Targets",
         "assignModule": "Assign Module",
         "assignModuleTitle": "Assign Software Modules",
         "selectModuleWarning": "Please select at least one module",

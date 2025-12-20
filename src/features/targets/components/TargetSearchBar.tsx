@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Input, Space, Button, Select, Tooltip } from 'antd';
 import {
     SearchOutlined,
@@ -7,6 +7,8 @@ import {
     FilterOutlined,
 } from '@ant-design/icons';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
+import { buildWildcardSearch } from '@/utils/fiql';
 
 const { Search } = Input;
 
@@ -38,9 +40,6 @@ interface TargetSearchBarProps {
 
 type SearchField = 'name' | 'description';
 
-import { useTranslation } from 'react-i18next';
-// ...
-
 const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
     onSearch,
     onRefresh,
@@ -57,15 +56,10 @@ const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
         { value: 'description', label: t('search.fields.description') },
     ];
 
-    const buildFiqlQuery = useCallback((field: SearchField, value: string): string => {
-        if (!value.trim()) return '';
-        // FIQL wildcard search
-        return `${field}==*${value.trim()}*`;
-    }, []);
-
     const handleSearch = (value: string) => {
         setSearchValue(value);
-        const query = buildFiqlQuery(searchField, value);
+        // Use centralized FIQL utility
+        const query = buildWildcardSearch(searchField, value);
         onSearch(query);
     };
 

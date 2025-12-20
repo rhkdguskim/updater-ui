@@ -18,11 +18,11 @@ const ModuleUsageTab: React.FC<ModuleUsageTabProps> = ({ softwareModuleId }) => 
 
     const offset = (pagination.current - 1) * pagination.pageSize;
 
-    // HawkBit RQL: assignedSM.id=={id}
+    // HawkBit RQL: modules.id=={id}
     const { data, isLoading } = useGetDistributionSets({
         offset,
         limit: pagination.pageSize,
-        q: `assignedSM.id==${softwareModuleId}`
+        q: `modules.id==${softwareModuleId}`
     });
 
     const columns = [
