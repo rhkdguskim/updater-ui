@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Typography, Card, message, Alert } from 'antd';
+import { Typography, Card, message, Alert, Select, Space } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
     TargetTable,
@@ -21,6 +21,9 @@ import type { MgmtTarget, MgmtDistributionSetAssignments, MgmtDistributionSetAss
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
+import { useGetTargetTags } from '@/api/generated/target-tags/target-tags';
+import { useGetFilters } from '@/api/generated/target-filter-queries/target-filter-queries';
+import type { MgmtTag, MgmtTargetFilterQuery } from '@/api/generated/model';
 
 const { Title } = Typography;
 
@@ -48,6 +51,8 @@ const TargetList: React.FC = () => {
     const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
     const [sort, setSort] = useState<string>('');
     const [searchQuery, setSearchQuery] = useState<string>('');
+    const [selectedTagId, setSelectedTagId] = useState<number | undefined>(undefined);
+    const [selectedFilterId, setSelectedFilterId] = useState<number | undefined>(undefined);
 
     // Modal States
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -59,6 +64,24 @@ const TargetList: React.FC = () => {
     // Calculate offset for API
     const offset = (pagination.current - 1) * pagination.pageSize;
 
+    // FR-06: Target Tags
+    const { data: tagsData } = useGetTargetTags({ limit: 100 });
+
+    // FR-07: Saved Filters
+    const { data: filtersData } = useGetFilters({ limit: 100 });
+
+    // Get selected filter query
+    const selectedFilter = filtersData?.content?.find((f: MgmtTargetFilterQuery) => f.id === selectedFilterId);
+
+    // Build search query combining manual search, tag filter, and saved filter
+    const buildFinalQuery = useCallback(() => {
+        const queries: string[] = [];
+        if (searchQuery) queries.push(searchQuery);
+        if (selectedTagId) queries.push(`tag.id==${selectedTagId}`);
+        if (selectedFilter?.query) queries.push(selectedFilter.query);
+        return queries.length > 0 ? queries.join(';') : undefined;
+    }, [searchQuery, selectedTagId, selectedFilter]);
+
     // API Queries
     const {
         data: targetsData,
@@ -69,7 +92,7 @@ const TargetList: React.FC = () => {
         offset,
         limit: pagination.pageSize,
         sort: sort || undefined,
-        q: searchQuery || undefined,
+        q: buildFinalQuery(),
     });
 
     const { data: dsData, isLoading: dsLoading } = useGetDistributionSets(
@@ -229,6 +252,38 @@ const TargetList: React.FC = () => {
                     canAddTarget={isAdmin}
                     loading={targetsLoading}
                 />
+
+                {/* FR-06 & FR-07: Tag and Saved Filter Selectors */}
+                <Space style={{ marginTop: 16, marginBottom: 16 }} wrap>
+                    <Select
+                        placeholder="Filter by Tag"
+                        allowClear
+                        style={{ width: 180 }}
+                        value={selectedTagId}
+                        onChange={(val) => {
+                            setSelectedTagId(val);
+                            setPagination(prev => ({ ...prev, current: 1 }));
+                        }}
+                        options={(tagsData?.content as MgmtTag[] || []).map((tag: MgmtTag) => ({
+                            value: tag.id,
+                            label: tag.name,
+                        }))}
+                    />
+                    <Select
+                        placeholder="Saved Filters"
+                        allowClear
+                        style={{ width: 220 }}
+                        value={selectedFilterId}
+                        onChange={(val) => {
+                            setSelectedFilterId(val);
+                            setPagination(prev => ({ ...prev, current: 1 }));
+                        }}
+                        options={(filtersData?.content as MgmtTargetFilterQuery[] || []).map((f: MgmtTargetFilterQuery) => ({
+                            value: f.id,
+                            label: f.name,
+                        }))}
+                    />
+                </Space>
 
                 <TargetTable
                     data={targetsData?.content || []}
