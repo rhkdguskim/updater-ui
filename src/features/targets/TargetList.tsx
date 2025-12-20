@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Typography, Card, message, Alert, Select, Space } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import {
     TargetTable,
     TargetSearchBar,
@@ -44,6 +44,7 @@ const HeaderRow = styled.div`
 
 const TargetList: React.FC = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const queryClient = useQueryClient();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
@@ -52,7 +53,10 @@ const TargetList: React.FC = () => {
     // Pagination & Sorting State
     const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
     const [sort, setSort] = useState<string>('');
-    const [searchQuery, setSearchQuery] = useState<string>('');
+    const [searchQuery, setSearchQuery] = useState<string>(() => {
+        const params = new URLSearchParams(location.search);
+        return params.get('q') || '';
+    });
     const [selectedTagId, setSelectedTagId] = useState<number | undefined>(undefined);
     const [selectedFilterId, setSelectedFilterId] = useState<number | undefined>(undefined);
 
@@ -62,6 +66,15 @@ const TargetList: React.FC = () => {
     const [formModalOpen, setFormModalOpen] = useState(false);
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [targetToAssign, setTargetToAssign] = useState<MgmtTarget | null>(null);
+
+    // Sync URL query param to state
+    React.useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const q = params.get('q');
+        if (q !== null && q !== searchQuery) {
+            setSearchQuery(q);
+        }
+    }, [location.search]);
 
     // Calculate offset for API
     const offset = (pagination.current - 1) * pagination.pageSize;

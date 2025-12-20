@@ -54,7 +54,7 @@ Management API를 통해서만 동작한다.
 
 ### 포함 (In Scope)
 
-* Dashboard
+* **Dashboard (Operational Intelligence)**
 * Target Management
 * Distribution / Artifact 관리
 * Direct Assignment
@@ -110,19 +110,24 @@ Management API를 통해서만 동작한다.
 
 ---
 
-## FR-01 Dashboard
+## FR-01 Dashboard (Operational Intelligence)
+
+**Detailed Spec**: `docs/prd/DashboardImprovementPRD.md`
 
 ### 기능
 
-* 전체 Target 수
-* Online / Offline 집계
+* **Smart KPI (Trend & Risk)**
+* **Failure Analysis Widget**
+* **Version Fragmentation Map**
+* **Active Rollout Monitor**
+* 전체 Target 수 / Online / Offline 집계
 * 최근 배포 성공률
-* Action 상태 차트
 
 ### 데이터 소스
 
 * `/rest/v1/targets`
 * `/rest/v1/actions`
+* `/rest/v1/rollouts`
 
 ### Acceptance Criteria
 
@@ -130,6 +135,7 @@ Management API를 통해서만 동작한다.
 * [x] 실패 시 Skeleton UI
 * [x] 10초 Polling + Backoff
 * [x] 권한 없는 사용자 접근 불가
+* [ ] Advanced Widgets Implementation
 
 ---
 

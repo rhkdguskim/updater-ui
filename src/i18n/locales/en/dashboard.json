@@ -10,6 +10,8 @@
     "charts": {
         "deviceStatus": "Device Status",
         "actionStatus": "Action Status Distribution",
+        "failureAnalysis": "Failure Analysis (24h)",
+        "versionMap": "Status Distribution Map",
         "online": "Online",
         "offline": "Offline",
         "finished": "Finished",
@@ -17,6 +19,16 @@
         "running": "Running",
         "pending": "Pending",
         "count": "Count"
+    },
+    "rollout": {
+        "activeMonitor": "Active Rollout Monitor",
+        "noActiveRollout": "No active rollout currently"
+    },
+    "status": {
+        "in_sync": "In Sync",
+        "pending": "Pending",
+        "error": "Error",
+        "unknown": "Unknown"
     },
     "errors": {
         "loadFailed": "Data loading failed",
