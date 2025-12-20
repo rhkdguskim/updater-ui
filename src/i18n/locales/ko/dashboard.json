@@ -1,0 +1,29 @@
+{
+    "pageTitle": "대시보드 개요",
+    "kpi": {
+        "totalTargets": "총 대상",
+        "onlineTargets": "온라인 대상",
+        "offlineTargets": "오프라인 대상",
+        "successRate": "성공률 (최근)",
+        "notAvailable": "N/A"
+    },
+    "charts": {
+        "deviceStatus": "장치 상태",
+        "actionStatus": "액션 상태 분포",
+        "online": "온라인",
+        "offline": "오프라인",
+        "finished": "완료됨",
+        "error": "오류",
+        "running": "실행 중",
+        "pending": "대기 중",
+        "count": "개수"
+    },
+    "errors": {
+        "loadFailed": "데이터 로드 실패",
+        "chartLoadFailed": "차트 데이터 로드 실패"
+    },
+    "empty": {
+        "noDevices": "등록된 디바이스가 없습니다",
+        "noActions": "등록된 Action이 없습니다"
+    }
+}

@@ -9,6 +9,7 @@ import {
     AssignDSModal,
 } from './components';
 import type { AssignType } from './components';
+import { useTranslation } from 'react-i18next';
 import {
     useGetTargets,
     useDeleteTarget,
@@ -46,6 +47,7 @@ const TargetList: React.FC = () => {
     const queryClient = useQueryClient();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
+    const { t } = useTranslation('targets');
 
     // Pagination & Sorting State
     const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
@@ -104,15 +106,15 @@ const TargetList: React.FC = () => {
     const deleteTargetMutation = useDeleteTarget({
         mutation: {
             onSuccess: () => {
-                message.success('Target deleted successfully');
+                message.success(t('messages.deleteSuccess'));
                 setDeleteModalOpen(false);
                 setTargetToDelete(null);
                 queryClient.invalidateQueries({ queryKey: getGetTargetsQueryKey() });
             },
             onError: (error) => {
-                const errMsg = (error as Error).message || 'Failed to delete target';
+                const errMsg = (error as Error).message || t('messages.deleteFailed');
                 if (errMsg.includes('409')) {
-                    message.error('Conflict: Target was modified. Please refresh and try again.');
+                    message.error(t('messages.conflict', { ns: 'common' }));
                 } else {
                     message.error(errMsg);
                 }
@@ -123,14 +125,14 @@ const TargetList: React.FC = () => {
     const createTargetMutation = useCreateTargets({
         mutation: {
             onSuccess: () => {
-                message.success('Target created successfully');
+                message.success(t('messages.createSuccess'));
                 setFormModalOpen(false);
                 queryClient.invalidateQueries({ queryKey: getGetTargetsQueryKey() });
             },
             onError: (error) => {
-                const errMsg = (error as Error).message || 'Failed to create target';
+                const errMsg = (error as Error).message || t('messages.createFailed');
                 if (errMsg.includes('409')) {
-                    message.error('Target with this Controller ID already exists');
+                    message.error(t('messages.targetExists'));
                 } else {
                     message.error(errMsg);
                 }
@@ -141,13 +143,13 @@ const TargetList: React.FC = () => {
     const assignDSMutation = usePostAssignedDistributionSet({
         mutation: {
             onSuccess: () => {
-                message.success('Distribution Set assigned successfully');
+                message.success(t('messages.assignSuccess'));
                 setAssignModalOpen(false);
                 setTargetToAssign(null);
                 queryClient.invalidateQueries({ queryKey: getGetTargetsQueryKey() });
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to assign distribution set');
+                message.error((error as Error).message || t('messages.error', { ns: 'common' }));
             },
         },
     });
@@ -240,7 +242,7 @@ const TargetList: React.FC = () => {
         <PageContainer>
             <HeaderRow>
                 <Title level={2} style={{ margin: 0 }}>
-                    Target Management
+                    {t('title')}
                 </Title>
             </HeaderRow>
 
@@ -256,7 +258,7 @@ const TargetList: React.FC = () => {
                 {/* FR-06 & FR-07: Tag and Saved Filter Selectors */}
                 <Space style={{ marginTop: 16, marginBottom: 16 }} wrap>
                     <Select
-                        placeholder="Filter by Tag"
+                        placeholder={t('list.filterByTag')}
                         allowClear
                         style={{ width: 180 }}
                         value={selectedTagId}
@@ -270,7 +272,7 @@ const TargetList: React.FC = () => {
                         }))}
                     />
                     <Select
-                        placeholder="Saved Filters"
+                        placeholder={t('list.savedFilters')}
                         allowClear
                         style={{ width: 220 }}
                         value={selectedFilterId}

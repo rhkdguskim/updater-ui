@@ -3,7 +3,9 @@
     "list": {
         "title": "Target List",
         "addTarget": "Add Target",
-        "searchPlaceholder": "Enter search term"
+        "searchPlaceholder": "Enter search term",
+        "filterByTag": "Filter by Tag",
+        "savedFilters": "Saved Filters"
     },
     "detail": {
         "title": "Target Details",
@@ -14,8 +16,13 @@
             "distribution": "Distribution Sets",
             "metadata": "Metadata",
             "tags": "Tags",
-            "autoConfirm": "AutoConfirm"
-        }
+            "autoConfirm": "AutoConfirm",
+            "targetType": "Target Type"
+        },
+        "notFoundTitle": "Target not found",
+        "notFoundDesc": "The requested target does not exist or you don't have permission to view it.",
+        "backToTargets": "Back to Targets",
+        "assignDS": "Assign DS"
     },
     "table": {
         "controllerId": "Controller ID",
@@ -23,7 +30,12 @@
         "status": "Status",
         "updateStatus": "Update Status",
         "installedDS": "Installed DS",
-        "lastModified": "Last Modified"
+        "lastModified": "Last Modified",
+        "actions": "Actions",
+        "id": "ID",
+        "type": "Type",
+        "forceType": "Force Type",
+        "started": "Started"
     },
     "form": {
         "controllerId": "Controller ID",
@@ -45,7 +57,15 @@
         "updateSuccess": "Target updated successfully.",
         "deleteSuccess": "Target deleted successfully.",
         "assignSuccess": "Distribution Set assigned successfully.",
-        "notFound": "Target not found."
+        "metadataCreateSuccess": "Metadata created successfully.",
+        "metadataUpdateSuccess": "Metadata updated successfully.",
+        "metadataDeleteSuccess": "Metadata deleted successfully.",
+        "targetTypeAssigned": "Target type assigned successfully.",
+        "targetTypeRemoved": "Target type removed successfully.",
+        "notFound": "Target not found.",
+        "deleteFailed": "Failed to delete target.",
+        "createFailed": "Failed to create target.",
+        "targetExists": "Target with this Controller ID already exists."
     },
     "assign": {
         "title": "Assign Distribution Set",
@@ -84,5 +104,70 @@
         "requested": "Requested",
         "notRequested": "Not Requested",
         "targetType": "Target Type"
+    },
+    "status": {
+        "inSync": "In Sync",
+        "pending": "Pending",
+        "error": "Error",
+        "unknown": "Unknown",
+        "online": "Online",
+        "offline": "Offline"
+    },
+    "actions": {
+        "viewDetails": "View Details",
+        "delete": "Delete",
+        "refresh": "Refresh",
+        "filter": "Filter",
+        "force": "Force Update",
+        "cancel": "Cancel"
+    },
+    "search": {
+        "placeholder": "Search by {{field}}",
+        "fields": {
+            "controllerId": "Controller ID",
+            "name": "Name",
+            "description": "Description"
+        }
+    },
+    "attributes": {
+        "key": "Key",
+        "value": "Value",
+        "category": "Category",
+        "noAttributes": "No attributes found"
+    },
+    "ds": {
+        "installed": "Installed Distribution Set",
+        "assigned": "Assigned Distribution Set",
+        "current": "Current",
+        "pending": "Pending",
+        "modules": "Modules",
+        "softwareModules": "Software Modules",
+        "requiredMigration": "Required Migration",
+        "noInstalled": "No installed distribution set",
+        "noAssigned": "No assigned distribution set",
+        "noConfigured": "No distribution sets configured",
+        "yes": "Yes",
+        "no": "No"
+    },
+    "metadata": {
+        "key": "Key",
+        "value": "Value",
+        "noMetadata": "No metadata found",
+        "add": "Add Metadata",
+        "emptyText": "No metadata. Click 'Add Metadata' to create."
+    },
+    "tags": {
+        "noTags": "No tags assigned to this target"
+    },
+    "targetType": {
+        "current": "Current Target Type",
+        "noAssigned": "No target type assigned",
+        "assign": "Assign Target Type",
+        "change": "Change Type",
+        "remove": "Remove Type",
+        "select": "Select target type",
+        "assignTitle": "Assign Target Type",
+        "removeTitle": "Remove Target Type",
+        "removeConfirm": "Are you sure you want to remove the target type '{{name}}' from this target?"
     }
 }

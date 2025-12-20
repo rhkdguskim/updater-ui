@@ -2,6 +2,7 @@ import React from 'react';
 import { Tag, Typography, Skeleton, Empty, Space, Card, Row, Col } from 'antd';
 import { TagOutlined } from '@ant-design/icons';
 import type { MgmtTag } from '@/api/generated/model';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -11,12 +12,13 @@ interface TagsTabProps {
 }
 
 const TagsTab: React.FC<TagsTabProps> = ({ data, loading }) => {
+    const { t } = useTranslation('targets');
     if (loading) {
         return <Skeleton active paragraph={{ rows: 4 }} />;
     }
 
     if (!data || data.length === 0) {
-        return <Empty description="No tags assigned to this target" />;
+        return <Empty description={t('tags.noTags')} />;
     }
 
     return (
@@ -43,7 +45,7 @@ const TagsTab: React.FC<TagsTabProps> = ({ data, loading }) => {
                                 color={tag.colour || 'default'}
                                 style={{ marginTop: 8 }}
                             >
-                                ID: {tag.id}
+                                {t('tags.id') || 'ID'}: {tag.id}
                             </Tag>
                         </Space>
                     </Card>

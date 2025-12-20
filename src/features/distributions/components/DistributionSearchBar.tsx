@@ -12,17 +12,23 @@ interface DistributionSearchBarProps {
     type?: 'set' | 'module';
 }
 
+import { useTranslation } from 'react-i18next';
+
 const DistributionSearchBar: React.FC<DistributionSearchBarProps> = ({
     onSearch,
     onRefresh,
     onAdd,
     loading = false,
     canAdd = false,
-    placeholder = 'Search by name or version',
+    placeholder,
     type = 'set',
 }) => {
+    const { t } = useTranslation('distributions');
     const [searchText, setSearchText] = useState('');
     const [searchField, setSearchField] = useState('name');
+
+    // Default placeholder handling if not provided
+    const displayPlaceholder = placeholder || t('list.searchPlaceholder', { field: t(`list.searchFields.${searchField}`) });
 
     const handleSearch = () => {
         if (!searchText.trim()) {
@@ -47,15 +53,15 @@ const DistributionSearchBar: React.FC<DistributionSearchBarProps> = ({
                 <Select
                     defaultValue="name"
                     options={[
-                        { value: 'name', label: 'Name' },
-                        { value: 'version', label: 'Version' },
-                        { value: 'description', label: 'Description' },
+                        { value: 'name', label: t('list.searchFields.name') },
+                        { value: 'version', label: t('list.searchFields.version') },
+                        { value: 'description', label: t('list.searchFields.description') },
                     ]}
                     onChange={setSearchField}
                     style={{ width: 120 }}
                 />
                 <Input
-                    placeholder={placeholder}
+                    placeholder={displayPlaceholder}
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
                     onKeyPress={handleKeyPress}
@@ -64,16 +70,16 @@ const DistributionSearchBar: React.FC<DistributionSearchBarProps> = ({
                     prefix={<SearchOutlined />}
                 />
                 <Button type="primary" onClick={handleSearch} loading={loading}>
-                    Search
+                    {t('list.search')}
                 </Button>
                 <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
-                    Refresh
+                    {t('list.refresh')}
                 </Button>
             </Space>
 
             {canAdd && onAdd && (
                 <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-                    Add {type === 'set' ? 'Distribution Set' : 'Software Module'}
+                    {type === 'set' ? t('list.addSet') : t('list.addModule')}
                 </Button>
             )}
         </div>

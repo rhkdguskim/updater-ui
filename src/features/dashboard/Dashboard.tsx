@@ -12,6 +12,7 @@ import { useGetTargets } from '@/api/generated/targets/targets';
 import { useGetActions } from '@/api/generated/actions/actions';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { Navigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 
 const { Title } = Typography;
 
@@ -30,6 +31,7 @@ const ChartCard = styled(Card)`
 const COLORS = ['#52c41a', '#ff4d4f', '#1890ff', '#faad14'];
 
 const Dashboard: React.FC = () => {
+    const { t } = useTranslation('dashboard');
     const { role } = useAuthStore();
 
     // Redirect if not authenticated
@@ -68,8 +70,8 @@ const Dashboard: React.FC = () => {
 
     // Prepare Pie Chart Data
     const pieChartData = [
-        { name: 'Online', value: onlineCount },
-        { name: 'Offline', value: offlineCount },
+        { name: t('charts.online'), value: onlineCount },
+        { name: t('charts.offline'), value: offlineCount },
     ];
     const hasPieData = onlineCount > 0 || offlineCount > 0;
 
@@ -81,16 +83,16 @@ const Dashboard: React.FC = () => {
         pending: actionsData?.content?.filter((a) => a.status === 'pending').length || 0,
     };
     const barChartData = [
-        { name: 'Finished', value: actionStatusCounts.finished },
-        { name: 'Error', value: actionStatusCounts.error },
-        { name: 'Running', value: actionStatusCounts.running },
-        { name: 'Pending', value: actionStatusCounts.pending },
+        { name: t('charts.finished'), value: actionStatusCounts.finished },
+        { name: t('charts.error'), value: actionStatusCounts.error },
+        { name: t('charts.running'), value: actionStatusCounts.running },
+        { name: t('charts.pending'), value: actionStatusCounts.pending },
     ];
     const hasBarData = Object.values(actionStatusCounts).some((v) => v > 0);
 
     return (
         <div style={{ padding: '24px' }}>
-            <Title level={4} style={{ marginBottom: 24 }}>Dashboard Overview</Title>
+            <Title level={4} style={{ marginBottom: 24 }}>{t('pageTitle')}</Title>
 
             {/* KPI Cards */}
             <Row gutter={[16, 16]}>
@@ -99,10 +101,10 @@ const Dashboard: React.FC = () => {
                         {targetsLoading ? (
                             <Skeleton active paragraph={false} />
                         ) : targetsError ? (
-                            <Empty description="데이터 로드 실패" />
+                            <Empty description={t('errors.loadFailed')} />
                         ) : (
                             <Statistic
-                                title="Total Targets"
+                                title={t('kpi.totalTargets')}
                                 value={totalTargets}
                                 prefix={<DesktopOutlined />}
                             />
@@ -114,10 +116,10 @@ const Dashboard: React.FC = () => {
                         {targetsLoading ? (
                             <Skeleton active paragraph={false} />
                         ) : targetsError ? (
-                            <Empty description="데이터 로드 실패" />
+                            <Empty description={t('errors.loadFailed')} />
                         ) : (
                             <Statistic
-                                title="Online Targets"
+                                title={t('kpi.onlineTargets')}
                                 value={onlineCount}
                                 styles={{ content: { color: '#52c41a' } }}
                                 prefix={<CheckCircleOutlined style={{ color: '#52c41a' }} />}
@@ -130,10 +132,10 @@ const Dashboard: React.FC = () => {
                         {targetsLoading ? (
                             <Skeleton active paragraph={false} />
                         ) : targetsError ? (
-                            <Empty description="데이터 로드 실패" />
+                            <Empty description={t('errors.loadFailed')} />
                         ) : (
                             <Statistic
-                                title="Offline Targets"
+                                title={t('kpi.offlineTargets')}
                                 value={offlineCount}
                                 styles={{ content: { color: '#ff4d4f' } }}
                                 prefix={<CloseCircleOutlined style={{ color: '#ff4d4f' }} />}
@@ -146,16 +148,16 @@ const Dashboard: React.FC = () => {
                         {actionsLoading ? (
                             <Skeleton active paragraph={false} />
                         ) : actionsError ? (
-                            <Empty description="데이터 로드 실패" />
+                            <Empty description={t('errors.loadFailed')} />
                         ) : successRate === null ? (
                             <Statistic
-                                title="Success Rate (Recent)"
-                                value="N/A"
+                                title={t('kpi.successRate')}
+                                value={t('kpi.notAvailable')}
                                 prefix={<RiseOutlined />}
                             />
                         ) : (
                             <Statistic
-                                title="Success Rate (Recent)"
+                                title={t('kpi.successRate')}
                                 value={successRate}
                                 suffix="%"
                                 styles={{ content: { color: successRate >= 80 ? '#52c41a' : '#faad14' } }}
@@ -169,13 +171,13 @@ const Dashboard: React.FC = () => {
             {/* Charts */}
             <Row gutter={[16, 16]} style={{ marginTop: 24 }}>
                 <Col xs={24} lg={12}>
-                    <ChartCard title="Device Status">
+                    <ChartCard title={t('charts.deviceStatus')}>
                         {targetsLoading ? (
                             <Skeleton active />
                         ) : targetsError ? (
-                            <Empty description="차트 데이터 로드 실패" />
+                            <Empty description={t('errors.chartLoadFailed')} />
                         ) : !hasPieData ? (
-                            <Empty description="등록된 디바이스가 없습니다" />
+                            <Empty description={t('empty.noDevices')} />
                         ) : (
                             <ResponsiveContainer width="100%" height={300}>
                                 <PieChart>
@@ -200,13 +202,13 @@ const Dashboard: React.FC = () => {
                     </ChartCard>
                 </Col>
                 <Col xs={24} lg={12}>
-                    <ChartCard title="Action Status Distribution">
+                    <ChartCard title={t('charts.actionStatus')}>
                         {actionsLoading ? (
                             <Skeleton active />
                         ) : actionsError ? (
-                            <Empty description="차트 데이터 로드 실패" />
+                            <Empty description={t('errors.chartLoadFailed')} />
                         ) : !hasBarData ? (
-                            <Empty description="등록된 Action이 없습니다" />
+                            <Empty description={t('empty.noActions')} />
                         ) : (
                             <ResponsiveContainer width="100%" height={300}>
                                 <BarChart data={barChartData}>
@@ -214,7 +216,7 @@ const Dashboard: React.FC = () => {
                                     <YAxis />
                                     <Tooltip />
                                     <Legend />
-                                    <Bar dataKey="value" name="Count">
+                                    <Bar dataKey="value" name={t('charts.count')}>
                                         {barChartData.map((_entry, index) => (
                                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                         ))}
@@ -230,3 +232,4 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+

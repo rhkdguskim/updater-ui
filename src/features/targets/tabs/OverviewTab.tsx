@@ -31,13 +31,17 @@ interface OverviewTabProps {
     loading: boolean;
 }
 
+import { useTranslation } from 'react-i18next';
+// ...
+
 const OverviewTab: React.FC<OverviewTabProps> = ({ target, loading }) => {
+    const { t } = useTranslation('targets');
     if (loading) {
         return <Skeleton active paragraph={{ rows: 6 }} />;
     }
 
     if (!target) {
-        return <Empty description="Target not found" />;
+        return <Empty description={t('detail.notFound')} />;
     }
 
     const isOnline = !target.pollStatus?.overdue;
@@ -48,8 +52,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ target, loading }) => {
                 <Col xs={12} sm={6}>
                     <StyledCard>
                         <Statistic
-                            title="Status"
-                            value={isOnline ? 'Online' : 'Offline'}
+                            title={t('overview.status')}
+                            value={isOnline ? t('status.online') : t('status.offline')}
                             valueStyle={{ color: isOnline ? '#52c41a' : '#ff4d4f' }}
                             prefix={isOnline ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
                         />
@@ -58,8 +62,8 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ target, loading }) => {
                 <Col xs={12} sm={6}>
                     <StyledCard>
                         <Statistic
-                            title="Update Status"
-                            value={target.updateStatus || 'Unknown'}
+                            title={t('overview.updateStatus')}
+                            value={target.updateStatus ? t(`status.${target.updateStatus}`, { defaultValue: target.updateStatus }) : t('status.unknown')}
                             prefix={<DesktopOutlined />}
                         />
                     </StyledCard>
@@ -67,11 +71,11 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ target, loading }) => {
                 <Col xs={12} sm={6}>
                     <StyledCard>
                         <Statistic
-                            title="Last Poll"
+                            title={t('overview.lastPoll')}
                             value={
                                 target.pollStatus?.lastRequestAt
                                     ? dayjs(target.pollStatus.lastRequestAt).fromNow()
-                                    : 'Never'
+                                    : t('overview.never')
                             }
                             prefix={<ClockCircleOutlined />}
                         />
@@ -80,7 +84,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ target, loading }) => {
                 <Col xs={12} sm={6}>
                     <StyledCard>
                         <Statistic
-                            title="Next Poll"
+                            title={t('overview.nextPoll')}
                             value={
                                 target.pollStatus?.nextExpectedRequestAt
                                     ? dayjs(target.pollStatus.nextExpectedRequestAt).fromNow()
@@ -97,21 +101,21 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ target, loading }) => {
                 column={{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }}
                 size="middle"
             >
-                <Descriptions.Item label="Controller ID">
+                <Descriptions.Item label={t('table.controllerId')}>
                     <Text strong copyable>
                         {target.controllerId}
                     </Text>
                 </Descriptions.Item>
-                <Descriptions.Item label="Name">
+                <Descriptions.Item label={t('table.name')}>
                     {target.name || <Text type="secondary">-</Text>}
                 </Descriptions.Item>
-                <Descriptions.Item label="Description" span={2}>
+                <Descriptions.Item label={t('form.description')} span={2}>
                     {target.description || <Text type="secondary">No description</Text>}
                 </Descriptions.Item>
-                <Descriptions.Item label="Address">
+                <Descriptions.Item label={t('overview.address')}>
                     {target.address || <Text type="secondary">-</Text>}
                 </Descriptions.Item>
-                <Descriptions.Item label="Security Token">
+                <Descriptions.Item label={t('overview.securityToken')}>
                     {target.securityToken ? (
                         <Text code copyable>
                             {target.securityToken}
@@ -120,7 +124,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ target, loading }) => {
                         <Text type="secondary">-</Text>
                     )}
                 </Descriptions.Item>
-                <Descriptions.Item label="Created">
+                <Descriptions.Item label={t('overview.created')}>
                     {target.createdAt ? (
                         <>
                             {dayjs(target.createdAt).format('YYYY-MM-DD HH:mm:ss')}
@@ -130,7 +134,7 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ target, loading }) => {
                         <Text type="secondary">-</Text>
                     )}
                 </Descriptions.Item>
-                <Descriptions.Item label="Last Modified">
+                <Descriptions.Item label={t('overview.lastModified')}>
                     {target.lastModifiedAt ? (
                         <>
                             {dayjs(target.lastModifiedAt).format('YYYY-MM-DD HH:mm:ss')}
@@ -140,12 +144,12 @@ const OverviewTab: React.FC<OverviewTabProps> = ({ target, loading }) => {
                         <Text type="secondary">-</Text>
                     )}
                 </Descriptions.Item>
-                <Descriptions.Item label="Request Attributes">
+                <Descriptions.Item label={t('overview.requestAttributes')}>
                     <Tag color={target.requestAttributes ? 'blue' : 'default'}>
-                        {target.requestAttributes ? 'Requested' : 'Not Requested'}
+                        {target.requestAttributes ? t('overview.requested') : t('overview.notRequested')}
                     </Tag>
                 </Descriptions.Item>
-                <Descriptions.Item label="Target Type">
+                <Descriptions.Item label={t('overview.targetType')}>
                     {target.targetType ? (
                         <Tag color="purple">{target.targetType}</Tag>
                     ) : (

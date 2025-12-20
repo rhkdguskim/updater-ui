@@ -1,0 +1,29 @@
+{
+    "pageTitle": "Dashboard Overview",
+    "kpi": {
+        "totalTargets": "Total Targets",
+        "onlineTargets": "Online Targets",
+        "offlineTargets": "Offline Targets",
+        "successRate": "Success Rate (Recent)",
+        "notAvailable": "N/A"
+    },
+    "charts": {
+        "deviceStatus": "Device Status",
+        "actionStatus": "Action Status Distribution",
+        "online": "Online",
+        "offline": "Offline",
+        "finished": "Finished",
+        "error": "Error",
+        "running": "Running",
+        "pending": "Pending",
+        "count": "Count"
+    },
+    "errors": {
+        "loadFailed": "Data loading failed",
+        "chartLoadFailed": "Chart data loading failed"
+    },
+    "empty": {
+        "noDevices": "No registered devices",
+        "noActions": "No registered actions"
+    }
+}

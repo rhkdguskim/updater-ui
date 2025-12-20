@@ -15,7 +15,10 @@ import SetTagsTab from './components/SetTagsTab';
 import type { MgmtSoftwareModuleAssignment, MgmtSoftwareModule } from '@/api/generated/model';
 import type { TableProps } from 'antd';
 
+import { useTranslation } from 'react-i18next';
+
 const DistributionSetDetail: React.FC = () => {
+    const { t } = useTranslation(['distributions', 'common']);
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const distributionSetId = parseInt(id || '0', 10);
@@ -38,12 +41,12 @@ const DistributionSetDetail: React.FC = () => {
     const assignMutation = useAssignSoftwareModules({
         mutation: {
             onSuccess: () => {
-                message.success('Modules assigned successfully');
+                message.success(t('detail.assignSuccess'));
                 setIsAssignModalVisible(false);
                 refetchModules();
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to assign modules');
+                message.error((error as Error).message || t('detail.assignError'));
             },
         },
     });
@@ -53,36 +56,28 @@ const DistributionSetDetail: React.FC = () => {
         assignMutation.mutate({ distributionSetId, data: assignments });
     };
 
-    // Note: HawkBit API documentation for removing an assigned module from a DS is specific.
-    // Usually it involves updating the list of assigned modules or a specific DELETE endpoint.
-    // Based on the generated client, we might not have a direct unassign endpoint exposed easily or it might be 'deleteAssignedSoftwareModule' which I should check.
-    // For now, I will omit the unassign button if I'm not sure, or verify if assign replaces the list.
-    // The `assignSoftwareModules` (POST) usually adds to the list or replaces it?
-    // REST API usually: POST adds, PUT replaces.
-    // Let's assume for now we just show the list. Unassigning might require more investigation on the specific API endpoint.
-
     const overviewTab = (
         <Descriptions bordered column={1}>
-            <Descriptions.Item label="Name">{setData?.name}</Descriptions.Item>
-            <Descriptions.Item label="Version">{setData?.version}</Descriptions.Item>
-            <Descriptions.Item label="Type">{setData?.typeName}</Descriptions.Item>
-            <Descriptions.Item label="Description">{setData?.description}</Descriptions.Item>
-            <Descriptions.Item label="Required Migration Step">
+            <Descriptions.Item label={t('detail.labels.name')}>{setData?.name}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.version')}>{setData?.version}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.type')}>{setData?.typeName}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.description')}>{setData?.description}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.requiredMigration')}>
                 <Tag color={setData?.requiredMigrationStep ? 'red' : 'green'}>
-                    {setData?.requiredMigrationStep ? 'Yes' : 'No'}
+                    {setData?.requiredMigrationStep ? t('detail.values.yes') : t('detail.values.no')}
                 </Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="Functionally Complete">
+            <Descriptions.Item label={t('detail.labels.functionallyComplete')}>
                 <Tag color={setData?.complete ? 'success' : 'warning'}>
-                    {setData?.complete ? 'Yes' : 'No'}
+                    {setData?.complete ? t('detail.values.yes') : t('detail.values.no')}
                 </Tag>
             </Descriptions.Item>
-            <Descriptions.Item label="Created By">{setData?.createdBy}</Descriptions.Item>
-            <Descriptions.Item label="Created At">
+            <Descriptions.Item label={t('detail.labels.createdBy')}>{setData?.createdBy}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.createdAt')}>
                 {setData?.createdAt ? format(setData.createdAt, 'yyyy-MM-dd HH:mm:ss') : '-'}
             </Descriptions.Item>
-            <Descriptions.Item label="Last Modified By">{setData?.lastModifiedBy}</Descriptions.Item>
-            <Descriptions.Item label="Last Modified At">
+            <Descriptions.Item label={t('detail.labels.lastModifiedBy')}>{setData?.lastModifiedBy}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.lastModifiedAt')}>
                 {setData?.lastModifiedAt ? format(setData.lastModifiedAt, 'yyyy-MM-dd HH:mm:ss') : '-'}
             </Descriptions.Item>
         </Descriptions>
@@ -90,7 +85,7 @@ const DistributionSetDetail: React.FC = () => {
 
     const columns: TableProps<MgmtSoftwareModule>['columns'] = [
         {
-            title: 'Name',
+            title: t('list.columns.name'),
             dataIndex: 'name',
             key: 'name',
             render: (text, record) => (
@@ -98,17 +93,17 @@ const DistributionSetDetail: React.FC = () => {
             )
         },
         {
-            title: 'Version',
+            title: t('list.columns.version'),
             dataIndex: 'version',
             key: 'version',
         },
         {
-            title: 'Type',
+            title: t('list.columns.type'),
             dataIndex: 'typeName',
             key: 'typeName',
         },
         {
-            title: 'Vendor',
+            title: t('list.columns.vendor'),
             dataIndex: 'vendor',
             key: 'vendor',
         },
@@ -123,7 +118,7 @@ const DistributionSetDetail: React.FC = () => {
                         icon={<PlusOutlined />}
                         onClick={() => setIsAssignModalVisible(true)}
                     >
-                        Assign Module
+                        {t('detail.assignModule')}
                     </Button>
                 </div>
             )}
@@ -160,10 +155,10 @@ const DistributionSetDetail: React.FC = () => {
                 activeKey={activeTab}
                 onChange={setActiveTab}
                 items={[
-                    { key: 'overview', label: 'Overview', children: overviewTab },
-                    { key: 'modules', label: 'Assigned Modules', children: modulesTab },
-                    { key: 'metadata', label: 'Metadata', children: <SetMetadataTab distributionSetId={distributionSetId} isAdmin={isAdmin} /> },
-                    { key: 'tags', label: 'Tags', children: <SetTagsTab distributionSetId={distributionSetId} isAdmin={isAdmin} /> },
+                    { key: 'overview', label: t('detail.overview'), children: overviewTab },
+                    { key: 'modules', label: t('detail.assignedModules'), children: modulesTab },
+                    { key: 'metadata', label: t('detail.metadata'), children: <SetMetadataTab distributionSetId={distributionSetId} isAdmin={isAdmin} /> },
+                    { key: 'tags', label: t('detail.tags'), children: <SetTagsTab distributionSetId={distributionSetId} isAdmin={isAdmin} /> },
                 ]}
             />
         </Card>

@@ -1,0 +1,144 @@
+{
+    "pageTitle": "Distributions Management",
+    "tabs": {
+        "sets": "Distribution Sets",
+        "modules": "Software Modules"
+    },
+    "list": {
+        "columns": {
+            "name": "Name",
+            "version": "Version",
+            "type": "Type",
+            "vendor": "Vendor",
+            "description": "Description",
+            "completeness": "Completeness",
+            "lastModified": "Last Modified",
+            "actions": "Actions"
+        },
+        "addSet": "Add Distribution Set",
+        "addModule": "Add Software Module",
+        "refresh": "Refresh",
+        "search": "Search",
+        "searchPlaceholder": "Search by {{field}}",
+        "searchFields": {
+            "name": "Name",
+            "version": "Version",
+            "description": "Description"
+        }
+    },
+    "tags": {
+        "complete": "Complete",
+        "incomplete": "Incomplete"
+    },
+    "actions": {
+        "viewDetails": "View Details",
+        "delete": "Delete"
+    },
+    "messages": {
+        "deleteSetSuccess": "Distribution Set deleted successfully",
+        "deleteSetConfirmTitle": "Delete Distribution Set",
+        "deleteSetConfirmDesc": "Are you sure you want to delete this Distribution Set?",
+        "deleteModuleSuccess": "Software Module deleted successfully",
+        "deleteModuleConfirmTitle": "Delete Software Module",
+        "deleteModuleConfirmDesc": "Are you sure you want to delete this Software Module?",
+        "deleteSetError": "Failed to delete Distribution Set",
+        "deleteModuleError": "Failed to delete Software Module",
+        "createSetSuccess": "Distribution Set created successfully",
+        "createModuleSuccess": "Software Module created successfully",
+        "createSetError": "Failed to create Distribution Set",
+        "createModuleError": "Failed to create Software Module"
+    },
+    "modal": {
+        "createSetTitle": "Create Distribution Set",
+        "createModuleTitle": "Create Software Module",
+        "name": "Name",
+        "version": "Version",
+        "type": "Type",
+        "description": "Description",
+        "vendor": "Vendor",
+        "requiredMigration": "Required Migration Step",
+        "placeholders": {
+            "name": "Enter name",
+            "version": "Enter version (e.g., 1.0.0)",
+            "type": "Select type",
+            "vendor": "Enter vendor name",
+            "description": "Enter description"
+        }
+    },
+    "detail": {
+        "overview": "Overview",
+        "assignedModules": "Assigned Modules",
+        "metadata": "Metadata",
+        "tags": "Tags",
+        "artifacts": "Artifacts",
+        "assignModule": "Assign Module",
+        "assignModuleTitle": "Assign Software Modules",
+        "selectModuleWarning": "Please select at least one module",
+        "assignSuccess": "Modules assigned successfully",
+        "assignError": "Failed to assign modules",
+        "uploadArtifactSuccess": "Artifact uploaded successfully",
+        "uploadArtifactError": "Failed to upload artifact",
+        "deleteArtifactSuccess": "Artifact deleted successfully",
+        "deleteArtifactError": "Failed to delete artifact",
+        "deleteArtifactConfirmTitle": "Delete Artifact",
+        "deleteArtifactConfirmDesc": "Are you sure you want to delete this artifact?",
+        "downloadNotImplemented": "Download not fully implemented",
+        "dragDropTitle": "Click or drag file to this area to upload",
+        "dragDropHint": "Support for single file upload. Drag and drop your artifact here.",
+        "labels": {
+            "name": "Name",
+            "version": "Version",
+            "type": "Type",
+            "description": "Description",
+            "requiredMigration": "Required Migration Step",
+            "functionallyComplete": "Functionally Complete",
+            "createdBy": "Created By",
+            "createdAt": "Created At",
+            "lastModifiedBy": "Last Modified By",
+            "lastModifiedAt": "Last Modified At",
+            "vendor": "Vendor"
+        },
+        "values": {
+            "yes": "Yes",
+            "no": "No"
+        },
+        "artifactsColumns": {
+            "filename": "Filename",
+            "size": "Size",
+            "hashes": "Hashes",
+            "actions": "Actions"
+        }
+    },
+    "metadataTab": {
+        "add": "Add Metadata",
+        "edit": "Edit Metadata",
+        "deleteTitle": "Delete Metadata",
+        "deleteDesc": "Are you sure you want to delete this metadata?",
+        "successCreate": "Metadata created successfully",
+        "successUpdate": "Metadata updated successfully",
+        "successDelete": "Metadata deleted successfully",
+        "errorCreate": "Failed to create metadata",
+        "errorUpdate": "Failed to update metadata",
+        "errorDelete": "Failed to delete metadata",
+        "key": "Key",
+        "value": "Value",
+        "targetVisible": "Target Visible",
+        "placeholderKey": "Please enter key",
+        "placeholderValue": "Please enter value"
+    },
+    "tagsTab": {
+        "add": "Add Tag",
+        "selectTitle": "Select Tag to Assign",
+        "noTags": "No tags assigned",
+        "noAvailable": "No available tags to assign",
+        "successAssign": "Tag assigned successfully",
+        "successUnassign": "Tag removed successfully",
+        "errorAssign": "Failed to assign tag",
+        "errorUnassign": "Failed to remove tag",
+        "warningSelect": "Please select a tag",
+        "columns": {
+            "name": "Tag Name",
+            "description": "Description"
+        }
+    }
+}

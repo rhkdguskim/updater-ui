@@ -13,7 +13,10 @@ import DistributionSearchBar from './components/DistributionSearchBar';
 import CreateDistributionSetModal from './components/CreateDistributionSetModal';
 import { format } from 'date-fns';
 
+import { useTranslation } from 'react-i18next';
+
 const DistributionSetList: React.FC = () => {
+    const { t } = useTranslation(['distributions', 'common']);
     const navigate = useNavigate();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
@@ -43,22 +46,22 @@ const DistributionSetList: React.FC = () => {
     const deleteMutation = useDeleteDistributionSet({
         mutation: {
             onSuccess: () => {
-                message.success('Distribution Set deleted successfully');
+                message.success(t('messages.deleteSetSuccess'));
                 refetch();
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to delete Distribution Set');
+                message.error((error as Error).message || t('messages.deleteSetError'));
             },
         },
     });
 
     const handleDelete = (id: number) => {
         Modal.confirm({
-            title: 'Delete Distribution Set',
-            content: 'Are you sure you want to delete this Distribution Set?',
-            okText: 'Delete',
+            title: t('messages.deleteSetConfirmTitle'),
+            content: t('messages.deleteSetConfirmDesc'),
+            okText: t('actions.delete'),
             okType: 'danger',
-            cancelText: 'Cancel',
+            cancelText: t('common:actions.cancel'),
             onOk: () => deleteMutation.mutate({ distributionSetId: id }),
         });
     };
@@ -92,7 +95,7 @@ const DistributionSetList: React.FC = () => {
 
     const columns: TableProps<MgmtDistributionSet>['columns'] = [
         {
-            title: 'Name',
+            title: t('list.columns.name'),
             dataIndex: 'name',
             key: 'name',
             sorter: true,
@@ -101,35 +104,35 @@ const DistributionSetList: React.FC = () => {
             ),
         },
         {
-            title: 'Version',
+            title: t('list.columns.version'),
             dataIndex: 'version',
             key: 'version',
             sorter: true,
         },
         {
-            title: 'Type',
+            title: t('list.columns.type'),
             dataIndex: 'typeName',
             key: 'typeName',
             render: (text) => <Tag color="blue">{text}</Tag>,
         },
         {
-            title: 'Description',
+            title: t('list.columns.description'),
             dataIndex: 'description',
             key: 'description',
             ellipsis: true,
         },
         {
-            title: 'Completeness',
+            title: t('list.columns.completeness'),
             dataIndex: 'complete',
             key: 'complete',
             render: (complete: boolean) => (
                 <Tag color={complete ? 'success' : 'warning'}>
-                    {complete ? 'Complete' : 'Incomplete'}
+                    {complete ? t('tags.complete') : t('tags.incomplete')}
                 </Tag>
             ),
         },
         {
-            title: 'Last Modified',
+            title: t('list.columns.lastModified'),
             dataIndex: 'lastModifiedAt',
             key: 'lastModifiedAt',
             sorter: true,
@@ -137,12 +140,12 @@ const DistributionSetList: React.FC = () => {
             render: (val: number) => (val ? format(val, 'yyyy-MM-dd HH:mm') : '-'),
         },
         {
-            title: 'Actions',
+            title: t('list.columns.actions'),
             key: 'actions',
             width: 120,
             render: (_, record) => (
                 <Space size="small">
-                    <Tooltip title="View Details">
+                    <Tooltip title={t('actions.viewDetails')}>
                         <Button
                             type="text"
                             icon={<EyeOutlined />}
@@ -150,7 +153,7 @@ const DistributionSetList: React.FC = () => {
                         />
                     </Tooltip>
                     {isAdmin && (
-                        <Tooltip title="Delete">
+                        <Tooltip title={t('actions.delete')}>
                             <Button
                                 type="text"
                                 danger

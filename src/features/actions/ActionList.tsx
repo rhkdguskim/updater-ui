@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGetActions } from '@/api/generated/actions/actions';
 import type { MgmtAction } from '@/api/generated/model';
 import type { TableProps } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -31,6 +32,7 @@ const getStatusColor = (status?: string) => {
 };
 
 const ActionList: React.FC = () => {
+    const { t } = useTranslation('actions');
     const navigate = useNavigate();
     const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
     const [statusFilter, setStatusFilter] = useState<string>('');
@@ -58,13 +60,13 @@ const ActionList: React.FC = () => {
 
     const columns: TableProps<MgmtAction>['columns'] = [
         {
-            title: 'ID',
+            title: t('columns.id'),
             dataIndex: 'id',
             key: 'id',
             width: 80,
         },
         {
-            title: 'Status',
+            title: t('columns.status'),
             dataIndex: 'status',
             key: 'status',
             width: 150,
@@ -75,7 +77,7 @@ const ActionList: React.FC = () => {
             ),
         },
         {
-            title: 'Type',
+            title: t('columns.type'),
             dataIndex: 'type',
             key: 'type',
             width: 120,
@@ -86,7 +88,7 @@ const ActionList: React.FC = () => {
             ),
         },
         {
-            title: 'Distribution Set',
+            title: t('columns.distributionSet'),
             key: 'distributionSet',
             render: (_, record) => (
                 <span>
@@ -95,13 +97,13 @@ const ActionList: React.FC = () => {
             ),
         },
         {
-            title: 'Force Type',
+            title: t('columns.forceType'),
             dataIndex: 'forceType',
             key: 'forceType',
             width: 100,
         },
         {
-            title: 'Actions',
+            title: t('columns.actions'),
             key: 'actions',
             width: 100,
             render: (_, record) => (
@@ -109,7 +111,7 @@ const ActionList: React.FC = () => {
                     type="link"
                     onClick={() => navigate(`/actions/${record.id}`)}
                 >
-                    View
+                    {t('actions.view')}
                 </Button>
             ),
         },
@@ -126,20 +128,20 @@ const ActionList: React.FC = () => {
         <div style={{ padding: 24 }}>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Title level={2} style={{ margin: 0 }}>Actions</Title>
+                    <Title level={2} style={{ margin: 0 }}>{t('pageTitle')}</Title>
                     <Button
                         icon={<ReloadOutlined />}
                         onClick={() => refetch()}
                         loading={isLoading}
                     >
-                        Refresh
+                        {t('refresh')}
                     </Button>
                 </div>
 
                 <Card>
                     <Space style={{ marginBottom: 16 }} wrap>
                         <Input
-                            placeholder="Search by target..."
+                            placeholder={t('filter.searchPlaceholder')}
                             prefix={<SearchOutlined />}
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -147,24 +149,24 @@ const ActionList: React.FC = () => {
                             style={{ width: 200 }}
                         />
                         <Select
-                            placeholder="Filter by status"
+                            placeholder={t('filter.statusPlaceholder')}
                             value={statusFilter || undefined}
                             onChange={setStatusFilter}
                             allowClear
                             style={{ width: 180 }}
                         >
-                            <Option value="pending">Pending</Option>
-                            <Option value="running">Running</Option>
-                            <Option value="finished">Finished</Option>
-                            <Option value="error">Error</Option>
-                            <Option value="canceled">Canceled</Option>
-                            <Option value="wait_for_confirmation">Wait for Confirmation</Option>
+                            <Option value="pending">{t('filter.pending')}</Option>
+                            <Option value="running">{t('filter.running')}</Option>
+                            <Option value="finished">{t('filter.finished')}</Option>
+                            <Option value="error">{t('filter.error')}</Option>
+                            <Option value="canceled">{t('filter.canceled')}</Option>
+                            <Option value="wait_for_confirmation">{t('filter.waitForConfirmation')}</Option>
                         </Select>
                         <Button onClick={() => {
                             setSearchQuery('');
                             setStatusFilter('');
                         }}>
-                            Clear Filters
+                            {t('filter.clearFilters')}
                         </Button>
                     </Space>
 
@@ -178,7 +180,7 @@ const ActionList: React.FC = () => {
                             pageSize: pagination.pageSize,
                             total: data?.total || 0,
                             showSizeChanger: true,
-                            showTotal: (total) => `Total ${total} actions`,
+                            showTotal: (total) => t('pagination.total', { count: total }),
                         }}
                         onChange={handleTableChange}
                     />
@@ -189,3 +191,4 @@ const ActionList: React.FC = () => {
 };
 
 export default ActionList;
+

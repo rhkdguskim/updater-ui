@@ -6,6 +6,7 @@ import DistributionSetList from './DistributionSetList';
 import SoftwareModuleList from './SoftwareModuleList';
 import SoftwareModuleDetail from './SoftwareModuleDetail';
 import DistributionSetDetail from './DistributionSetDetail';
+import { useTranslation } from 'react-i18next';
 
 const { Title } = Typography;
 
@@ -23,7 +24,9 @@ const HeaderRow = styled.div`
     gap: 16px;
 `;
 
+
 const Distributions: React.FC = () => {
+    const { t } = useTranslation('distributions');
     const location = useLocation();
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState('sets');
@@ -46,7 +49,7 @@ const Distributions: React.FC = () => {
         <PageContainer>
             <HeaderRow>
                 <Title level={2} style={{ margin: 0 }}>
-                    Distributions Management
+                    {t('pageTitle')}
                 </Title>
             </HeaderRow>
 
@@ -56,11 +59,11 @@ const Distributions: React.FC = () => {
                 items={[
                     {
                         key: 'sets',
-                        label: 'Distribution Sets',
+                        label: t('tabs.sets'),
                     },
                     {
                         key: 'modules',
-                        label: 'Software Modules',
+                        label: t('tabs.modules'),
                     },
                 ]}
             />

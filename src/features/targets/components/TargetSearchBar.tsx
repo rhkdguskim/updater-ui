@@ -38,11 +38,8 @@ interface TargetSearchBarProps {
 
 type SearchField = 'controllerId' | 'name' | 'description';
 
-const searchFieldOptions = [
-    { value: 'controllerId', label: 'Controller ID' },
-    { value: 'name', label: 'Name' },
-    { value: 'description', label: 'Description' },
-];
+import { useTranslation } from 'react-i18next';
+// ...
 
 const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
     onSearch,
@@ -51,8 +48,15 @@ const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
     canAddTarget,
     loading,
 }) => {
+    const { t } = useTranslation('targets');
     const [searchField, setSearchField] = useState<SearchField>('controllerId');
     const [searchValue, setSearchValue] = useState('');
+
+    const searchFieldOptions = [
+        { value: 'controllerId', label: t('search.fields.controllerId') },
+        { value: 'name', label: t('search.fields.name') },
+        { value: 'description', label: t('search.fields.description') },
+    ];
 
     const buildFiqlQuery = useCallback((field: SearchField, value: string): string => {
         if (!value.trim()) return '';
@@ -82,7 +86,7 @@ const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
                     suffixIcon={<FilterOutlined />}
                 />
                 <Search
-                    placeholder={`Search by ${searchFieldOptions.find(o => o.value === searchField)?.label}`}
+                    placeholder={t('search.placeholder', { field: searchFieldOptions.find(o => o.value === searchField)?.label })}
                     value={searchValue}
                     onChange={(e) => setSearchValue(e.target.value)}
                     onSearch={handleSearch}
@@ -95,7 +99,7 @@ const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
             </SearchGroup>
 
             <ActionGroup>
-                <Tooltip title="Refresh">
+                <Tooltip title={t('actions.refresh')}>
                     <Button
                         icon={<ReloadOutlined />}
                         onClick={onRefresh}
@@ -108,7 +112,7 @@ const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
                         icon={<PlusOutlined />}
                         onClick={onAddTarget}
                     >
-                        Add Target
+                        {t('list.addTarget')}
                     </Button>
                 )}
             </ActionGroup>

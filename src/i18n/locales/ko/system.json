@@ -1,0 +1,33 @@
+{
+    "pageTitle": "시스템 구성",
+    "readOnly": "읽기 전용",
+    "refresh": "새로고침",
+    "columns": {
+        "key": "설정 키",
+        "value": "값",
+        "description": "설명"
+    },
+    "values": {
+        "enabled": "활성화됨",
+        "disabled": "비활성화됨"
+    },
+    "descriptions": {
+        "pollingTime": "대상의 기본 폴링 간격 (HH:mm:ss)",
+        "pollingOverdueTime": "대상이 오프라인으로 간주되는 시간 (HH:mm:ss)",
+        "authTargetToken": "대상 토큰 인증 활성화",
+        "authGatewayToken": "게이트웨이 토큰 인증 활성화",
+        "rolloutApproval": "롤아웃 승인 필요",
+        "actionsAutoclose": "완료된 액션 자동 종료",
+        "maintenanceWindowPollCount": "유지보수 창 중 폴링 횟수",
+        "anonymousDownload": "익명 아티팩트 다운로드 허용",
+        "multiAssignments": "다중 배포 세트 할당 활성화",
+        "batchAssignments": "일괄 할당 활성화",
+        "actionCleanupEnabled": "자동 액션 정리 활성화",
+        "actionCleanupExpiry": "정리를 위한 액션 만료 시간",
+        "actionCleanupStatus": "정리할 액션 상태"
+    },
+    "errors": {
+        "loadFailed": "설정 로드 실패",
+        "loadFailedDesc": "시스템 설정을 가져올 수 없습니다. 권한을 확인해주세요."
+    }
+}

@@ -13,7 +13,10 @@ import { format } from 'date-fns';
 import type { MgmtArtifact } from '@/api/generated/model';
 import ModuleMetadataTab from './components/ModuleMetadataTab';
 
+import { useTranslation } from 'react-i18next';
+
 const SoftwareModuleDetail: React.FC = () => {
+    const { t } = useTranslation(['distributions', 'common']);
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const softwareModuleId = parseInt(id || '0', 10);
@@ -31,11 +34,11 @@ const SoftwareModuleDetail: React.FC = () => {
     const uploadMutation = useUploadArtifact({
         mutation: {
             onSuccess: () => {
-                message.success('Artifact uploaded successfully');
+                message.success(t('detail.uploadArtifactSuccess'));
                 refetchArtifacts();
             },
             onError: () => {
-                message.error('Failed to upload artifact');
+                message.error(t('detail.uploadArtifactError'));
             },
         },
     });
@@ -44,11 +47,11 @@ const SoftwareModuleDetail: React.FC = () => {
     const deleteArtifactMutation = useDeleteArtifact({
         mutation: {
             onSuccess: () => {
-                message.success('Artifact deleted successfully');
+                message.success(t('detail.deleteArtifactSuccess'));
                 refetchArtifacts();
             },
             onError: () => {
-                message.error('Failed to delete artifact');
+                message.error(t('detail.deleteArtifactError'));
             },
         },
     });
@@ -70,27 +73,28 @@ const SoftwareModuleDetail: React.FC = () => {
 
     const handleDeleteArtifact = (artifactId: number) => {
         Modal.confirm({
-            title: 'Delete Artifact',
-            content: 'Are you sure you want to delete this artifact?',
-            okText: 'Delete',
+            title: t('detail.deleteArtifactConfirmTitle'),
+            content: t('detail.deleteArtifactConfirmDesc'),
+            okText: t('actions.delete'),
             okType: 'danger',
+            cancelText: t('common:actions.cancel'),
             onOk: () => deleteArtifactMutation.mutate({ softwareModuleId, artifactId }),
         });
     };
 
     const overviewTab = (
         <Descriptions bordered column={1}>
-            <Descriptions.Item label="Name">{moduleData?.name}</Descriptions.Item>
-            <Descriptions.Item label="Version">{moduleData?.version}</Descriptions.Item>
-            <Descriptions.Item label="Type">{moduleData?.typeName}</Descriptions.Item>
-            <Descriptions.Item label="Vendor">{moduleData?.vendor}</Descriptions.Item>
-            <Descriptions.Item label="Description">{moduleData?.description}</Descriptions.Item>
-            <Descriptions.Item label="Created By">{moduleData?.createdBy}</Descriptions.Item>
-            <Descriptions.Item label="Created At">
+            <Descriptions.Item label={t('detail.labels.name')}>{moduleData?.name}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.version')}>{moduleData?.version}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.type')}>{moduleData?.typeName}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.vendor')}>{moduleData?.vendor}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.description')}>{moduleData?.description}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.createdBy')}>{moduleData?.createdBy}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.createdAt')}>
                 {moduleData?.createdAt ? format(moduleData.createdAt, 'yyyy-MM-dd HH:mm:ss') : '-'}
             </Descriptions.Item>
-            <Descriptions.Item label="Last Modified By">{moduleData?.lastModifiedBy}</Descriptions.Item>
-            <Descriptions.Item label="Last Modified At">
+            <Descriptions.Item label={t('detail.labels.lastModifiedBy')}>{moduleData?.lastModifiedBy}</Descriptions.Item>
+            <Descriptions.Item label={t('detail.labels.lastModifiedAt')}>
                 {moduleData?.lastModifiedAt ? format(moduleData.lastModifiedAt, 'yyyy-MM-dd HH:mm:ss') : '-'}
             </Descriptions.Item>
         </Descriptions>
@@ -107,9 +111,9 @@ const SoftwareModuleDetail: React.FC = () => {
                     <p className="ant-upload-drag-icon">
                         <InboxOutlined />
                     </p>
-                    <p className="ant-upload-text">Click or drag file to this area to upload</p>
+                    <p className="ant-upload-text">{t('detail.dragDropTitle')}</p>
                     <p className="ant-upload-hint">
-                        Support for single file upload. Drag and drop your artifact here.
+                        {t('detail.dragDropHint')}
                     </p>
                 </Upload.Dragger>
             )}
@@ -120,7 +124,7 @@ const SoftwareModuleDetail: React.FC = () => {
                 pagination={false}
                 columns={[
                     {
-                        title: 'Filename',
+                        title: t('detail.artifactsColumns.filename'),
                         dataIndex: 'providedFilename',
                         key: 'providedFilename',
                         render: (text) => (
@@ -131,13 +135,13 @@ const SoftwareModuleDetail: React.FC = () => {
                         ),
                     },
                     {
-                        title: 'Size',
+                        title: t('detail.artifactsColumns.size'),
                         dataIndex: 'size',
                         key: 'size',
                         render: (size) => size ? `${(size / 1024).toFixed(2)} KB` : '-',
                     },
                     {
-                        title: 'Hashes',
+                        title: t('detail.artifactsColumns.hashes'),
                         key: 'hashes',
                         render: (_, record: MgmtArtifact) => (
                             <Space direction="vertical" size="small">
@@ -147,7 +151,7 @@ const SoftwareModuleDetail: React.FC = () => {
                         ),
                     },
                     {
-                        title: 'Actions',
+                        title: t('detail.artifactsColumns.actions'),
                         key: 'actions',
                         render: (_, record: MgmtArtifact) => (
                             <Space>
@@ -156,11 +160,11 @@ const SoftwareModuleDetail: React.FC = () => {
                                         icon={<DownloadOutlined />}
                                         type="text"
                                         // This is a placeholder as direct download link handling needs careful auth consideration
-                                        onClick={() => message.info("Download not fully implemented")}
+                                        onClick={() => message.info(t('detail.downloadNotImplemented'))}
                                     />
                                 </Tooltip>
                                 {isAdmin && record.id && (
-                                    <Tooltip title="Delete">
+                                    <Tooltip title={t('actions.delete')}>
                                         <Button
                                             icon={<DeleteOutlined />}
                                             danger
@@ -191,9 +195,9 @@ const SoftwareModuleDetail: React.FC = () => {
                 activeKey={activeTab}
                 onChange={setActiveTab}
                 items={[
-                    { key: 'overview', label: 'Overview', children: overviewTab },
-                    { key: 'artifacts', label: 'Artifacts', children: artifactsTab },
-                    { key: 'metadata', label: 'Metadata', children: <ModuleMetadataTab softwareModuleId={softwareModuleId} isAdmin={isAdmin} /> },
+                    { key: 'overview', label: t('detail.overview'), children: overviewTab },
+                    { key: 'artifacts', label: t('detail.artifacts'), children: artifactsTab },
+                    { key: 'metadata', label: t('detail.metadata'), children: <ModuleMetadataTab softwareModuleId={softwareModuleId} isAdmin={isAdmin} /> },
                 ]}
             />
         </Card>

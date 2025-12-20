@@ -1,0 +1,33 @@
+{
+    "pageTitle": "System Configuration",
+    "readOnly": "Read-only",
+    "refresh": "Refresh",
+    "columns": {
+        "key": "Configuration Key",
+        "value": "Value",
+        "description": "Description"
+    },
+    "values": {
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+    },
+    "descriptions": {
+        "pollingTime": "Default polling interval for targets (HH:mm:ss)",
+        "pollingOverdueTime": "Time after which a target is considered offline (HH:mm:ss)",
+        "authTargetToken": "Enable Target Token authentication",
+        "authGatewayToken": "Enable Gateway Token authentication",
+        "rolloutApproval": "Require approval for rollouts",
+        "actionsAutoclose": "Automatically close finished actions",
+        "maintenanceWindowPollCount": "Number of polls during maintenance window",
+        "anonymousDownload": "Allow anonymous artifact downloads",
+        "multiAssignments": "Enable multiple distribution set assignments",
+        "batchAssignments": "Enable batch assignments",
+        "actionCleanupEnabled": "Enable automatic action cleanup",
+        "actionCleanupExpiry": "Action expiry time for cleanup",
+        "actionCleanupStatus": "Action statuses to clean up"
+    },
+    "errors": {
+        "loadFailed": "Failed to load configuration",
+        "loadFailedDesc": "Unable to fetch system configuration. Please check your permissions."
+    }
+}

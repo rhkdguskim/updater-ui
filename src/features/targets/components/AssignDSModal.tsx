@@ -27,23 +27,8 @@ interface AssignDSModalProps {
     onCancel: () => void;
 }
 
-const assignTypeOptions = [
-    {
-        value: 'soft',
-        label: 'Soft',
-        description: 'Device will be updated when convenient',
-    },
-    {
-        value: 'forced',
-        label: 'Forced',
-        description: 'Device will be updated immediately',
-    },
-    {
-        value: 'downloadonly',
-        label: 'Download Only',
-        description: 'Only download, do not install',
-    },
-];
+import { useTranslation } from 'react-i18next';
+// ...
 
 const AssignDSModal: React.FC<AssignDSModalProps> = ({
     open,
@@ -55,8 +40,27 @@ const AssignDSModal: React.FC<AssignDSModalProps> = ({
     onConfirm,
     onCancel,
 }) => {
+    const { t } = useTranslation(['targets', 'common']);
     const [form] = Form.useForm();
     const [selectedType, setSelectedType] = useState<AssignType>('soft');
+
+    const assignTypeOptions = [
+        {
+            value: 'soft',
+            label: t('assign.soft'),
+            description: t('assign.softDesc'),
+        },
+        {
+            value: 'forced',
+            label: t('assign.forced'),
+            description: t('assign.forcedDesc'),
+        },
+        {
+            value: 'downloadonly',
+            label: t('assign.downloadOnly'),
+            description: t('assign.downloadOnlyDesc'),
+        },
+    ];
 
     const handleSubmit = async () => {
         try {
@@ -78,13 +82,13 @@ const AssignDSModal: React.FC<AssignDSModalProps> = ({
 
     return (
         <Modal
-            title="Assign Distribution Set"
+            title={t('assign.title')}
             open={open}
             onCancel={onCancel}
             footer={
                 <Space>
                     <Button onClick={onCancel} disabled={loading}>
-                        Cancel
+                        {t('common:actions.cancel')}
                     </Button>
                     <Button
                         type="primary"
@@ -92,7 +96,7 @@ const AssignDSModal: React.FC<AssignDSModalProps> = ({
                         onClick={handleSubmit}
                         loading={loading}
                     >
-                        Assign
+                        {t('common:actions.assign')}
                     </Button>
                 </Space>
             }
@@ -117,11 +121,11 @@ const AssignDSModal: React.FC<AssignDSModalProps> = ({
 
                 <Form.Item
                     name="distributionSetId"
-                    label="Distribution Set"
-                    rules={[{ required: true, message: 'Please select a distribution set' }]}
+                    label={t('assign.selectDS')}
+                    rules={[{ required: true, message: t('common:validation.required') }]}
                 >
                     <Select
-                        placeholder="Select a distribution set"
+                        placeholder={t('assign.selectDS')}
                         loading={dsLoading}
                         showSearch
                         optionFilterProp="label"
@@ -136,8 +140,8 @@ const AssignDSModal: React.FC<AssignDSModalProps> = ({
 
                 <Form.Item
                     name="type"
-                    label="Assignment Type"
-                    rules={[{ required: true, message: 'Please select an assignment type' }]}
+                    label={t('assign.assignType')}
+                    rules={[{ required: true, message: t('common:validation.required') }]}
                 >
                     <Select
                         value={selectedType}
@@ -160,7 +164,7 @@ const AssignDSModal: React.FC<AssignDSModalProps> = ({
                 {!canForced && (
                     <Alert
                         type="warning"
-                        message="Forced assignment requires Admin privileges"
+                        message={t('assign.forcedWarning')}
                         style={{ marginTop: 16 }}
                     />
                 )}

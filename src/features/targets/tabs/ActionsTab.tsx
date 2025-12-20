@@ -43,29 +43,8 @@ const getStatusIcon = (status?: string) => {
     }
 };
 
-const getStatusTag = (status?: string) => {
-    const icon = getStatusIcon(status);
-    const colorMap: Record<string, string> = {
-        finished: 'success',
-        error: 'error',
-        running: 'processing',
-        pending: 'warning',
-        waiting: 'warning',
-        canceled: 'default',
-    };
-    return (
-        <Tag icon={icon} color={colorMap[status || ''] || 'default'}>
-            {status?.toUpperCase() || 'UNKNOWN'}
-        </Tag>
-    );
-};
-
-const getForceTypeTag = (forceType?: string) => {
-    if (forceType === 'forced') {
-        return <Tag color="orange">Forced</Tag>;
-    }
-    return <Tag>Soft</Tag>;
-};
+import { useTranslation } from 'react-i18next';
+// ...
 
 const ActionsTab: React.FC<ActionsTabProps> = ({
     data,
@@ -76,59 +55,84 @@ const ActionsTab: React.FC<ActionsTabProps> = ({
     canForce,
     canCancel,
 }) => {
+    const { t } = useTranslation('targets');
     if (loading) {
         return <Skeleton active paragraph={{ rows: 8 }} />;
     }
 
     if (!data?.content?.length) {
-        return <Empty description="No actions found" />;
+        return <Empty description={t('common:messages.noData')} />;
     }
+
+    const getStatusTag = (status?: string) => {
+        const icon = getStatusIcon(status);
+        const colorMap: Record<string, string> = {
+            finished: 'success',
+            error: 'error',
+            running: 'processing',
+            pending: 'warning',
+            waiting: 'warning',
+            canceled: 'default',
+        };
+        return (
+            <Tag icon={icon} color={colorMap[status || ''] || 'default'}>
+                {status ? t(`status.${status}`, { defaultValue: status.toUpperCase() }) : t('status.unknown')}
+            </Tag>
+        );
+    };
+
+    const getForceTypeTag = (forceType?: string) => {
+        if (forceType === 'forced') {
+            return <Tag color="orange">{t('assign.forced')}</Tag>;
+        }
+        return <Tag>{t('assign.soft')}</Tag>;
+    };
 
     const columns: TableProps<MgmtAction>['columns'] = [
         {
-            title: 'ID',
+            title: t('table.id'),
             dataIndex: 'id',
             key: 'id',
             width: 80,
             render: (id: number) => <Text strong>#{id}</Text>,
         },
         {
-            title: 'Status',
+            title: t('table.status'),
             dataIndex: 'status',
             key: 'status',
             width: 120,
             render: (status: string) => getStatusTag(status),
         },
         {
-            title: 'Type',
+            title: t('table.type'),
             dataIndex: 'type',
             key: 'type',
             width: 100,
             render: (type: string) => <Tag>{type?.toUpperCase()}</Tag>,
         },
         {
-            title: 'Force Type',
+            title: t('table.forceType'),
             dataIndex: 'forceType',
             key: 'forceType',
             width: 100,
             render: (forceType: string) => getForceTypeTag(forceType),
         },
         {
-            title: 'Started',
+            title: t('table.started'),
             dataIndex: 'createdAt',
             key: 'createdAt',
             render: (value: number) =>
                 value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-',
         },
         {
-            title: 'Last Modified',
+            title: t('table.lastModified'),
             dataIndex: 'lastModifiedAt',
             key: 'lastModifiedAt',
             render: (value: number) =>
                 value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-',
         },
         {
-            title: 'Actions',
+            title: t('table.actions'),
             key: 'actions',
             width: 150,
             render: (_, record) => {
@@ -137,7 +141,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({
 
                 return (
                     <Space size="small">
-                        <Tooltip title="View Details">
+                        <Tooltip title={t('actions.viewDetails')}>
                             <Button
                                 type="text"
                                 icon={<EyeOutlined />}
@@ -145,7 +149,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({
                             />
                         </Tooltip>
                         {canForce && canBeForced && onForceAction && (
-                            <Tooltip title="Force Update">
+                            <Tooltip title={t('actions.force')}>
                                 <Button
                                     type="text"
                                     icon={<ThunderboltOutlined />}
@@ -154,7 +158,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({
                             </Tooltip>
                         )}
                         {canCancel && isActive && onCancelAction && (
-                            <Tooltip title="Cancel">
+                            <Tooltip title={t('actions.cancel')}>
                                 <Button
                                     type="text"
                                     danger

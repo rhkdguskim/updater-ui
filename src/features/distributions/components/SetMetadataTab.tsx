@@ -7,85 +7,25 @@ import {
     useUpdateMetadata2,
     useDeleteMetadata2,
 } from '@/api/generated/distribution-sets/distribution-sets';
-import type { MgmtMetadata, MgmtMetadataBodyPut } from '@/api/generated/model';
+import type { MgmtMetadata } from '@/api/generated/model';
 
 interface SetMetadataTabProps {
     distributionSetId: number;
     isAdmin: boolean;
 }
 
+import { useTranslation } from 'react-i18next';
+
 const SetMetadataTab: React.FC<SetMetadataTabProps> = ({ distributionSetId, isAdmin }) => {
+    const { t } = useTranslation('distributions');
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingMetadata, setEditingMetadata] = useState<MgmtMetadata | null>(null);
     const [form] = Form.useForm();
 
-    const { data, isLoading, refetch } = useGetMetadata2(distributionSetId);
-
-    const createMutation = useCreateMetadata2({
-        mutation: {
-            onSuccess: () => {
-                message.success('Metadata created successfully');
-                handleCancel();
-                refetch();
-            },
-            onError: () => message.error('Failed to create metadata'),
-        },
-    });
-
-    const updateMutation = useUpdateMetadata2({
-        mutation: {
-            onSuccess: () => {
-                message.success('Metadata updated successfully');
-                handleCancel();
-                refetch();
-            },
-            onError: () => message.error('Failed to update metadata'),
-        },
-    });
-
-    const deleteMutation = useDeleteMetadata2({
-        mutation: {
-            onSuccess: () => {
-                message.success('Metadata deleted successfully');
-                refetch();
-            },
-            onError: () => message.error('Failed to delete metadata'),
-        },
-    });
-
-    const handleCreate = async () => {
-        try {
-            const values = await form.validateFields();
-            const payload: MgmtMetadata = { key: values.key, value: values.value };
-            createMutation.mutate({ distributionSetId, data: [payload] });
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const handleUpdate = async () => {
-        if (!editingMetadata) return;
-        try {
-            const values = await form.validateFields();
-            const payload: MgmtMetadataBodyPut = { value: values.value };
-            updateMutation.mutate({
-                distributionSetId,
-                metadataKey: editingMetadata.key,
-                data: payload,
-            });
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const handleDelete = (key: string) => {
-        deleteMutation.mutate({ distributionSetId, metadataKey: key });
-    };
-
-    const openModal = (metadata?: MgmtMetadata) => {
-        if (metadata) {
-            setEditingMetadata(metadata);
-            form.setFieldsValue(metadata);
+    const openModal = (record?: MgmtMetadata) => {
+        if (record) {
+            setEditingMetadata(record);
+            form.setFieldsValue({ key: record.key, value: record.value });
         } else {
             setEditingMetadata(null);
             form.resetFields();
@@ -99,19 +39,81 @@ const SetMetadataTab: React.FC<SetMetadataTabProps> = ({ distributionSetId, isAd
         form.resetFields();
     };
 
+    const handleDelete = (key?: string) => {
+        if (!key) return;
+        deleteMutation.mutate({ distributionSetId, metadataKey: key });
+    };
+
+    const handleUpdate = async () => {
+        try {
+            const values = await form.validateFields();
+            if (!editingMetadata?.key) return;
+            updateMutation.mutate({
+                distributionSetId,
+                metadataKey: editingMetadata.key,
+                data: { value: values.value }
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const { data, isLoading, refetch } = useGetMetadata2(distributionSetId);
+
+    const createMutation = useCreateMetadata2({
+        mutation: {
+            onSuccess: () => {
+                message.success(t('metadataTab.successCreate'));
+                handleCancel();
+                refetch();
+            },
+            onError: () => message.error(t('metadataTab.errorCreate')),
+        },
+    });
+
+    const updateMutation = useUpdateMetadata2({
+        mutation: {
+            onSuccess: () => {
+                message.success(t('metadataTab.successUpdate'));
+                handleCancel();
+                refetch();
+            },
+            onError: () => message.error(t('metadataTab.errorUpdate')),
+        },
+    });
+
+    const deleteMutation = useDeleteMetadata2({
+        mutation: {
+            onSuccess: () => {
+                message.success(t('metadataTab.successDelete'));
+                refetch();
+            },
+            onError: () => message.error(t('metadataTab.errorDelete')),
+        },
+    });
+
+    const handleCreate = async () => {
+        try {
+            const values = await form.validateFields();
+            const payload: MgmtMetadata = { key: values.key, value: values.value };
+            createMutation.mutate({ distributionSetId, data: [payload] });
+        } catch (error) {
+            console.error(error);
+        }
+    };
     const columns = [
         {
-            title: 'Key',
+            title: t('metadataTab.key'),
             dataIndex: 'key',
             key: 'key',
         },
         {
-            title: 'Value',
+            title: t('metadataTab.value'),
             dataIndex: 'value',
             key: 'value',
         },
         {
-            title: 'Actions',
+            title: t('list.columns.actions'),
             key: 'actions',
             render: (_: unknown, record: MgmtMetadata) => (
                 <Space>
@@ -123,11 +125,11 @@ const SetMetadataTab: React.FC<SetMetadataTabProps> = ({ distributionSetId, isAd
                                 onClick={() => openModal(record)}
                             />
                             <Popconfirm
-                                title="Delete Metadata"
-                                description="Are you sure you want to delete this metadata?"
+                                title={t('metadataTab.deleteTitle')}
+                                description={t('metadataTab.deleteDesc')}
                                 onConfirm={() => handleDelete(record.key)}
-                                okText="Yes"
-                                cancelText="No"
+                                okText={t('values.yes')}
+                                cancelText={t('values.no')}
                             >
                                 <Button icon={<DeleteOutlined />} type="text" danger />
                             </Popconfirm>
@@ -143,7 +145,7 @@ const SetMetadataTab: React.FC<SetMetadataTabProps> = ({ distributionSetId, isAd
             {isAdmin && (
                 <div style={{ marginBottom: 16 }}>
                     <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
-                        Add Metadata
+                        {t('metadataTab.add')}
                     </Button>
                 </div>
             )}
@@ -156,7 +158,7 @@ const SetMetadataTab: React.FC<SetMetadataTabProps> = ({ distributionSetId, isAd
             />
 
             <Modal
-                title={editingMetadata ? 'Edit Metadata' : 'Add Metadata'}
+                title={editingMetadata ? t('metadataTab.edit') : t('metadataTab.add')}
                 open={isModalVisible}
                 onOk={editingMetadata ? handleUpdate : handleCreate}
                 onCancel={handleCancel}
@@ -165,17 +167,17 @@ const SetMetadataTab: React.FC<SetMetadataTabProps> = ({ distributionSetId, isAd
                 <Form form={form} layout="vertical">
                     <Form.Item
                         name="key"
-                        label="Key"
-                        rules={[{ required: true, message: 'Please enter key' }]}
+                        label={t('metadataTab.key')}
+                        rules={[{ required: true, message: t('metadataTab.placeholderKey') }]}
                     >
-                        <Input disabled={!!editingMetadata} placeholder="Key" />
+                        <Input disabled={!!editingMetadata} placeholder={t('metadataTab.key')} />
                     </Form.Item>
                     <Form.Item
                         name="value"
-                        label="Value"
-                        rules={[{ required: true, message: 'Please enter value' }]}
+                        label={t('metadataTab.value')}
+                        rules={[{ required: true, message: t('metadataTab.placeholderValue') }]}
                     >
-                        <Input.TextArea rows={3} placeholder="Value" />
+                        <Input.TextArea rows={3} placeholder={t('metadataTab.value')} />
                     </Form.Item>
                 </Form>
             </Modal>

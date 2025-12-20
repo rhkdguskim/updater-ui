@@ -32,29 +32,9 @@ interface TargetTableProps {
     canDelete: boolean;
 }
 
-const getUpdateStatusTag = (updateStatus?: string) => {
-    switch (updateStatus) {
-        case 'in_sync':
-            return <Tag icon={<CheckCircleOutlined />} color="success">In Sync</Tag>;
-        case 'pending':
-            return <Tag icon={<SyncOutlined spin />} color="processing">Pending</Tag>;
-        case 'error':
-            return <Tag icon={<CloseCircleOutlined />} color="error">Error</Tag>;
-        default:
-            return <Tag icon={<ExclamationCircleOutlined />} color="default">Unknown</Tag>;
-    }
-};
+import { useTranslation } from 'react-i18next';
 
-const getOnlineStatusTag = (pollStatus?: { overdue?: boolean }) => {
-    if (!pollStatus) {
-        return <Tag color="default">Unknown</Tag>;
-    }
-    return pollStatus.overdue ? (
-        <Tag color="red">Offline</Tag>
-    ) : (
-        <Tag color="green">Online</Tag>
-    );
-};
+// ... (imports)
 
 const TargetTable: React.FC<TargetTableProps> = ({
     data,
@@ -67,9 +47,35 @@ const TargetTable: React.FC<TargetTableProps> = ({
     onDelete,
     canDelete,
 }) => {
+    const { t } = useTranslation('targets');
+
+    const getUpdateStatusTag = (updateStatus?: string) => {
+        switch (updateStatus) {
+            case 'in_sync':
+                return <Tag icon={<CheckCircleOutlined />} color="success">{t('status.inSync')}</Tag>;
+            case 'pending':
+                return <Tag icon={<SyncOutlined spin />} color="processing">{t('status.pending')}</Tag>;
+            case 'error':
+                return <Tag icon={<CloseCircleOutlined />} color="error">{t('status.error')}</Tag>;
+            default:
+                return <Tag icon={<ExclamationCircleOutlined />} color="default">{t('status.unknown')}</Tag>;
+        }
+    };
+
+    const getOnlineStatusTag = (pollStatus?: { overdue?: boolean }) => {
+        if (!pollStatus) {
+            return <Tag color="default">{t('status.unknown')}</Tag>;
+        }
+        return pollStatus.overdue ? (
+            <Tag color="red">{t('status.offline')}</Tag>
+        ) : (
+            <Tag color="green">{t('status.online')}</Tag>
+        );
+    };
+
     const columns: TableProps<MgmtTarget>['columns'] = [
         {
-            title: 'Controller ID',
+            title: t('table.controllerId'),
             dataIndex: 'controllerId',
             key: 'controllerId',
             sorter: true,
@@ -80,7 +86,7 @@ const TargetTable: React.FC<TargetTableProps> = ({
             ),
         },
         {
-            title: 'Name',
+            title: t('table.name'),
             dataIndex: 'name',
             key: 'name',
             sorter: true,
@@ -88,20 +94,20 @@ const TargetTable: React.FC<TargetTableProps> = ({
             render: (text: string) => text || <Text type="secondary">-</Text>,
         },
         {
-            title: 'Status',
+            title: t('table.status'),
             key: 'status',
             width: 100,
             render: (_, record) => getOnlineStatusTag(record.pollStatus),
         },
         {
-            title: 'Update Status',
+            title: t('table.updateStatus'),
             dataIndex: 'updateStatus',
             key: 'updateStatus',
             width: 130,
             render: (status: string) => getUpdateStatusTag(status),
         },
         {
-            title: 'Installed DS',
+            title: t('table.installedDS'),
             dataIndex: 'installedAt',
             key: 'installedAt',
             ellipsis: true,
@@ -109,7 +115,7 @@ const TargetTable: React.FC<TargetTableProps> = ({
                 value ? dayjs(value).format('YYYY-MM-DD HH:mm') : <Text type="secondary">-</Text>,
         },
         {
-            title: 'Last Modified',
+            title: t('table.lastModified'),
             dataIndex: 'lastModifiedAt',
             key: 'lastModifiedAt',
             sorter: true,
@@ -118,13 +124,13 @@ const TargetTable: React.FC<TargetTableProps> = ({
                 value ? dayjs(value).format('YYYY-MM-DD HH:mm') : <Text type="secondary">-</Text>,
         },
         {
-            title: 'Actions',
+            title: t('table.actions'),
             key: 'actions',
             width: 120,
             fixed: 'right',
             render: (_, record) => (
                 <Space size="small">
-                    <Tooltip title="View Details">
+                    <Tooltip title={t('actions.viewDetails')}>
                         <Button
                             type="text"
                             icon={<EyeOutlined />}
@@ -132,7 +138,7 @@ const TargetTable: React.FC<TargetTableProps> = ({
                         />
                     </Tooltip>
                     {canDelete && (
-                        <Tooltip title="Delete">
+                        <Tooltip title={t('actions.delete')}>
                             <Button
                                 type="text"
                                 danger

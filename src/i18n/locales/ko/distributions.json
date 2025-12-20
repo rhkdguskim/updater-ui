@@ -1,0 +1,144 @@
+{
+    "pageTitle": "배포 관리",
+    "tabs": {
+        "sets": "배포 세트",
+        "modules": "소프트웨어 모듈"
+    },
+    "list": {
+        "columns": {
+            "name": "이름",
+            "version": "버전",
+            "type": "유형",
+            "vendor": "공급업체",
+            "description": "설명",
+            "completeness": "완전성",
+            "lastModified": "최종 수정일",
+            "actions": "액션"
+        },
+        "addSet": "배포 세트 추가",
+        "addModule": "소프트웨어 모듈 추가",
+        "refresh": "새로고침",
+        "search": "검색",
+        "searchPlaceholder": "{{field}} 검색",
+        "searchFields": {
+            "name": "이름",
+            "version": "버전",
+            "description": "설명"
+        }
+    },
+    "tags": {
+        "complete": "완료",
+        "incomplete": "미완료"
+    },
+    "actions": {
+        "viewDetails": "상세 보기",
+        "delete": "삭제"
+    },
+    "messages": {
+        "deleteSetSuccess": "배포 세트가 성공적으로 삭제되었습니다.",
+        "deleteSetConfirmTitle": "배포 세트 삭제",
+        "deleteSetConfirmDesc": "정말로 이 배포 세트를 삭제하시겠습니까?",
+        "deleteModuleSuccess": "소프트웨어 모듈이 성공적으로 삭제되었습니다.",
+        "deleteModuleConfirmTitle": "소프트웨어 모듈 삭제",
+        "deleteModuleConfirmDesc": "정말로 이 소프트웨어 모듈을 삭제하시겠습니까?",
+        "deleteSetError": "배포 세트 삭제에 실패했습니다.",
+        "deleteModuleError": "소프트웨어 모듈 삭제에 실패했습니다.",
+        "createSetSuccess": "배포 세트가 성공적으로 생성되었습니다.",
+        "createModuleSuccess": "소프트웨어 모듈이 성공적으로 생성되었습니다.",
+        "createSetError": "배포 세트 생성에 실패했습니다.",
+        "createModuleError": "소프트웨어 모듈 생성에 실패했습니다."
+    },
+    "modal": {
+        "createSetTitle": "배포 세트 생성",
+        "createModuleTitle": "소프트웨어 모듈 생성",
+        "name": "이름",
+        "version": "버전",
+        "type": "유형",
+        "description": "설명",
+        "vendor": "공급업체",
+        "requiredMigration": "마이그레이션 단계 필요",
+        "placeholders": {
+            "name": "이름을 입력하세요",
+            "version": "버전을 입력하세요 (예: 1.0.0)",
+            "type": "유형을 선택하세요",
+            "vendor": "공급업체 이름을 입력하세요",
+            "description": "설명을 입력하세요"
+        }
+    },
+    "detail": {
+        "overview": "개요",
+        "assignedModules": "할당된 모듈",
+        "metadata": "메타데이터",
+        "tags": "태그",
+        "artifacts": "아티팩트",
+        "assignModule": "모듈 할당",
+        "assignModuleTitle": "소프트웨어 모듈 할당",
+        "selectModuleWarning": "최소 하나의 모듈을 선택해주세요.",
+        "assignSuccess": "모듈이 성공적으로 할당되었습니다.",
+        "assignError": "모듈 할당에 실패했습니다.",
+        "uploadArtifactSuccess": "아티팩트가 성공적으로 업로드되었습니다.",
+        "uploadArtifactError": "아티팩트 업로드에 실패했습니다.",
+        "deleteArtifactSuccess": "아티팩트가 성공적으로 삭제되었습니다.",
+        "deleteArtifactError": "아티팩트 삭제에 실패했습니다.",
+        "deleteArtifactConfirmTitle": "아티팩트 삭제",
+        "deleteArtifactConfirmDesc": "정말로 이 아티팩트를 삭제하시겠습니까?",
+        "downloadNotImplemented": "다운로드는 아직 완전히 구현되지 않았습니다.",
+        "dragDropTitle": "이 영역을 클릭하거나 파일을 드래그하여 업로드하세요.",
+        "dragDropHint": "단일 파일 업로드를 지원합니다.",
+        "labels": {
+            "name": "이름",
+            "version": "버전",
+            "type": "유형",
+            "description": "설명",
+            "requiredMigration": "마이그레이션 단계 필요",
+            "functionallyComplete": "기능적 완전성",
+            "createdBy": "생성자",
+            "createdAt": "생성일",
+            "lastModifiedBy": "최종 수정자",
+            "lastModifiedAt": "최종 수정일",
+            "vendor": "공급업체"
+        },
+        "values": {
+            "yes": "예",
+            "no": "아니오"
+        },
+        "artifactsColumns": {
+            "filename": "파일명",
+            "size": "크기",
+            "hashes": "해시",
+            "actions": "액션"
+        }
+    },
+    "metadataTab": {
+        "add": "메타데이터 추가",
+        "edit": "메타데이터 수정",
+        "deleteTitle": "메타데이터 삭제",
+        "deleteDesc": "정말로 이 메타데이터를 삭제하시겠습니까?",
+        "successCreate": "메타데이터가 성공적으로 생성되었습니다.",
+        "successUpdate": "메타데이터가 성공적으로 수정되었습니다.",
+        "successDelete": "메타데이터가 성공적으로 삭제되었습니다.",
+        "errorCreate": "메타데이터 생성에 실패했습니다.",
+        "errorUpdate": "메타데이터 수정에 실패했습니다.",
+        "errorDelete": "메타데이터 삭제에 실패했습니다.",
+        "key": "키",
+        "value": "값",
+        "targetVisible": "대상 표시",
+        "placeholderKey": "키를 입력하세요",
+        "placeholderValue": "값을 입력하세요"
+    },
+    "tagsTab": {
+        "add": "태그 추가",
+        "selectTitle": "할당할 태그 선택",
+        "noTags": "할당된 태그 없음",
+        "noAvailable": "할당 가능한 태그가 없습니다.",
+        "successAssign": "태그가 성공적으로 할당되었습니다.",
+        "successUnassign": "태그가 성공적으로 제거되었습니다.",
+        "errorAssign": "태그 할당에 실패했습니다.",
+        "errorUnassign": "태그 제거에 실패했습니다.",
+        "warningSelect": "태그를 선택해주세요.",
+        "columns": {
+            "name": "태그 이름",
+            "description": "설명"
+        }
+    }
+}

@@ -36,6 +36,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import type { TableProps } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
@@ -65,6 +66,7 @@ const getStatusColor = (status?: string) => {
 };
 
 const RolloutDetail: React.FC = () => {
+    const { t } = useTranslation('rollouts');
     const { rolloutId } = useParams<{ rolloutId: string }>();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -89,11 +91,11 @@ const RolloutDetail: React.FC = () => {
     const startMutation = useStart({
         mutation: {
             onSuccess: () => {
-                message.success('Rollout started');
+                message.success(t('detail.messages.startSuccess'));
                 queryClient.invalidateQueries();
             },
             onError: (err) => {
-                message.error((err as Error).message || 'Failed to start rollout');
+                message.error((err as Error).message || t('detail.messages.startError'));
             },
         },
     });
@@ -101,11 +103,11 @@ const RolloutDetail: React.FC = () => {
     const pauseMutation = usePause({
         mutation: {
             onSuccess: () => {
-                message.success('Rollout paused');
+                message.success(t('detail.messages.pauseSuccess'));
                 queryClient.invalidateQueries();
             },
             onError: (err) => {
-                message.error((err as Error).message || 'Failed to pause rollout');
+                message.error((err as Error).message || t('detail.messages.pauseError'));
             },
         },
     });
@@ -113,11 +115,11 @@ const RolloutDetail: React.FC = () => {
     const resumeMutation = useResume({
         mutation: {
             onSuccess: () => {
-                message.success('Rollout resumed');
+                message.success(t('detail.messages.resumeSuccess'));
                 queryClient.invalidateQueries();
             },
             onError: (err) => {
-                message.error((err as Error).message || 'Failed to resume rollout');
+                message.error((err as Error).message || t('detail.messages.resumeError'));
             },
         },
     });
@@ -125,11 +127,11 @@ const RolloutDetail: React.FC = () => {
     const approveMutation = useApprove({
         mutation: {
             onSuccess: () => {
-                message.success('Rollout approved');
+                message.success(t('detail.messages.approveSuccess'));
                 queryClient.invalidateQueries();
             },
             onError: (err) => {
-                message.error((err as Error).message || 'Failed to approve rollout');
+                message.error((err as Error).message || t('detail.messages.approveError'));
             },
         },
     });
@@ -137,11 +139,11 @@ const RolloutDetail: React.FC = () => {
     const denyMutation = useDeny({
         mutation: {
             onSuccess: () => {
-                message.success('Rollout denied');
+                message.success(t('detail.messages.denySuccess'));
                 queryClient.invalidateQueries();
             },
             onError: (err) => {
-                message.error((err as Error).message || 'Failed to deny rollout');
+                message.error((err as Error).message || t('detail.messages.denyError'));
             },
         },
     });
@@ -190,11 +192,11 @@ const RolloutDetail: React.FC = () => {
             <div style={{ padding: 24 }}>
                 <Alert
                     type="error"
-                    message="Rollout not found"
-                    description="The requested rollout does not exist."
+                    message={t('detail.notFound')}
+                    description={t('detail.notFoundDesc')}
                     action={
                         <Button onClick={() => navigate('/rollouts')}>
-                            Back to Rollouts
+                            {t('detail.backToRollouts')}
                         </Button>
                     }
                 />
@@ -215,18 +217,18 @@ const RolloutDetail: React.FC = () => {
 
     const groupColumns: TableProps<MgmtRolloutGroup>['columns'] = [
         {
-            title: 'ID',
+            title: t('columns.id'),
             dataIndex: 'id',
             key: 'id',
             width: 80,
         },
         {
-            title: 'Name',
+            title: t('columns.name'),
             dataIndex: 'name',
             key: 'name',
         },
         {
-            title: 'Status',
+            title: t('columns.status'),
             dataIndex: 'status',
             key: 'status',
             width: 120,
@@ -237,13 +239,13 @@ const RolloutDetail: React.FC = () => {
             ),
         },
         {
-            title: 'Total Targets',
+            title: t('columns.totalTargets'),
             key: 'totalTargets',
             width: 120,
             render: (_, record) => (record as unknown as { totalTargets?: number }).totalTargets || 0,
         },
         {
-            title: 'Progress',
+            title: t('columns.progress'),
             key: 'progress',
             width: 200,
             render: (_, record) => {
@@ -265,7 +267,7 @@ const RolloutDetail: React.FC = () => {
                         icon={<ArrowLeftOutlined />}
                         onClick={() => navigate('/rollouts')}
                     >
-                        Back
+                        {t('detail.back')}
                     </Button>
                     <Title level={2} style={{ margin: 0 }}>
                         {rolloutData.name}
@@ -277,11 +279,11 @@ const RolloutDetail: React.FC = () => {
 
                 {/* Rollout Controls (Admin Only) */}
                 {isAdmin && (
-                    <Card title="Rollout Controls" size="small">
+                    <Card title={t('detail.controlsTitle')} size="small">
                         <Space>
                             {canStart && (
                                 <Popconfirm
-                                    title="Start this rollout?"
+                                    title={t('detail.controls.startConfirm')}
                                     onConfirm={handleStart}
                                 >
                                     <Button
@@ -289,20 +291,20 @@ const RolloutDetail: React.FC = () => {
                                         icon={<PlayCircleOutlined />}
                                         loading={startMutation.isPending}
                                     >
-                                        Start
+                                        {t('detail.controls.start')}
                                     </Button>
                                 </Popconfirm>
                             )}
                             {canPause && (
                                 <Popconfirm
-                                    title="Pause this rollout?"
+                                    title={t('detail.controls.pauseConfirm')}
                                     onConfirm={handlePause}
                                 >
                                     <Button
                                         icon={<PauseCircleOutlined />}
                                         loading={pauseMutation.isPending}
                                     >
-                                        Pause
+                                        {t('detail.controls.pause')}
                                     </Button>
                                 </Popconfirm>
                             )}
@@ -312,7 +314,7 @@ const RolloutDetail: React.FC = () => {
                                     onClick={handleResume}
                                     loading={resumeMutation.isPending}
                                 >
-                                    Resume
+                                    {t('detail.controls.resume')}
                                 </Button>
                             )}
                             {canApprove && (
@@ -323,7 +325,7 @@ const RolloutDetail: React.FC = () => {
                                         onClick={handleApprove}
                                         loading={approveMutation.isPending}
                                     >
-                                        Approve
+                                        {t('detail.controls.approve')}
                                     </Button>
                                     <Button
                                         danger
@@ -331,45 +333,45 @@ const RolloutDetail: React.FC = () => {
                                         onClick={handleDeny}
                                         loading={denyMutation.isPending}
                                     >
-                                        Deny
+                                        {t('detail.controls.deny')}
                                     </Button>
                                 </>
                             )}
                             {!canStart && !canPause && !canResume && !canApprove && (
-                                <Text type="secondary">No actions available for this status</Text>
+                                <Text type="secondary">{t('detail.noActions')}</Text>
                             )}
                         </Space>
                     </Card>
                 )}
 
                 {/* Overview */}
-                <Card title="Overview">
+                <Card title={t('detail.overviewTitle')}>
                     <Descriptions bordered column={2}>
-                        <Descriptions.Item label="ID">{rolloutData.id}</Descriptions.Item>
-                        <Descriptions.Item label="Name">{rolloutData.name}</Descriptions.Item>
-                        <Descriptions.Item label="Status">
+                        <Descriptions.Item label={t('detail.labels.id')}>{rolloutData.id}</Descriptions.Item>
+                        <Descriptions.Item label={t('detail.labels.name')}>{rolloutData.name}</Descriptions.Item>
+                        <Descriptions.Item label={t('detail.labels.status')}>
                             <Tag color={getStatusColor(rolloutData.status)}>
                                 {rolloutData.status?.toUpperCase().replace(/_/g, ' ')}
                             </Tag>
                         </Descriptions.Item>
-                        <Descriptions.Item label="Total Targets">
+                        <Descriptions.Item label={t('detail.labels.totalTargets')}>
                             {rolloutData.totalTargets}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Overall Progress" span={2}>
+                        <Descriptions.Item label={t('detail.labels.overallProgress')} span={2}>
                             <Progress percent={overallProgress} />
                         </Descriptions.Item>
-                        <Descriptions.Item label="Created At">
+                        <Descriptions.Item label={t('detail.labels.createdAt')}>
                             {rolloutData.createdAt
                                 ? format(rolloutData.createdAt, 'yyyy-MM-dd HH:mm:ss')
                                 : '-'}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Last Modified">
+                        <Descriptions.Item label={t('detail.labels.lastModified')}>
                             {rolloutData.lastModifiedAt
                                 ? format(rolloutData.lastModifiedAt, 'yyyy-MM-dd HH:mm:ss')
                                 : '-'}
                         </Descriptions.Item>
                         {rolloutData.description && (
-                            <Descriptions.Item label="Description" span={2}>
+                            <Descriptions.Item label={t('detail.labels.description')} span={2}>
                                 {rolloutData.description}
                             </Descriptions.Item>
                         )}
@@ -377,7 +379,7 @@ const RolloutDetail: React.FC = () => {
                 </Card>
 
                 {/* Deploy Groups */}
-                <Card title="Deploy Groups" loading={groupsLoading}>
+                <Card title={t('detail.deployGroupsTitle')} loading={groupsLoading}>
                     <Table
                         dataSource={groupsData?.content || []}
                         columns={groupColumns}

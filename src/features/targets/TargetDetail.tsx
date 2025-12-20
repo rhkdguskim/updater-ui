@@ -62,6 +62,7 @@ import type { MgmtDistributionSetAssignment, MgmtDistributionSetAssignments, Mgm
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
@@ -91,6 +92,7 @@ const TargetDetail: React.FC = () => {
     const queryClient = useQueryClient();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
+    const { t } = useTranslation(['targets', 'common']);
 
     // Active Tab State
     const [activeTab, setActiveTab] = useState('overview');
@@ -158,12 +160,12 @@ const TargetDetail: React.FC = () => {
     const updateTargetMutation = useUpdateTarget({
         mutation: {
             onSuccess: () => {
-                message.success('Target updated successfully');
+                message.success(t('messages.updateSuccess'));
                 setEditModalOpen(false);
                 queryClient.invalidateQueries({ queryKey: getGetTargetQueryKey(targetId) });
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to update target');
+                message.error((error as Error).message || t('common:messages.error'));
             },
         },
     });
@@ -171,11 +173,11 @@ const TargetDetail: React.FC = () => {
     const deleteTargetMutation = useDeleteTarget({
         mutation: {
             onSuccess: () => {
-                message.success('Target deleted successfully');
+                message.success(t('messages.deleteSuccess'));
                 navigate('/targets');
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to delete target');
+                message.error((error as Error).message || t('messages.deleteFailed'));
             },
         },
     });
@@ -183,12 +185,12 @@ const TargetDetail: React.FC = () => {
     const assignDSMutation = usePostAssignedDistributionSet({
         mutation: {
             onSuccess: () => {
-                message.success('Distribution Set assigned successfully');
+                message.success(t('messages.assignSuccess'));
                 setAssignModalOpen(false);
                 queryClient.invalidateQueries();
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to assign distribution set');
+                message.error((error as Error).message || t('common:messages.error'));
             },
         },
     });
@@ -196,11 +198,11 @@ const TargetDetail: React.FC = () => {
     const activateAutoConfirmMutation = useActivateAutoConfirm({
         mutation: {
             onSuccess: () => {
-                message.success('AutoConfirm activated');
+                message.success(t('messages.autoConfirmActivated'));
                 queryClient.invalidateQueries();
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to activate AutoConfirm');
+                message.error((error as Error).message || t('common:messages.error'));
             },
         },
     });
@@ -208,11 +210,11 @@ const TargetDetail: React.FC = () => {
     const deactivateAutoConfirmMutation = useDeactivateAutoConfirm({
         mutation: {
             onSuccess: () => {
-                message.success('AutoConfirm deactivated');
+                message.success(t('messages.autoConfirmDeactivated'));
                 queryClient.invalidateQueries();
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to deactivate AutoConfirm');
+                message.error((error as Error).message || t('common:messages.error'));
             },
         },
     });
@@ -221,12 +223,12 @@ const TargetDetail: React.FC = () => {
     const createMetadataMutation = useCreateMetadata({
         mutation: {
             onSuccess: () => {
-                message.success('Metadata created successfully');
+                message.success(t('messages.metadataCreateSuccess'));
                 setMetadataFormOpen(false);
                 queryClient.invalidateQueries({ queryKey: getGetMetadataQueryKey(targetId) });
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to create metadata');
+                message.error((error as Error).message || t('common:messages.error'));
             },
         },
     });
@@ -234,13 +236,13 @@ const TargetDetail: React.FC = () => {
     const updateMetadataMutation = useUpdateMetadata({
         mutation: {
             onSuccess: () => {
-                message.success('Metadata updated successfully');
+                message.success(t('messages.metadataUpdateSuccess'));
                 setMetadataFormOpen(false);
                 setMetadataToEdit(null);
                 queryClient.invalidateQueries({ queryKey: getGetMetadataQueryKey(targetId) });
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to update metadata');
+                message.error((error as Error).message || t('common:messages.error'));
             },
         },
     });
@@ -248,13 +250,13 @@ const TargetDetail: React.FC = () => {
     const deleteMetadataMutation = useDeleteMetadata({
         mutation: {
             onSuccess: () => {
-                message.success('Metadata deleted successfully');
+                message.success(t('messages.metadataDeleteSuccess'));
                 setDeleteMetadataOpen(false);
                 setMetadataToDelete(null);
                 queryClient.invalidateQueries({ queryKey: getGetMetadataQueryKey(targetId) });
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to delete metadata');
+                message.error((error as Error).message || t('common:messages.error'));
             },
         },
     });
@@ -263,11 +265,11 @@ const TargetDetail: React.FC = () => {
     const assignTargetTypeMutation = useAssignTargetType({
         mutation: {
             onSuccess: () => {
-                message.success('Target type assigned successfully');
+                message.success(t('messages.targetTypeAssigned'));
                 queryClient.invalidateQueries({ queryKey: getGetTargetQueryKey(targetId) });
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to assign target type');
+                message.error((error as Error).message || t('common:messages.error'));
             },
         },
     });
@@ -275,11 +277,11 @@ const TargetDetail: React.FC = () => {
     const unassignTargetTypeMutation = useUnassignTargetType({
         mutation: {
             onSuccess: () => {
-                message.success('Target type removed successfully');
+                message.success(t('messages.targetTypeRemoved'));
                 queryClient.invalidateQueries({ queryKey: getGetTargetQueryKey(targetId) });
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to remove target type');
+                message.error((error as Error).message || t('common:messages.error'));
             },
         },
     });
@@ -407,12 +409,12 @@ const TargetDetail: React.FC = () => {
             <PageContainer>
                 <Alert
                     type="error"
-                    message="Target not found"
-                    description="The requested target does not exist or you don't have permission to view it."
+                    message={t('detail.notFoundTitle')}
+                    description={t('detail.notFoundDesc')}
                     showIcon
                     action={
                         <Button type="primary" onClick={() => navigate('/targets')}>
-                            Back to Targets
+                            {t('detail.backToTargets')}
                         </Button>
                     }
                 />
@@ -423,12 +425,12 @@ const TargetDetail: React.FC = () => {
     const tabItems = [
         {
             key: 'overview',
-            label: 'Overview',
+            label: t('detail.tabs.overview'),
             children: <OverviewTab target={targetData} loading={targetLoading} />,
         },
         {
             key: 'actions',
-            label: 'Actions',
+            label: t('detail.tabs.actions'),
             children: (
                 <ActionsTab
                     data={actionsData}
@@ -443,12 +445,12 @@ const TargetDetail: React.FC = () => {
         },
         {
             key: 'attributes',
-            label: 'Attributes',
+            label: t('detail.tabs.attributes'),
             children: <AttributesTab data={attributesData} loading={attributesLoading} />,
         },
         {
             key: 'distribution',
-            label: 'Distribution Sets',
+            label: t('detail.tabs.distribution'),
             children: (
                 <DistributionSetTab
                     installedDS={installedDSData}
@@ -461,7 +463,7 @@ const TargetDetail: React.FC = () => {
         },
         {
             key: 'metadata',
-            label: 'Metadata',
+            label: t('detail.tabs.metadata'),
             children: (
                 <MetadataTab
                     data={metadataData}
@@ -475,14 +477,14 @@ const TargetDetail: React.FC = () => {
         },
         {
             key: 'tags',
-            label: 'Tags',
+            label: t('detail.tabs.tags'),
             children: <TagsTab data={tagsData} loading={tagsLoading} />,
         },
         ...(isAdmin
             ? [
                 {
                     key: 'autoconfirm',
-                    label: 'AutoConfirm',
+                    label: t('detail.tabs.autoConfirm'),
                     children: (
                         <AutoConfirmTab
                             data={autoConfirmData}
@@ -499,7 +501,7 @@ const TargetDetail: React.FC = () => {
                 },
                 {
                     key: 'targettype',
-                    label: 'Target Type',
+                    label: t('detail.tabs.targetType'),
                     children: (
                         <TargetTypeTab
                             target={targetData}
@@ -523,7 +525,7 @@ const TargetDetail: React.FC = () => {
             {/* Breadcrumb */}
             <Breadcrumb
                 items={[
-                    { title: <Link to="/targets">Targets</Link> },
+                    { title: <Link to="/targets">{t('list.title')}</Link> },
                     { title: targetId },
                 ]}
             />
@@ -536,7 +538,7 @@ const TargetDetail: React.FC = () => {
                             icon={<ArrowLeftOutlined />}
                             onClick={() => navigate('/targets')}
                         >
-                            Back
+                            {t('actions.back', { ns: 'common' })}
                         </Button>
                         {targetLoading ? (
                             <Skeleton.Input active size="large" style={{ width: 200 }} />
@@ -558,7 +560,7 @@ const TargetDetail: React.FC = () => {
                         icon={<SendOutlined />}
                         onClick={() => setAssignModalOpen(true)}
                     >
-                        Assign DS
+                        {t('detail.assignDS')}
                     </Button>
                     {isAdmin && (
                         <>
@@ -566,14 +568,14 @@ const TargetDetail: React.FC = () => {
                                 icon={<EditOutlined />}
                                 onClick={() => setEditModalOpen(true)}
                             >
-                                Edit
+                                {t('actions.edit', { ns: 'common' })}
                             </Button>
                             <Button
                                 danger
                                 icon={<DeleteOutlined />}
                                 onClick={() => setDeleteModalOpen(true)}
                             >
-                                Delete
+                                {t('actions.delete', { ns: 'common' })}
                             </Button>
                         </>
                     )}

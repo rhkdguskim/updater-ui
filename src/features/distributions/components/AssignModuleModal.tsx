@@ -13,6 +13,8 @@ interface AssignModuleModalProps {
     excludedModuleIds?: number[];
 }
 
+import { useTranslation } from 'react-i18next';
+
 const AssignModuleModal: React.FC<AssignModuleModalProps> = ({
     visible,
     onCancel,
@@ -20,6 +22,7 @@ const AssignModuleModal: React.FC<AssignModuleModalProps> = ({
     isAssigning,
     excludedModuleIds = [],
 }) => {
+    const { t } = useTranslation('distributions');
     const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
@@ -39,7 +42,7 @@ const AssignModuleModal: React.FC<AssignModuleModalProps> = ({
 
     const handleOk = () => {
         if (selectedRowKeys.length === 0) {
-            message.warning('Please select at least one module');
+            message.warning(t('detail.selectModuleWarning'));
             return;
         }
         onAssign(selectedRowKeys as number[]);
@@ -65,22 +68,22 @@ const AssignModuleModal: React.FC<AssignModuleModalProps> = ({
 
     const columns: TableProps<MgmtSoftwareModule>['columns'] = [
         {
-            title: 'Name',
+            title: t('list.columns.name'),
             dataIndex: 'name',
             key: 'name',
         },
         {
-            title: 'Version',
+            title: t('list.columns.version'),
             dataIndex: 'version',
             key: 'version',
         },
         {
-            title: 'Type',
+            title: t('list.columns.type'),
             dataIndex: 'typeName',
             key: 'typeName',
         },
         {
-            title: 'Vendor',
+            title: t('list.columns.vendor'),
             dataIndex: 'vendor',
             key: 'vendor',
         },
@@ -88,7 +91,7 @@ const AssignModuleModal: React.FC<AssignModuleModalProps> = ({
 
     return (
         <Modal
-            title="Assign Software Modules"
+            title={t('detail.assignModuleTitle')}
             open={visible}
             onOk={handleOk}
             onCancel={handleCancel}

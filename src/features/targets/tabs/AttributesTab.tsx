@@ -2,6 +2,7 @@ import React from 'react';
 import { Table, Typography, Skeleton, Empty, Tag } from 'antd';
 import type { TableProps } from 'antd';
 import type { MgmtTargetAttributes } from '@/api/generated/model';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -40,25 +41,27 @@ const parseAttributes = (attributes: MgmtTargetAttributes): AttributeRow[] => {
 };
 
 const AttributesTab: React.FC<AttributesTabProps> = ({ data, loading }) => {
+    const { t } = useTranslation('targets');
+
     if (loading) {
         return <Skeleton active paragraph={{ rows: 6 }} />;
     }
 
     if (!data || Object.keys(data).length === 0) {
-        return <Empty description="No attributes found" />;
+        return <Empty description={t('attributes.noAttributes')} />;
     }
 
     const rows = parseAttributes(data);
 
     const columns: TableProps<AttributeRow>['columns'] = [
         {
-            title: 'Key',
+            title: t('attributes.key'),
             dataIndex: 'key',
             key: 'key',
             render: (text: string) => <Text code>{text}</Text>,
         },
         {
-            title: 'Value',
+            title: t('attributes.value'),
             dataIndex: 'value',
             key: 'value',
             render: (text: string) => (
@@ -68,7 +71,7 @@ const AttributesTab: React.FC<AttributesTabProps> = ({ data, loading }) => {
             ),
         },
         {
-            title: 'Category',
+            title: t('attributes.category'),
             dataIndex: 'category',
             key: 'category',
             width: 150,

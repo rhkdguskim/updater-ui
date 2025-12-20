@@ -1,9 +1,8 @@
 import React from 'react';
-import { Modal, Typography, Alert } from 'antd';
+import { Modal, Alert } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import type { MgmtTarget } from '@/api/generated/model';
-
-const { Text } = Typography;
+import { useTranslation } from 'react-i18next';
 
 interface DeleteTargetModalProps {
     open: boolean;
@@ -13,6 +12,8 @@ interface DeleteTargetModalProps {
     onCancel: () => void;
 }
 
+
+
 const DeleteTargetModal: React.FC<DeleteTargetModalProps> = ({
     open,
     target,
@@ -20,30 +21,28 @@ const DeleteTargetModal: React.FC<DeleteTargetModalProps> = ({
     onConfirm,
     onCancel,
 }) => {
+    const { t } = useTranslation(['targets', 'common']);
     return (
         <Modal
             title={
                 <>
                     <ExclamationCircleOutlined style={{ color: '#faad14', marginRight: 8 }} />
-                    Delete Target
+                    {t('modal.deleteTitle')}
                 </>
             }
             open={open}
             onOk={onConfirm}
             onCancel={onCancel}
-            okText="Delete"
+            okText={t('actions.delete')}
             okButtonProps={{ danger: true, loading }}
             cancelButtonProps={{ disabled: loading }}
         >
             <Alert
                 type="warning"
-                message="This action cannot be undone"
+                message={t('common:messages.warning')}
                 description={
                     <>
-                        Are you sure you want to delete the target{' '}
-                        <Text strong>{target?.controllerId}</Text>?
-                        <br />
-                        All associated data including actions and metadata will be removed.
+                        {t('modal.deleteConfirm', { name: target?.controllerId })}
                     </>
                 }
                 showIcon

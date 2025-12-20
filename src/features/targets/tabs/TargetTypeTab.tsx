@@ -29,6 +29,9 @@ interface TargetTypeTabProps {
     actionLoading?: boolean;
 }
 
+import { useTranslation } from 'react-i18next';
+// ...
+
 const TargetTypeTab: React.FC<TargetTypeTabProps> = ({
     target,
     loading,
@@ -37,6 +40,7 @@ const TargetTypeTab: React.FC<TargetTypeTabProps> = ({
     onUnassign,
     actionLoading = false,
 }) => {
+    const { t } = useTranslation(['targets', 'common']);
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [unassignModalOpen, setUnassignModalOpen] = useState(false);
     const [selectedTypeId, setSelectedTypeId] = useState<number | null>(null);
@@ -59,7 +63,7 @@ const TargetTypeTab: React.FC<TargetTypeTabProps> = ({
             setAssignModalOpen(false);
             setSelectedTypeId(null);
         } else {
-            message.warning('Please select a target type');
+            message.warning(t('common:validation.required'));
         }
     };
 
@@ -75,7 +79,7 @@ const TargetTypeTab: React.FC<TargetTypeTabProps> = ({
                     <>
                         <Space direction="vertical" size="large" style={{ width: '100%' }}>
                             <Space align="center">
-                                <Title level={5} style={{ margin: 0 }}>Current Target Type</Title>
+                                <Title level={5} style={{ margin: 0 }}>{t('targetType.current')}</Title>
                                 <Tag color="blue">{currentType.name}</Tag>
                             </Space>
 
@@ -83,10 +87,10 @@ const TargetTypeTab: React.FC<TargetTypeTabProps> = ({
                                 <Descriptions.Item label="ID">
                                     {currentType.id}
                                 </Descriptions.Item>
-                                <Descriptions.Item label="Name">
+                                <Descriptions.Item label={t('table.name')}>
                                     {currentType.name || '-'}
                                 </Descriptions.Item>
-                                <Descriptions.Item label="Description">
+                                <Descriptions.Item label={t('form.description')}>
                                     {currentType.description || '-'}
                                 </Descriptions.Item>
                             </Descriptions>
@@ -97,14 +101,14 @@ const TargetTypeTab: React.FC<TargetTypeTabProps> = ({
                                         icon={<EditOutlined />}
                                         onClick={() => setAssignModalOpen(true)}
                                     >
-                                        Change Type
+                                        {t('targetType.change')}
                                     </Button>
                                     <Button
                                         danger
                                         icon={<DeleteOutlined />}
                                         onClick={() => setUnassignModalOpen(true)}
                                     >
-                                        Remove Type
+                                        {t('targetType.remove')}
                                     </Button>
                                 </Space>
                             )}
@@ -114,14 +118,14 @@ const TargetTypeTab: React.FC<TargetTypeTabProps> = ({
                     <Empty
                         description={
                             <Space direction="vertical" align="center">
-                                <Text>No target type assigned</Text>
+                                <Text>{t('targetType.noAssigned')}</Text>
                                 {canEdit && (
                                     <Button
                                         type="primary"
                                         icon={<PlusOutlined />}
                                         onClick={() => setAssignModalOpen(true)}
                                     >
-                                        Assign Target Type
+                                        {t('targetType.assign')}
                                     </Button>
                                 )}
                             </Space>
@@ -132,7 +136,7 @@ const TargetTypeTab: React.FC<TargetTypeTabProps> = ({
 
             {/* Assign Target Type Modal */}
             <Modal
-                title="Assign Target Type"
+                title={t('targetType.assignTitle')}
                 open={assignModalOpen}
                 onOk={handleAssign}
                 onCancel={() => {
@@ -142,9 +146,9 @@ const TargetTypeTab: React.FC<TargetTypeTabProps> = ({
                 confirmLoading={actionLoading}
             >
                 <Space direction="vertical" size="middle" style={{ width: '100%' }}>
-                    <Text>Select a target type to assign:</Text>
+                    <Text>{t('targetType.select')}:</Text>
                     <Select
-                        placeholder="Select target type"
+                        placeholder={t('targetType.select')}
                         style={{ width: '100%' }}
                         loading={typesLoading}
                         value={selectedTypeId}
@@ -168,17 +172,16 @@ const TargetTypeTab: React.FC<TargetTypeTabProps> = ({
 
             {/* Unassign Confirmation Modal */}
             <Modal
-                title="Remove Target Type"
+                title={t('targetType.removeTitle')}
                 open={unassignModalOpen}
                 onOk={handleUnassign}
                 onCancel={() => setUnassignModalOpen(false)}
-                okText="Remove"
+                okText={t('targetType.remove')}
                 okButtonProps={{ danger: true }}
                 confirmLoading={actionLoading}
             >
                 <p>
-                    Are you sure you want to remove the target type{' '}
-                    <Text strong>"{currentType?.name}"</Text> from this target?
+                    {t('targetType.removeConfirm', { name: currentType?.name })}
                 </p>
             </Modal>
         </>

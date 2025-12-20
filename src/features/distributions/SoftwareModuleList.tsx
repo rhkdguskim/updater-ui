@@ -13,7 +13,10 @@ import DistributionSearchBar from './components/DistributionSearchBar';
 import CreateSoftwareModuleModal from './components/CreateSoftwareModuleModal';
 import { format } from 'date-fns';
 
+import { useTranslation } from 'react-i18next';
+
 const SoftwareModuleList: React.FC = () => {
+    const { t } = useTranslation(['distributions', 'common']);
     const navigate = useNavigate();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
@@ -43,22 +46,22 @@ const SoftwareModuleList: React.FC = () => {
     const deleteMutation = useDeleteSoftwareModule({
         mutation: {
             onSuccess: () => {
-                message.success('Software Module deleted successfully');
+                message.success(t('messages.deleteModuleSuccess'));
                 refetch();
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to delete Software Module');
+                message.error((error as Error).message || t('messages.deleteModuleError'));
             },
         },
     });
 
     const handleDelete = (id: number) => {
         Modal.confirm({
-            title: 'Delete Software Module',
-            content: 'Are you sure you want to delete this Software Module?',
-            okText: 'Delete',
+            title: t('messages.deleteModuleConfirmTitle'),
+            content: t('messages.deleteModuleConfirmDesc'),
+            okText: t('actions.delete'),
             okType: 'danger',
-            cancelText: 'Cancel',
+            cancelText: t('common:actions.cancel'),
             onOk: () => deleteMutation.mutate({ softwareModuleId: id }),
         });
     };
@@ -92,7 +95,7 @@ const SoftwareModuleList: React.FC = () => {
 
     const columns: TableProps<MgmtSoftwareModule>['columns'] = [
         {
-            title: 'Name',
+            title: t('list.columns.name'),
             dataIndex: 'name',
             key: 'name',
             sorter: true,
@@ -101,31 +104,31 @@ const SoftwareModuleList: React.FC = () => {
             ),
         },
         {
-            title: 'Version',
+            title: t('list.columns.version'),
             dataIndex: 'version',
             key: 'version',
             sorter: true,
             render: (text) => <Tag color="blue">{text}</Tag>,
         },
         {
-            title: 'Type',
+            title: t('list.columns.type'),
             dataIndex: 'typeName',
             key: 'typeName',
             render: (text) => <Tag color="cyan">{text}</Tag>,
         },
         {
-            title: 'Vendor',
+            title: t('list.columns.vendor'),
             dataIndex: 'vendor',
             key: 'vendor',
         },
         {
-            title: 'Description',
+            title: t('list.columns.description'),
             dataIndex: 'description',
             key: 'description',
             ellipsis: true,
         },
         {
-            title: 'Last Modified',
+            title: t('list.columns.lastModified'),
             dataIndex: 'lastModifiedAt',
             key: 'lastModifiedAt',
             sorter: true,
@@ -133,12 +136,12 @@ const SoftwareModuleList: React.FC = () => {
             render: (val: number) => (val ? format(val, 'yyyy-MM-dd HH:mm') : '-'),
         },
         {
-            title: 'Actions',
+            title: t('list.columns.actions'),
             key: 'actions',
             width: 120,
             render: (_, record) => (
                 <Space size="small">
-                    <Tooltip title="View Details">
+                    <Tooltip title={t('actions.viewDetails')}>
                         <Button
                             type="text"
                             icon={<EyeOutlined />}
@@ -146,7 +149,7 @@ const SoftwareModuleList: React.FC = () => {
                         />
                     </Tooltip>
                     {isAdmin && (
-                        <Tooltip title="Delete">
+                        <Tooltip title={t('actions.delete')}>
                             <Button
                                 type="text"
                                 danger

@@ -1,0 +1,72 @@
+{
+    "pageTitle": "롤아웃",
+    "refresh": "새로고침",
+    "columns": {
+        "id": "ID",
+        "name": "이름",
+        "status": "상태",
+        "totalTargets": "총 대상",
+        "progress": "진행률",
+        "actions": "액션"
+    },
+    "filter": {
+        "placeholder": "상태로 필터",
+        "creating": "생성 중",
+        "ready": "준비됨",
+        "starting": "시작 중",
+        "running": "실행 중",
+        "paused": "일시정지됨",
+        "finished": "완료됨",
+        "error": "오류",
+        "waitingForApproval": "승인 대기 중",
+        "scheduled": "예약됨",
+        "clearFilters": "필터 초기화"
+    },
+    "pagination": {
+        "total": "총 {{count}}개 롤아웃"
+    },
+    "actions": {
+        "view": "보기"
+    },
+    "detail": {
+        "back": "뒤로",
+        "backToRollouts": "롤아웃 목록으로",
+        "notFound": "롤아웃을 찾을 수 없습니다",
+        "notFoundDesc": "요청하신 롤아웃이 존재하지 않습니다.",
+        "controlsTitle": "롤아웃 제어",
+        "overviewTitle": "개요",
+        "deployGroupsTitle": "배포 그룹",
+        "noActions": "현재 상태에서 사용 가능한 액션이 없습니다",
+        "labels": {
+            "id": "ID",
+            "name": "이름",
+            "status": "상태",
+            "totalTargets": "총 대상",
+            "overallProgress": "전체 진행률",
+            "createdAt": "생성일",
+            "lastModified": "최종 수정일",
+            "description": "설명"
+        },
+        "controls": {
+            "start": "시작",
+            "startConfirm": "이 롤아웃을 시작하시겠습니까?",
+            "pause": "일시정지",
+            "pauseConfirm": "이 롤아웃을 일시정지하시겠습니까?",
+            "resume": "재개",
+            "approve": "승인",
+            "deny": "거부"
+        },
+        "messages": {
+            "startSuccess": "롤아웃이 시작되었습니다",
+            "startError": "롤아웃 시작에 실패했습니다",
+            "pauseSuccess": "롤아웃이 일시정지되었습니다",
+            "pauseError": "롤아웃 일시정지에 실패했습니다",
+            "resumeSuccess": "롤아웃이 재개되었습니다",
+            "resumeError": "롤아웃 재개에 실패했습니다",
+            "approveSuccess": "롤아웃이 승인되었습니다",
+            "approveError": "롤아웃 승인에 실패했습니다",
+            "denySuccess": "롤아웃이 거부되었습니다",
+            "denyError": "롤아웃 거부에 실패했습니다"
+        }
+    }
+}

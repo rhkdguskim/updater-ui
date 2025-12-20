@@ -15,6 +15,9 @@ interface MetadataTabProps {
     onDelete?: (metadata: MgmtMetadata) => void;
 }
 
+import { useTranslation } from 'react-i18next';
+// ...
+
 const MetadataTab: React.FC<MetadataTabProps> = ({
     data,
     loading,
@@ -23,6 +26,7 @@ const MetadataTab: React.FC<MetadataTabProps> = ({
     onEdit,
     onDelete,
 }) => {
+    const { t } = useTranslation(['targets', 'common']);
     if (loading) {
         return <Skeleton active paragraph={{ rows: 6 }} />;
     }
@@ -30,19 +34,19 @@ const MetadataTab: React.FC<MetadataTabProps> = ({
     const metadata = data?.content || [];
 
     if (metadata.length === 0 && !canEdit) {
-        return <Empty description="No metadata found" />;
+        return <Empty description={t('metadata.noMetadata')} />;
     }
 
     const columns: TableProps<MgmtMetadata>['columns'] = [
         {
-            title: 'Key',
+            title: t('metadata.key'),
             dataIndex: 'key',
             key: 'key',
             width: 250,
             render: (text: string) => <Text strong>{text}</Text>,
         },
         {
-            title: 'Value',
+            title: t('metadata.value'),
             dataIndex: 'value',
             key: 'value',
             render: (text: string) => (
@@ -56,19 +60,19 @@ const MetadataTab: React.FC<MetadataTabProps> = ({
     // Add actions column if canEdit
     if (canEdit) {
         columns.push({
-            title: 'Actions',
+            title: t('table.actions'),
             key: 'actions',
             width: 100,
             render: (_, record) => (
                 <Space size="small">
-                    <Tooltip title="Edit">
+                    <Tooltip title={t('common:actions.edit')}>
                         <Button
                             type="text"
                             icon={<EditOutlined />}
                             onClick={() => onEdit?.(record)}
                         />
                     </Tooltip>
-                    <Tooltip title="Delete">
+                    <Tooltip title={t('common:actions.delete')}>
                         <Button
                             type="text"
                             danger
@@ -86,7 +90,7 @@ const MetadataTab: React.FC<MetadataTabProps> = ({
             {canEdit && (
                 <div style={{ marginBottom: 16, textAlign: 'right' }}>
                     <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-                        Add Metadata
+                        {t('metadata.add')}
                     </Button>
                 </div>
             )}
@@ -96,7 +100,7 @@ const MetadataTab: React.FC<MetadataTabProps> = ({
                 rowKey="key"
                 pagination={metadata.length > 10 ? { pageSize: 10 } : false}
                 size="middle"
-                locale={{ emptyText: <Empty description="No metadata. Click 'Add Metadata' to create." /> }}
+                locale={{ emptyText: <Empty description={t('metadata.emptyText')} /> }}
             />
         </>
     );

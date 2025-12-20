@@ -1,0 +1,72 @@
+{
+    "pageTitle": "Rollouts",
+    "refresh": "Refresh",
+    "columns": {
+        "id": "ID",
+        "name": "Name",
+        "status": "Status",
+        "totalTargets": "Total Targets",
+        "progress": "Progress",
+        "actions": "Actions"
+    },
+    "filter": {
+        "placeholder": "Filter by status",
+        "creating": "Creating",
+        "ready": "Ready",
+        "starting": "Starting",
+        "running": "Running",
+        "paused": "Paused",
+        "finished": "Finished",
+        "error": "Error",
+        "waitingForApproval": "Waiting for Approval",
+        "scheduled": "Scheduled",
+        "clearFilters": "Clear Filters"
+    },
+    "pagination": {
+        "total": "Total {{count}} rollouts"
+    },
+    "actions": {
+        "view": "View"
+    },
+    "detail": {
+        "back": "Back",
+        "backToRollouts": "Back to Rollouts",
+        "notFound": "Rollout not found",
+        "notFoundDesc": "The requested rollout does not exist.",
+        "controlsTitle": "Rollout Controls",
+        "overviewTitle": "Overview",
+        "deployGroupsTitle": "Deploy Groups",
+        "noActions": "No actions available for this status",
+        "labels": {
+            "id": "ID",
+            "name": "Name",
+            "status": "Status",
+            "totalTargets": "Total Targets",
+            "overallProgress": "Overall Progress",
+            "createdAt": "Created At",
+            "lastModified": "Last Modified",
+            "description": "Description"
+        },
+        "controls": {
+            "start": "Start",
+            "startConfirm": "Start this rollout?",
+            "pause": "Pause",
+            "pauseConfirm": "Pause this rollout?",
+            "resume": "Resume",
+            "approve": "Approve",
+            "deny": "Deny"
+        },
+        "messages": {
+            "startSuccess": "Rollout started",
+            "startError": "Failed to start rollout",
+            "pauseSuccess": "Rollout paused",
+            "pauseError": "Failed to pause rollout",
+            "resumeSuccess": "Rollout resumed",
+            "resumeError": "Failed to resume rollout",
+            "approveSuccess": "Rollout approved",
+            "approveError": "Failed to approve rollout",
+            "denySuccess": "Rollout denied",
+            "denyError": "Failed to deny rollout"
+        }
+    }
+}

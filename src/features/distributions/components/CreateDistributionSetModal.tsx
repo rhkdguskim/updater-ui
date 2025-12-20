@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Form, Input, Select, Checkbox, message } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useCreateDistributionSets } from '@/api/generated/distribution-sets/distribution-sets';
 import { useGetDistributionSetTypes } from '@/api/generated/distribution-set-types/distribution-set-types';
 import type { MgmtDistributionSetRequestBodyPost } from '@/api/generated/model';
@@ -15,6 +16,7 @@ const CreateDistributionSetModal: React.FC<CreateDistributionSetModalProps> = ({
     onCancel,
     onSuccess,
 }) => {
+    const { t } = useTranslation('distributions');
     const [form] = Form.useForm();
     const { data: typesData, isLoading: isTypesLoading } = useGetDistributionSetTypes({ limit: 100 });
 
@@ -23,12 +25,12 @@ const CreateDistributionSetModal: React.FC<CreateDistributionSetModalProps> = ({
     const { mutate: createDistributionSet, isPending: isCreating } = useCreateDistributionSets({
         mutation: {
             onSuccess: () => {
-                message.success('Distribution Set created successfully');
+                message.success(t('messages.createSetSuccess'));
                 form.resetFields();
                 onSuccess();
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to create Distribution Set');
+                message.error((error as Error).message || t('messages.createSetError'));
             },
         },
     });
@@ -51,7 +53,7 @@ const CreateDistributionSetModal: React.FC<CreateDistributionSetModalProps> = ({
 
     return (
         <Modal
-            title="Create Distribution Set"
+            title={t('modal.createSetTitle')}
             open={visible}
             onOk={handleOk}
             onCancel={onCancel}
@@ -61,34 +63,34 @@ const CreateDistributionSetModal: React.FC<CreateDistributionSetModalProps> = ({
             <Form form={form} layout="vertical">
                 <Form.Item
                     name="name"
-                    label="Name"
-                    rules={[{ required: true, message: 'Please enter the name' }]}
+                    label={t('modal.name')}
+                    rules={[{ required: true, message: t('modal.placeholders.name') }]}
                 >
-                    <Input placeholder="Enter distribution set name" />
+                    <Input placeholder={t('modal.placeholders.name')} />
                 </Form.Item>
                 <Form.Item
                     name="version"
-                    label="Version"
-                    rules={[{ required: true, message: 'Please enter the version' }]}
+                    label={t('modal.version')}
+                    rules={[{ required: true, message: t('modal.placeholders.version') }]}
                 >
-                    <Input placeholder="Enter version (e.g., 1.0.0)" />
+                    <Input placeholder={t('modal.placeholders.version')} />
                 </Form.Item>
                 <Form.Item
                     name="type"
-                    label="Type"
-                    rules={[{ required: true, message: 'Please select a type' }]}
+                    label={t('modal.type')}
+                    rules={[{ required: true, message: t('modal.placeholders.type') }]}
                 >
                     <Select
-                        placeholder="Select type"
+                        placeholder={t('modal.placeholders.type')}
                         loading={isTypesLoading}
                         options={typesData?.content?.map((t) => ({ label: t.name, value: t.key }))}
                     />
                 </Form.Item>
-                <Form.Item name="description" label="Description">
-                    <Input.TextArea rows={3} placeholder="Enter description" />
+                <Form.Item name="description" label={t('modal.description')}>
+                    <Input.TextArea rows={3} placeholder={t('modal.placeholders.description')} />
                 </Form.Item>
                 <Form.Item name="requiredMigrationStep" valuePropName="checked">
-                    <Checkbox>Required Migration Step</Checkbox>
+                    <Checkbox>{t('modal.requiredMigration')}</Checkbox>
                 </Form.Item>
             </Form>
         </Modal>

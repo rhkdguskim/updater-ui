@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, Form, Input, Select, message } from 'antd';
+import { useTranslation } from 'react-i18next';
 import { useCreateSoftwareModules } from '@/api/generated/software-modules/software-modules';
 import { useGetTypes } from '@/api/generated/software-module-types/software-module-types';
 import type { MgmtSoftwareModuleRequestBodyPost } from '@/api/generated/model';
@@ -15,6 +16,7 @@ const CreateSoftwareModuleModal: React.FC<CreateSoftwareModuleModalProps> = ({
     onCancel,
     onSuccess,
 }) => {
+    const { t } = useTranslation('distributions');
     const [form] = Form.useForm();
     const { data: typesData, isLoading: isTypesLoading } = useGetTypes({ limit: 100 });
 
@@ -23,12 +25,12 @@ const CreateSoftwareModuleModal: React.FC<CreateSoftwareModuleModalProps> = ({
     const { mutate: createSoftwareModule, isPending: isCreating } = useCreateSoftwareModules({
         mutation: {
             onSuccess: () => {
-                message.success('Software Module created successfully');
+                message.success(t('messages.createModuleSuccess'));
                 form.resetFields();
                 onSuccess();
             },
             onError: (error) => {
-                message.error((error as Error).message || 'Failed to create Software Module');
+                message.error((error as Error).message || t('messages.createModuleError'));
             },
         },
     });
@@ -52,7 +54,7 @@ const CreateSoftwareModuleModal: React.FC<CreateSoftwareModuleModalProps> = ({
 
     return (
         <Modal
-            title="Create Software Module"
+            title={t('modal.createModuleTitle')}
             open={visible}
             onOk={handleOk}
             onCancel={onCancel}
@@ -62,34 +64,34 @@ const CreateSoftwareModuleModal: React.FC<CreateSoftwareModuleModalProps> = ({
             <Form form={form} layout="vertical">
                 <Form.Item
                     name="name"
-                    label="Name"
-                    rules={[{ required: true, message: 'Please enter the name' }]}
+                    label={t('modal.name')}
+                    rules={[{ required: true, message: t('modal.placeholders.name') }]}
                 >
-                    <Input placeholder="Enter software module name" />
+                    <Input placeholder={t('modal.placeholders.name')} />
                 </Form.Item>
                 <Form.Item
                     name="version"
-                    label="Version"
-                    rules={[{ required: true, message: 'Please enter the version' }]}
+                    label={t('modal.version')}
+                    rules={[{ required: true, message: t('modal.placeholders.version') }]}
                 >
-                    <Input placeholder="Enter version (e.g., 1.0.0)" />
+                    <Input placeholder={t('modal.placeholders.version')} />
                 </Form.Item>
                 <Form.Item
                     name="type"
-                    label="Type"
-                    rules={[{ required: true, message: 'Please select a type' }]}
+                    label={t('modal.type')}
+                    rules={[{ required: true, message: t('modal.placeholders.type') }]}
                 >
                     <Select
-                        placeholder="Select type"
+                        placeholder={t('modal.placeholders.type')}
                         loading={isTypesLoading}
                         options={typesData?.content?.map((t) => ({ label: t.name, value: t.key }))}
                     />
                 </Form.Item>
-                <Form.Item name="vendor" label="Vendor">
-                    <Input placeholder="Enter vendor name" />
+                <Form.Item name="vendor" label={t('modal.vendor')}>
+                    <Input placeholder={t('modal.placeholders.vendor')} />
                 </Form.Item>
-                <Form.Item name="description" label="Description">
-                    <Input.TextArea rows={3} placeholder="Enter description" />
+                <Form.Item name="description" label={t('modal.description')}>
+                    <Input.TextArea rows={3} placeholder={t('modal.placeholders.description')} />
                 </Form.Item>
             </Form>
         </Modal>

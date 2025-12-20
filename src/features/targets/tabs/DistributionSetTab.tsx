@@ -14,15 +14,19 @@ interface DistributionSetTabProps {
     canAssign?: boolean;
 }
 
+import { useTranslation } from 'react-i18next';
+// ...
+
 const DSCard: React.FC<{ ds: MgmtDistributionSet | null | undefined; title: string; type: 'installed' | 'assigned' }> = ({
     ds,
     title,
     type,
 }) => {
+    const { t } = useTranslation('targets');
     if (!ds) {
         return (
             <Card title={title} style={{ marginBottom: 16 }}>
-                <Empty description={`No ${type} distribution set`} />
+                <Empty description={type === 'installed' ? t('ds.noInstalled') : t('ds.noAssigned')} />
             </Card>
         );
     }
@@ -32,34 +36,34 @@ const DSCard: React.FC<{ ds: MgmtDistributionSet | null | undefined; title: stri
             title={
                 <>
                     {title}
-                    {type === 'installed' && <Tag color="green" style={{ marginLeft: 8 }}>Current</Tag>}
-                    {type === 'assigned' && <Tag color="blue" style={{ marginLeft: 8 }}>Pending</Tag>}
+                    {type === 'installed' && <Tag color="green" style={{ marginLeft: 8 }}>{t('ds.current')}</Tag>}
+                    {type === 'assigned' && <Tag color="blue" style={{ marginLeft: 8 }}>{t('ds.pending')}</Tag>}
                 </>
             }
             style={{ marginBottom: 16 }}
         >
             <Descriptions column={2} size="small">
-                <Descriptions.Item label="Name">
+                <Descriptions.Item label={t('table.name')}>
                     <Text strong>{ds.name}</Text>
                 </Descriptions.Item>
                 <Descriptions.Item label="Version">
                     <Tag color="cyan">v{ds.version}</Tag>
                 </Descriptions.Item>
-                <Descriptions.Item label="Description" span={2}>
+                <Descriptions.Item label={t('form.description')} span={2}>
                     {ds.description || <Text type="secondary">-</Text>}
                 </Descriptions.Item>
-                <Descriptions.Item label="Type">
+                <Descriptions.Item label={t('table.type')}>
                     {ds.type ? <Tag>{ds.type}</Tag> : <Text type="secondary">-</Text>}
                 </Descriptions.Item>
-                <Descriptions.Item label="Required Migration">
+                <Descriptions.Item label={t('ds.requiredMigration')}>
                     <Tag color={ds.requiredMigrationStep ? 'orange' : 'default'}>
-                        {ds.requiredMigrationStep ? 'Yes' : 'No'}
+                        {ds.requiredMigrationStep ? t('ds.yes') : t('ds.no')}
                     </Tag>
                 </Descriptions.Item>
-                <Descriptions.Item label="Created">
+                <Descriptions.Item label={t('overview.created')}>
                     {ds.createdAt ? dayjs(ds.createdAt).format('YYYY-MM-DD HH:mm') : '-'}
                 </Descriptions.Item>
-                <Descriptions.Item label="Modules">
+                <Descriptions.Item label={t('ds.modules')}>
                     {ds.modules?.length || 0} module(s)
                 </Descriptions.Item>
             </Descriptions>
@@ -67,7 +71,7 @@ const DSCard: React.FC<{ ds: MgmtDistributionSet | null | undefined; title: stri
             {ds.modules && ds.modules.length > 0 && (
                 <>
                     <Title level={5} style={{ marginTop: 16, marginBottom: 8 }}>
-                        Software Modules
+                        {t('ds.softwareModules')}
                     </Title>
                     <List
                         size="small"
@@ -93,6 +97,7 @@ const DistributionSetTab: React.FC<DistributionSetTabProps> = ({
     onAssign,
     canAssign,
 }) => {
+    const { t } = useTranslation(['targets', 'common']);
     if (loading) {
         return <Skeleton active paragraph={{ rows: 8 }} />;
     }
@@ -108,17 +113,17 @@ const DistributionSetTab: React.FC<DistributionSetTabProps> = ({
                         icon={<SyncOutlined />}
                         onClick={onAssign}
                     >
-                        Assign Distribution Set
+                        {t('assign.title')}
                     </Button>
                 </div>
             )}
 
             {!hasAnyDS && !canAssign ? (
-                <Empty description="No distribution sets configured" />
+                <Empty description={t('ds.noConfigured')} />
             ) : (
                 <>
-                    <DSCard ds={installedDS} title="Installed Distribution Set" type="installed" />
-                    <DSCard ds={assignedDS} title="Assigned Distribution Set" type="assigned" />
+                    <DSCard ds={installedDS} title={t('ds.installed')} type="installed" />
+                    <DSCard ds={assignedDS} title={t('ds.assigned')} type="assigned" />
                 </>
             )}
         </>

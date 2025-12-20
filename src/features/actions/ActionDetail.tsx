@@ -31,6 +31,7 @@ import type { MgmtActionStatus } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
+import { useTranslation } from 'react-i18next';
 
 const { Title, Text } = Typography;
 
@@ -56,6 +57,7 @@ const getStatusColor = (status?: string) => {
 };
 
 const ActionDetail: React.FC = () => {
+    const { t } = useTranslation('actions');
     const { actionId } = useParams<{ actionId: string }>();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -84,11 +86,11 @@ const ActionDetail: React.FC = () => {
     const cancelMutation = useCancelAction({
         mutation: {
             onSuccess: () => {
-                message.success('Action canceled successfully');
+                message.success(t('detail.messages.cancelSuccess'));
                 queryClient.invalidateQueries();
             },
             onError: (err) => {
-                message.error((err as Error).message || 'Failed to cancel action');
+                message.error((err as Error).message || t('detail.messages.cancelError'));
             },
         },
     });
@@ -96,11 +98,11 @@ const ActionDetail: React.FC = () => {
     const updateMutation = useUpdateAction({
         mutation: {
             onSuccess: () => {
-                message.success('Action updated to forced');
+                message.success(t('detail.messages.forceSuccess'));
                 queryClient.invalidateQueries();
             },
             onError: (err) => {
-                message.error((err as Error).message || 'Failed to update action');
+                message.error((err as Error).message || t('detail.messages.forceError'));
             },
         },
     });
@@ -108,11 +110,11 @@ const ActionDetail: React.FC = () => {
     const confirmMutation = useUpdateActionConfirmation({
         mutation: {
             onSuccess: () => {
-                message.success('Action confirmed');
+                message.success(t('detail.messages.confirmSuccess'));
                 queryClient.invalidateQueries();
             },
             onError: (err) => {
-                message.error((err as Error).message || 'Failed to confirm action');
+                message.error((err as Error).message || t('detail.messages.confirmError'));
             },
         },
     });
@@ -166,11 +168,11 @@ const ActionDetail: React.FC = () => {
             <div style={{ padding: 24 }}>
                 <Alert
                     type="error"
-                    message="Action not found"
-                    description="The requested action does not exist."
+                    message={t('detail.notFound')}
+                    description={t('detail.notFoundDesc')}
                     action={
                         <Button onClick={() => navigate('/actions')}>
-                            Back to Actions
+                            {t('detail.backToActions')}
                         </Button>
                     }
                 />
@@ -191,10 +193,10 @@ const ActionDetail: React.FC = () => {
                         icon={<ArrowLeftOutlined />}
                         onClick={() => navigate('/actions')}
                     >
-                        Back
+                        {t('detail.back')}
                     </Button>
                     <Title level={2} style={{ margin: 0 }}>
-                        Action #{actionData.id}
+                        {t('detail.pageTitle')} #{actionData.id}
                     </Title>
                     <Tag color={getStatusColor(actionData.status)} style={{ fontSize: 14 }}>
                         {actionData.status?.toUpperCase()}
@@ -203,26 +205,26 @@ const ActionDetail: React.FC = () => {
 
                 {/* Action Controls (Admin Only) */}
                 {isAdmin && (
-                    <Card title="Action Controls" size="small">
+                    <Card title={t('detail.controlsTitle')} size="small">
                         <Space>
                             {canForce && (
                                 <Popconfirm
-                                    title="Force this action?"
-                                    description="This will change the action type to forced."
+                                    title={t('detail.controls.forceConfirm')}
+                                    description={t('detail.controls.forceDesc')}
                                     onConfirm={handleForce}
                                 >
                                     <Button
                                         icon={<ThunderboltOutlined />}
                                         loading={updateMutation.isPending}
                                     >
-                                        Force
+                                        {t('detail.controls.force')}
                                     </Button>
                                 </Popconfirm>
                             )}
                             {canCancel && (
                                 <Popconfirm
-                                    title="Cancel this action?"
-                                    description="This action cannot be undone."
+                                    title={t('detail.controls.cancelConfirm')}
+                                    description={t('detail.controls.cancelDesc')}
                                     onConfirm={handleCancel}
                                 >
                                     <Button
@@ -230,7 +232,7 @@ const ActionDetail: React.FC = () => {
                                         icon={<StopOutlined />}
                                         loading={cancelMutation.isPending}
                                     >
-                                        Cancel
+                                        {t('detail.controls.cancel')}
                                     </Button>
                                 </Popconfirm>
                             )}
@@ -242,7 +244,7 @@ const ActionDetail: React.FC = () => {
                                         onClick={handleConfirm}
                                         loading={confirmMutation.isPending}
                                     >
-                                        Confirm
+                                        {t('detail.controls.confirm')}
                                     </Button>
                                     <Button
                                         danger
@@ -250,40 +252,40 @@ const ActionDetail: React.FC = () => {
                                         onClick={handleDeny}
                                         loading={confirmMutation.isPending}
                                     >
-                                        Deny
+                                        {t('detail.controls.deny')}
                                     </Button>
                                 </>
                             )}
                             {!canForce && !canCancel && !canConfirm && (
-                                <Text type="secondary">No actions available for this status</Text>
+                                <Text type="secondary">{t('detail.noActions')}</Text>
                             )}
                         </Space>
                     </Card>
                 )}
 
                 {/* Overview */}
-                <Card title="Overview">
+                <Card title={t('detail.overviewTitle')}>
                     <Descriptions bordered column={2}>
-                        <Descriptions.Item label="ID">{actionData.id}</Descriptions.Item>
-                        <Descriptions.Item label="Status">
+                        <Descriptions.Item label={t('detail.labels.id')}>{actionData.id}</Descriptions.Item>
+                        <Descriptions.Item label={t('detail.labels.status')}>
                             <Tag color={getStatusColor(actionData.status)}>
                                 {actionData.status?.toUpperCase()}
                             </Tag>
                         </Descriptions.Item>
-                        <Descriptions.Item label="Type">
+                        <Descriptions.Item label={t('detail.labels.type')}>
                             <Tag color={actionData.type === 'forced' ? 'red' : 'blue'}>
                                 {actionData.type?.toUpperCase()}
                             </Tag>
                         </Descriptions.Item>
-                        <Descriptions.Item label="Force Type">
+                        <Descriptions.Item label={t('detail.labels.forceType')}>
                             {actionData.forceType || '-'}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Created At">
+                        <Descriptions.Item label={t('detail.labels.createdAt')}>
                             {actionData.createdAt
                                 ? format(actionData.createdAt, 'yyyy-MM-dd HH:mm:ss')
                                 : '-'}
                         </Descriptions.Item>
-                        <Descriptions.Item label="Last Modified">
+                        <Descriptions.Item label={t('detail.labels.lastModified')}>
                             {actionData.lastModifiedAt
                                 ? format(actionData.lastModifiedAt, 'yyyy-MM-dd HH:mm:ss')
                                 : '-'}
@@ -292,7 +294,7 @@ const ActionDetail: React.FC = () => {
                 </Card>
 
                 {/* Status History Timeline */}
-                <Card title="Status History" loading={statusLoading}>
+                <Card title={t('detail.statusHistoryTitle')} loading={statusLoading}>
                     {statusData?.content && statusData.content.length > 0 ? (
                         <Timeline
                             mode="left"
@@ -320,7 +322,7 @@ const ActionDetail: React.FC = () => {
                             }))}
                         />
                     ) : (
-                        <Text type="secondary">No status history available</Text>
+                        <Text type="secondary">{t('detail.noStatusHistory')}</Text>
                     )}
                 </Card>
             </Space>
@@ -329,3 +331,4 @@ const ActionDetail: React.FC = () => {
 };
 
 export default ActionDetail;
+

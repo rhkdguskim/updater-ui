@@ -24,6 +24,9 @@ interface AutoConfirmTabProps {
     actionLoading?: boolean;
 }
 
+import { useTranslation } from 'react-i18next';
+// ...
+
 const AutoConfirmTab: React.FC<AutoConfirmTabProps> = ({
     data,
     loading,
@@ -32,12 +35,13 @@ const AutoConfirmTab: React.FC<AutoConfirmTabProps> = ({
     onDeactivate,
     actionLoading,
 }) => {
+    const { t } = useTranslation('targets');
     if (loading) {
         return <Skeleton active paragraph={{ rows: 4 }} />;
     }
 
     if (!data) {
-        return <Empty description="AutoConfirm status not available" />;
+        return <Empty description={t('common:messages.noData')} />;
     }
 
     const isActive = data.active;
@@ -48,13 +52,13 @@ const AutoConfirmTab: React.FC<AutoConfirmTabProps> = ({
                 type={isActive ? 'success' : 'info'}
                 message={
                     isActive
-                        ? 'AutoConfirm is Active'
-                        : 'AutoConfirm is Inactive'
+                        ? t('autoConfirm.enabled')
+                        : t('autoConfirm.disabled')
                 }
                 description={
                     isActive
-                        ? 'All actions will be automatically confirmed without manual intervention.'
-                        : 'Actions require manual confirmation before execution.'
+                        ? t('autoConfirm.enabledDesc')
+                        : t('autoConfirm.disabledDesc')
                 }
                 showIcon
                 icon={isActive ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
@@ -62,12 +66,12 @@ const AutoConfirmTab: React.FC<AutoConfirmTabProps> = ({
             />
 
             <Descriptions bordered column={1} size="middle">
-                <Descriptions.Item label="Status">
+                <Descriptions.Item label={t('overview.status')}>
                     <Tag
                         icon={isActive ? <CheckCircleOutlined /> : <CloseCircleOutlined />}
                         color={isActive ? 'success' : 'default'}
                     >
-                        {isActive ? 'Enabled' : 'Disabled'}
+                        {isActive ? t('autoConfirm.enabled') : t('autoConfirm.disabled')}
                     </Tag>
                 </Descriptions.Item>
                 {data.initiator && (
@@ -96,7 +100,7 @@ const AutoConfirmTab: React.FC<AutoConfirmTabProps> = ({
                             onClick={onDeactivate}
                             loading={actionLoading}
                         >
-                            Deactivate AutoConfirm
+                            {t('autoConfirm.deactivate')}
                         </Button>
                     ) : (
                         <Button
@@ -105,7 +109,7 @@ const AutoConfirmTab: React.FC<AutoConfirmTabProps> = ({
                             onClick={onActivate}
                             loading={actionLoading}
                         >
-                            Activate AutoConfirm
+                            {t('autoConfirm.activate')}
                         </Button>
                     )}
                 </div>

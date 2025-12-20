@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { useGetRollouts } from '@/api/generated/rollouts/rollouts';
 import type { MgmtRolloutResponseBody } from '@/api/generated/model';
 import type { TableProps } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -33,6 +34,7 @@ const getStatusColor = (status?: string) => {
 };
 
 const RolloutList: React.FC = () => {
+    const { t } = useTranslation('rollouts');
     const navigate = useNavigate();
     const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
     const [statusFilter, setStatusFilter] = useState<string>('');
@@ -47,18 +49,18 @@ const RolloutList: React.FC = () => {
 
     const columns: TableProps<MgmtRolloutResponseBody>['columns'] = [
         {
-            title: 'ID',
+            title: t('columns.id'),
             dataIndex: 'id',
             key: 'id',
             width: 80,
         },
         {
-            title: 'Name',
+            title: t('columns.name'),
             dataIndex: 'name',
             key: 'name',
         },
         {
-            title: 'Status',
+            title: t('columns.status'),
             dataIndex: 'status',
             key: 'status',
             width: 150,
@@ -69,13 +71,13 @@ const RolloutList: React.FC = () => {
             ),
         },
         {
-            title: 'Total Targets',
+            title: t('columns.totalTargets'),
             dataIndex: 'totalTargets',
             key: 'totalTargets',
             width: 120,
         },
         {
-            title: 'Progress',
+            title: t('columns.progress'),
             key: 'progress',
             width: 200,
             render: (_, record) => {
@@ -92,7 +94,7 @@ const RolloutList: React.FC = () => {
             },
         },
         {
-            title: 'Actions',
+            title: t('columns.actions'),
             key: 'actions',
             width: 100,
             render: (_, record) => (
@@ -100,7 +102,7 @@ const RolloutList: React.FC = () => {
                     type="link"
                     onClick={() => navigate(`/rollouts/${record.id}`)}
                 >
-                    View
+                    {t('actions.view')}
                 </Button>
             ),
         },
@@ -117,36 +119,36 @@ const RolloutList: React.FC = () => {
         <div style={{ padding: 24 }}>
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Title level={2} style={{ margin: 0 }}>Rollouts</Title>
+                    <Title level={2} style={{ margin: 0 }}>{t('pageTitle')}</Title>
                     <Button
                         icon={<ReloadOutlined />}
                         onClick={() => refetch()}
                         loading={isLoading}
                     >
-                        Refresh
+                        {t('refresh')}
                     </Button>
                 </div>
 
                 <Card>
                     <Space style={{ marginBottom: 16 }} wrap>
                         <Select
-                            placeholder="Filter by status"
+                            placeholder={t('filter.placeholder')}
                             value={statusFilter || undefined}
                             onChange={setStatusFilter}
                             allowClear
                             style={{ width: 200 }}
                         >
-                            <Option value="creating">Creating</Option>
-                            <Option value="ready">Ready</Option>
-                            <Option value="starting">Starting</Option>
-                            <Option value="running">Running</Option>
-                            <Option value="paused">Paused</Option>
-                            <Option value="finished">Finished</Option>
-                            <Option value="error">Error</Option>
-                            <Option value="waiting_for_approval">Waiting for Approval</Option>
+                            <Option value="creating">{t('filter.creating')}</Option>
+                            <Option value="ready">{t('filter.ready')}</Option>
+                            <Option value="starting">{t('filter.starting')}</Option>
+                            <Option value="running">{t('filter.running')}</Option>
+                            <Option value="paused">{t('filter.paused')}</Option>
+                            <Option value="finished">{t('filter.finished')}</Option>
+                            <Option value="error">{t('filter.error')}</Option>
+                            <Option value="waiting_for_approval">{t('filter.waitingForApproval')}</Option>
                         </Select>
                         <Button onClick={() => setStatusFilter('')}>
-                            Clear Filters
+                            {t('filter.clearFilters')}
                         </Button>
                     </Space>
 
@@ -160,7 +162,7 @@ const RolloutList: React.FC = () => {
                             pageSize: pagination.pageSize,
                             total: data?.total || 0,
                             showSizeChanger: true,
-                            showTotal: (total) => `Total ${total} rollouts`,
+                            showTotal: (total) => t('pagination.total', { count: total }),
                         }}
                         onChange={handleTableChange}
                     />
@@ -171,3 +173,4 @@ const RolloutList: React.FC = () => {
 };
 
 export default RolloutList;
+

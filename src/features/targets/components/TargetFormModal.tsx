@@ -11,6 +11,9 @@ interface TargetFormModalProps {
     onCancel: () => void;
 }
 
+import { useTranslation } from 'react-i18next';
+// ...
+
 const TargetFormModal: React.FC<TargetFormModalProps> = ({
     open,
     mode,
@@ -19,6 +22,7 @@ const TargetFormModal: React.FC<TargetFormModalProps> = ({
     onSubmit,
     onCancel,
 }) => {
+    const { t } = useTranslation(['targets', 'common']);
     const [form] = Form.useForm();
 
     const handleSubmit = async () => {
@@ -34,11 +38,11 @@ const TargetFormModal: React.FC<TargetFormModalProps> = ({
 
     return (
         <Modal
-            title={isEdit ? 'Edit Target' : 'Add New Target'}
+            title={isEdit ? t('modal.editTitle') : t('modal.createTitle')}
             open={open}
             onOk={handleSubmit}
             onCancel={onCancel}
-            okText={isEdit ? 'Update' : 'Create'}
+            okText={isEdit ? t('common:actions.update') : t('common:actions.create')}
             okButtonProps={{ loading }}
             cancelButtonProps={{ disabled: loading }}
             destroyOnClose
@@ -68,9 +72,9 @@ const TargetFormModal: React.FC<TargetFormModalProps> = ({
             >
                 <Form.Item
                     name="controllerId"
-                    label="Controller ID"
+                    label={t('form.controllerId')}
                     rules={[
-                        { required: true, message: 'Controller ID is required' },
+                        { required: true, message: t('common:validation.required') },
                         {
                             pattern: /^[a-zA-Z0-9_-]+$/,
                             message: 'Only alphanumeric characters, underscores, and hyphens allowed',
@@ -78,7 +82,7 @@ const TargetFormModal: React.FC<TargetFormModalProps> = ({
                     ]}
                 >
                     <Input
-                        placeholder="Enter unique controller ID"
+                        placeholder={t('form.controllerIdPlaceholder')}
                         disabled={isEdit}
                         maxLength={64}
                     />
@@ -87,26 +91,26 @@ const TargetFormModal: React.FC<TargetFormModalProps> = ({
                 {isEdit && (
                     <Alert
                         type="info"
-                        message="Controller ID cannot be changed after creation"
+                        message={t('form.controllerIdHelp')}
                         style={{ marginBottom: 16, marginTop: -8 }}
                     />
                 )}
 
                 <Form.Item
                     name="name"
-                    label="Name"
+                    label={t('form.name')}
                     rules={[{ max: 128, message: 'Name cannot exceed 128 characters' }]}
                 >
-                    <Input placeholder="Enter display name (optional)" maxLength={128} />
+                    <Input placeholder={t('form.namePlaceholder')} maxLength={128} />
                 </Form.Item>
 
                 <Form.Item
                     name="description"
-                    label="Description"
+                    label={t('form.description')}
                     rules={[{ max: 512, message: 'Description cannot exceed 512 characters' }]}
                 >
                     <Input.TextArea
-                        placeholder="Enter description (optional)"
+                        placeholder={t('form.descriptionPlaceholder')}
                         rows={3}
                         maxLength={512}
                         showCount
