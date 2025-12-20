@@ -1,7 +1,6 @@
 import React from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card } from 'antd';
-import { useTranslation } from 'react-i18next';
 
 interface VersionTreemapProps {
     data: any[];
@@ -39,14 +38,9 @@ const CustomizedContent: React.FC<any> = (props) => {
     );
 };
 
-const VersionTreemap: React.FC<VersionTreemapProps> = ({ data }) => {
-    const { t } = useTranslation('dashboard');
+export const VersionTreemap: React.FC<VersionTreemapProps> = ({ data }) => {
     return (
-        <Card
-            title={t('charts.versionMap')}
-            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-            styles={{ body: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' } }}
-        >
+        <Card title="Firmware Version Map" style={{ height: '100%', display: 'flex', flexDirection: 'column' }} bodyStyle={{ flex: 1, minHeight: 0 }}>
             <ResponsiveContainer width="100%" height="100%">
                 <Treemap
                     data={data}
@@ -61,5 +55,3 @@ const VersionTreemap: React.FC<VersionTreemapProps> = ({ data }) => {
         </Card>
     );
 };
-
-export default VersionTreemap;

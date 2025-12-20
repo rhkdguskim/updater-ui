@@ -62,8 +62,7 @@ import type {
     MgmtDistributionSet,
     MgmtDistributionSetAssignment,
 } from '@/api/generated/model';
-import { KPICard } from '../dashboard/components/KPICard';
-import { DelayedActionTable } from '../dashboard/components/DelayedActionTable';
+import { KPICard, DelayedActionTable } from '../dashboard/components';
 import JobStatusTimeline from './components/JobStatusTimeline';
 import ActivityLogs from './components/ActivityLogs';
 import { Tabs } from 'antd';
@@ -229,7 +228,6 @@ const JobManagement: React.FC = () => {
         refetch: refetchActions,
     } = useGetActions({
         limit: 100,
-        sort: 'lastModifiedAt:DESC',
     }, {
         query: { refetchInterval: 10000 } // Poll every 10s
     });
@@ -240,7 +238,6 @@ const JobManagement: React.FC = () => {
         refetch: refetchRollouts,
     } = useGetRollouts({
         limit: 100,
-        sort: 'createdAt:DESC',
     }, {
         query: { refetchInterval: 15000 } // Poll every 15s
     });
@@ -365,12 +362,19 @@ const JobManagement: React.FC = () => {
     };
 
     const treeData = useMemo(() => {
-        const filteredActions = (actionsData?.content || []).filter(a =>
+        const sortedActions = [...(actionsData?.content || [])].sort(
+            (a, b) => (b.lastModifiedAt || 0) - (a.lastModifiedAt || 0)
+        );
+        const sortedRollouts = [...(rolloutsData?.content || [])].sort(
+            (a, b) => (b.createdAt || 0) - (a.createdAt || 0)
+        );
+
+        const filteredActions = sortedActions.filter(a =>
             a.id?.toString().includes(treeSearchTerm) ||
             a.status?.toLowerCase().includes(treeSearchTerm.toLowerCase())
         );
 
-        const filteredRollouts = (rolloutsData?.content || []).filter(r =>
+        const filteredRollouts = sortedRollouts.filter(r =>
             r.name.toLowerCase().includes(treeSearchTerm.toLowerCase()) ||
             r.status?.toLowerCase().includes(treeSearchTerm.toLowerCase())
         );
@@ -511,11 +515,11 @@ const JobManagement: React.FC = () => {
                 {actionDetail.status === 'waiting_for_confirmation' && (
                     <div style={{ marginTop: 24, padding: 16, backgroundColor: '#fffbe6', border: '1px solid #ffe58f', borderRadius: 8 }}>
                         <Space direction="vertical" style={{ width: '100%' }}>
-                            <Text strong>Wait for confirmation</Text>
-                            <Text type="secondary">This action requires manual confirmation before proceeding.</Text>
+                            <Text strong>{t('detail.confirmWait')}</Text>
+                            <Text type="secondary">{t('detail.confirmWaitDesc')}</Text>
                             <Space style={{ marginTop: 8 }}>
-                                <Button type="primary" onClick={() => handleConfirmAction(true)}>Confirm</Button>
-                                <Button danger onClick={() => handleConfirmAction(false)}>Deny</Button>
+                                <Button type="primary" onClick={() => handleConfirmAction(true)}>{t('actions.confirm')}</Button>
+                                <Button danger onClick={() => handleConfirmAction(false)}>{t('actions.deny')}</Button>
                             </Space>
                         </Space>
                     </div>
@@ -770,7 +774,7 @@ const JobManagement: React.FC = () => {
                                             actionId={selectedNode.id}
                                         />
                                     ) : (
-                                        <Empty description="Timeline only available for Actions" />
+                                        <Empty description={t('detail.timelineOnlyAction')} />
                                     ),
                                     disabled: !selectedNode
                                 },

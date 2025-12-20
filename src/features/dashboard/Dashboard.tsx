@@ -1,15 +1,17 @@
 import React, { useState, useMemo } from 'react';
-import styled from 'styled-components';
 import { Row, Col, Button, Tooltip, Spin } from 'antd';
 import { FullscreenOutlined, FullscreenExitOutlined, CloudServerOutlined, CheckCircleOutlined, WarningOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 // Components
-import { KPICard } from './components/KPICard';
-import FailureChart from './components/FailureChart';
-import VersionTreemap from './components/VersionTreemap';
-import ActiveRolloutCard from './components/ActiveRolloutCard';
-import LiveTicker from './components/LiveTicker';
+import {
+    KPICard,
+    FailureChart,
+    VersionTreemap,
+    ActiveRolloutCard,
+    LiveTicker
+} from './components';
 
 // API Hooks
 import { useGetTargets } from '@/api/generated/targets/targets';
@@ -58,15 +60,9 @@ const Dashboard: React.FC = () => {
     const { t } = useTranslation('dashboard');
     const [isFocusMode, setIsFocusMode] = useState(false);
 
-    // Fetch KPI Data
-    const { data: targetsData, isLoading: targetsLoading } = useGetTargets({ limit: 1 });
-    const { data: onlineTargetsData } = useGetTargets({ q: 'pollStatus.overdue==false', limit: 1 });
-    const { data: pendingActionsData, isLoading: actionsLoading } = useGetActions({ q: 'status==scheduled', limit: 1 });
-    const { data: finishedActionsData } = useGetActions({ q: 'status==finished', limit: 100 });
-
-    // Fetch Data for Charts
-    const { data: recentActionsData } = useGetActions({ limit: 50, sort: 'createdAt,desc' });
-    const { data: allTargetsData } = useGetTargets({ limit: 100 });
+    // Fetch Base Data without complex sorting/filtering to avoid API errors
+    const { data: targetsData, isLoading: targetsLoading } = useGetTargets({ limit: 100 });
+    const { data: actionsData, isLoading: actionsLoading } = useGetActions({ limit: 100 });
 
     const toggleFocusMode = () => {
         setIsFocusMode(!isFocusMode);
@@ -77,24 +73,39 @@ const Dashboard: React.FC = () => {
         }
     };
 
-    // Calculate Metrics
+    // Calculate Metrics client-side
     const totalTargets = targetsData?.total || 0;
-    const onlineTargets = onlineTargetsData?.total || 0;
-    const availability = totalTargets > 0 ? (onlineTargets / totalTargets) * 100 : 0;
+    const onlineTargets = useMemo(() => {
+        if (!targetsData?.content) return 0;
+        // If we have total > limit, this is just an estimate from the current page
+        // But for many systems, 100 is a decent sample or the full set
+        return targetsData.content.filter(t => t.pollStatus?.overdue === false).length;
+    }, [targetsData]);
 
-    const pendingActions = pendingActionsData?.total || 0;
+    // Adjust onlineTargets if total is larger - scaling the sample
+    const estimatedOnlineTotal = totalTargets > 100
+        ? Math.round((onlineTargets / 100) * totalTargets)
+        : onlineTargets;
 
-    // Success Rate (simplified: finished / (finished + error) in last 100)
+    const availability = totalTargets > 0 ? (estimatedOnlineTotal / totalTargets) * 100 : 0;
+
+    const pendingActions = useMemo(() => {
+        if (!actionsData?.content) return 0;
+        return actionsData.content.filter(a => ['scheduled', 'pending'].includes(a.status?.toLowerCase() || '')).length;
+    }, [actionsData]);
+
     const successRate = useMemo(() => {
-        const finished = finishedActionsData?.content?.filter(a => a.status === 'finished').length || 0;
-        const total = finishedActionsData?.content?.length || 0;
+        if (!actionsData?.content) return 0;
+        const finished = actionsData.content.filter(a => a.status === 'finished').length;
+        const error = actionsData.content.filter(a => a.status === 'error').length;
+        const total = finished + error;
         return total > 0 ? (finished / total) * 100 : 0;
-    }, [finishedActionsData]);
+    }, [actionsData]);
 
     // Treemap Data from Target Types
     const treemapData = useMemo(() => {
         const types: Record<string, number> = {};
-        allTargetsData?.content?.forEach(target => {
+        targetsData?.content?.forEach(target => {
             const typeName = target.targetTypeName || 'Unknown';
             types[typeName] = (types[typeName] || 0) + 1;
         });
@@ -104,29 +115,32 @@ const Dashboard: React.FC = () => {
             size,
             fill: colors[index % colors.length]
         }));
-    }, [allTargetsData]);
+    }, [targetsData]);
 
-    // Failure Data (mocking time buckets from real data for now as API doesn't aggregate)
+    // Failure Data 
     const failureData = useMemo(() => {
-        // Just showing a distribution of the last 50 actions for now
-        const errors = recentActionsData?.content?.filter(a => a.status === 'error') || [];
+        const errors = actionsData?.content?.filter(a => a.status === 'error') || [];
+        // Distribution of errors (mocked buckets but based on real error count)
+        const count = errors.length;
         return Array.from({ length: 6 }, (_, i) => ({
             time: `${i * 4}h`,
-            timeout: errors.length > i ? Math.floor(Math.random() * 5) : 0,
-            installError: errors.length > i ? Math.floor(Math.random() * 3) : 0,
-            networkError: errors.length > i ? Math.floor(Math.random() * 2) : 0,
+            timeout: i === 5 ? count : 0, // Put real count in the last bucket for visibility
+            installError: 0,
+            networkError: 0,
         }));
-    }, [recentActionsData]);
+    }, [actionsData]);
 
     // Live Ticker Logs
     const liveLogs = useMemo(() => {
-        return (recentActionsData?.content || []).map(action => ({
-            id: action.id!,
-            time: new Date(action.createdAt!).toLocaleTimeString(),
-            type: action.status === 'error' ? 'error' : action.status === 'finished' ? 'success' : 'info',
-            message: `Action ${action.id} (${action.status}): Target ${action._links?.target?.href?.split('/').pop() || 'Unknown'}`
-        }));
-    }, [recentActionsData]);
+        return (actionsData?.content || [])
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            .map(action => ({
+                id: action.id!,
+                time: action.createdAt ? new Date(action.createdAt).toLocaleTimeString() : '-',
+                type: action.status === 'error' ? 'error' : action.status === 'finished' ? 'success' : 'info',
+                message: `Action ${action.id} (${action.status}): Target ${action._links?.target?.href?.split('/').pop() || 'Unknown'}`
+            }));
+    }, [actionsData]);
 
     if (targetsLoading || actionsLoading) {
         return (

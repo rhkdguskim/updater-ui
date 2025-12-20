@@ -38,18 +38,18 @@ const LogItem = styled.span`
     }
 `;
 
-interface Log {
+export interface LiveTickerLog {
     id: number;
     time: string;
     type: string;
     message: string;
 }
 
-interface LiveTickerProps {
-    logs: Log[];
+export interface LiveTickerProps {
+    logs: LiveTickerLog[];
 }
 
-const LiveTicker: React.FC<LiveTickerProps> = ({ logs }) => {
+export const LiveTicker: React.FC<LiveTickerProps> = ({ logs }) => {
     const getTypeColor = (type: string) => {
         switch (type) {
             case 'error': return 'red';
@@ -73,5 +73,3 @@ const LiveTicker: React.FC<LiveTickerProps> = ({ logs }) => {
         </TickerContainer>
     );
 };
-
-export default LiveTicker;

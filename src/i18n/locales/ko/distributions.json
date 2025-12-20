@@ -84,7 +84,25 @@
         "deleteArtifactConfirmDesc": "정말로 이 아티팩트를 삭제하시겠습니까?",
         "downloadNotImplemented": "다운로드는 아직 완전히 구현되지 않았습니다.",
         "dragDropTitle": "이 영역을 클릭하거나 파일을 드래그하여 업로드하세요.",
-        "dragDropHint": "단일 파일 업로드를 지원합니다.",
+        "dragDropHint": "아티팩트를 드래그하여 업로드하세요.",
+        "dragDropHintMulti": "여러 파일을 선택하거나 끌어다 놓으세요. 파일은 순차적으로 업로드되며 아래에서 상태를 확인할 수 있습니다.",
+        "lockedHint": "이 모듈은 잠겨 있어 아티팩트를 추가할 수 없습니다.",
+        "uploadListTitle": "업로드 대기열",
+        "uploadStatus": {
+            "queued": "대기 중",
+            "uploading": "업로드 중",
+            "success": "완료",
+            "error": "실패"
+        },
+        "usage": "사용처",
+        "usageTitle": "이 모듈을 사용하는 배포 세트",
+        "usageEmpty": "이 모듈을 사용하는 배포 세트가 없습니다.",
+        "usageColumns": {
+            "name": "배포 세트",
+            "version": "버전",
+            "type": "유형",
+            "lastModified": "최종 수정"
+        },
         "labels": {
             "name": "이름",
             "version": "버전",

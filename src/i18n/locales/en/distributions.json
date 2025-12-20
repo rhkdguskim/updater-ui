@@ -84,7 +84,25 @@
         "deleteArtifactConfirmDesc": "Are you sure you want to delete this artifact?",
         "downloadNotImplemented": "Download not fully implemented",
         "dragDropTitle": "Click or drag file to this area to upload",
-        "dragDropHint": "Support for single file upload. Drag and drop your artifact here.",
+        "dragDropHint": "Drag and drop your artifact here.",
+        "dragDropHintMulti": "Select or drop multiple files. Each file uploads sequentially and shows its status below.",
+        "lockedHint": "This module is locked and cannot accept new artifacts.",
+        "uploadListTitle": "Upload queue",
+        "uploadStatus": {
+            "queued": "Queued",
+            "uploading": "Uploading",
+            "success": "Uploaded",
+            "error": "Failed"
+        },
+        "usage": "Usage",
+        "usageTitle": "Distribution Sets using this module",
+        "usageEmpty": "This module is not used in any Distribution Set.",
+        "usageColumns": {
+            "name": "DS Name",
+            "version": "Version",
+            "type": "Type",
+            "lastModified": "Last Modified"
+        },
         "labels": {
             "name": "Name",
             "version": "Version",

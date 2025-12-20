@@ -162,9 +162,9 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
         if (path === '/') return ['/'];
         if (path.startsWith('/targets')) return ['targets-menu'];
         if (path.startsWith('/distributions')) return ['distributions-menu'];
-        if (path.startsWith('/actions')) return ['/actions'];
-        if (path.startsWith('/rollouts')) return ['/rollouts'];
         if (path.startsWith('/jobs')) return ['/jobs'];
+        if (path.startsWith('/actions')) return ['/jobs'];
+        if (path.startsWith('/rollouts')) return ['/jobs'];
         return [];
     };
 
@@ -235,22 +235,28 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
             ],
         },
         {
-            key: '/actions',
-            icon: <MdPlayArrow />,
-            label: t('nav.actions'),
-            onClick: () => navigate('/actions'),
-        },
-        {
-            key: '/rollouts',
-            icon: <MdRocketLaunch />,
-            label: t('nav.rollouts'),
-            onClick: () => navigate('/rollouts'),
-        },
-        {
             key: '/jobs',
             icon: <MdAssignment />,
             label: t('nav.jobs'),
-            onClick: () => navigate('/jobs'),
+            children: [
+                {
+                    key: '/jobs/dashboard',
+                    label: t('nav.dashboard'),
+                    onClick: () => navigate('/jobs'),
+                },
+                {
+                    key: '/actions',
+                    icon: <MdPlayArrow />,
+                    label: t('nav.actions'),
+                    onClick: () => navigate('/actions'),
+                },
+                {
+                    key: '/rollouts',
+                    icon: <MdRocketLaunch />,
+                    label: t('nav.rollouts'),
+                    onClick: () => navigate('/rollouts'),
+                },
+            ]
         },
     ];
 

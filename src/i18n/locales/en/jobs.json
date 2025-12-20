@@ -34,7 +34,10 @@
         "description": "Description",
         "targetFilter": "Target Filter",
         "totalTargets": "Total Targets",
-        "deployGroups": "Deploy Groups"
+        "deployGroups": "Deploy Groups",
+        "confirmWait": "Wait for confirmation",
+        "confirmWaitDesc": "This action requires manual confirmation before proceeding.",
+        "timelineOnlyAction": "Timeline only available for Actions"
     },
     "actions": {
         "force": "Force",
@@ -69,5 +72,13 @@
         "denySuccess": "Action denied",
         "rolloutActionSuccess": "Rollout operation completed",
         "rolloutActionError": "Failed to update rollout"
+    },
+    "logs": {
+        "time": "Time",
+        "type": "Type",
+        "id": "ID",
+        "event": "Event",
+        "user": "User",
+        "status": "Status"
     }
 }

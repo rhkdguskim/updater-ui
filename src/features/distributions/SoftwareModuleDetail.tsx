@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Descriptions, Tabs, Table, Button, Upload, message, Modal, Space, Tag, Tooltip } from 'antd';
-import { ArrowLeftOutlined, DeleteOutlined, DownloadOutlined, FileOutlined, InboxOutlined } from '@ant-design/icons';
+import { Card, Descriptions, Tabs, Table, Button, Upload, message, Modal, Space, Tag, Tooltip, List, Badge } from 'antd';
+import { ArrowLeftOutlined, DeleteOutlined, DownloadOutlined, FileOutlined, InboxOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import {
     useGetSoftwareModule,
     useGetArtifacts,
@@ -15,6 +15,7 @@ import ModuleMetadataTab from './components/ModuleMetadataTab';
 import ModuleUsageTab from './components/ModuleUsageTab';
 
 import { useTranslation } from 'react-i18next';
+import type { RcFile } from 'antd/es/upload';
 
 const SoftwareModuleDetail: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -24,6 +25,26 @@ const SoftwareModuleDetail: React.FC = () => {
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
     const [activeTab, setActiveTab] = useState('overview');
+    type UploadJobStatus = 'queued' | 'uploading' | 'success' | 'error';
+    interface UploadJob {
+        id: string;
+        filename: string;
+        status: UploadJobStatus;
+        errorMessage?: string;
+    }
+    interface UploadQueueItem {
+        id: string;
+        file: File;
+    }
+    const [uploadJobs, setUploadJobs] = useState<UploadJob[]>([]);
+    const uploadQueueRef = useRef<UploadQueueItem[]>([]);
+    const isProcessingRef = useRef(false);
+    const badgeStatusMap: Record<UploadJobStatus, 'default' | 'processing' | 'success' | 'error'> = {
+        queued: 'default',
+        uploading: 'processing',
+        success: 'success',
+        error: 'error',
+    };
 
     // Fetch Module Details
     const { data: moduleData, isLoading: isModuleLoading } = useGetSoftwareModule(softwareModuleId);
@@ -57,19 +78,58 @@ const SoftwareModuleDetail: React.FC = () => {
         },
     });
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handleUpload = async (options: any) => {
-        const { file, onSuccess, onError } = options;
-        try {
-            await uploadMutation.mutateAsync({
-                softwareModuleId,
-                data: { file: file as Blob },
-                params: { filename: (file as File).name },
-            });
-            onSuccess('ok');
-        } catch (err) {
-            onError({ err });
+    const processQueue = useCallback(async () => {
+        if (isProcessingRef.current) {
+            return;
         }
+        isProcessingRef.current = true;
+
+        while (uploadQueueRef.current.length > 0) {
+            const nextItem = uploadQueueRef.current[0];
+            setUploadJobs((prev) =>
+                prev.map((job) =>
+                    job.id === nextItem.id ? { ...job, status: 'uploading', errorMessage: undefined } : job
+                )
+            );
+
+            try {
+                await uploadMutation.mutateAsync({
+                    softwareModuleId,
+                    data: { file: nextItem.file },
+                    params: { filename: nextItem.file.name },
+                });
+                setUploadJobs((prev) =>
+                    prev.map((job) => (job.id === nextItem.id ? { ...job, status: 'success' } : job))
+                );
+            } catch (error) {
+                const errorMessage = error instanceof Error ? error.message : t('detail.uploadArtifactError');
+                setUploadJobs((prev) =>
+                    prev.map((job) =>
+                        job.id === nextItem.id ? { ...job, status: 'error', errorMessage } : job
+                    )
+                );
+            } finally {
+                uploadQueueRef.current = uploadQueueRef.current.slice(1);
+            }
+        }
+
+        isProcessingRef.current = false;
+    }, [softwareModuleId, t, uploadMutation]);
+
+    const enqueueFile = (file: File) => {
+        const id = `${file.name}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+        uploadQueueRef.current = [...uploadQueueRef.current, { id, file }];
+        setUploadJobs((prev) => [...prev, { id, filename: file.name, status: 'queued' }]);
+        void processQueue();
+    };
+
+    const handleBeforeUpload = (file: RcFile) => {
+        if (moduleData?.locked) {
+            message.warning(t('detail.lockedHint'));
+            return Upload.LIST_IGNORE;
+        }
+        enqueueFile(file);
+        return Upload.LIST_IGNORE;
     };
 
     const handleDeleteArtifact = (artifactId: number) => {
@@ -105,8 +165,10 @@ const SoftwareModuleDetail: React.FC = () => {
         <div>
             {isAdmin && (
                 <Upload.Dragger
-                    customRequest={handleUpload}
+                    beforeUpload={handleBeforeUpload}
+                    multiple
                     showUploadList={false}
+                    disabled={moduleData?.locked}
                     style={{ marginBottom: 16 }}
                 >
                     <p className="ant-upload-drag-icon">
@@ -114,9 +176,30 @@ const SoftwareModuleDetail: React.FC = () => {
                     </p>
                     <p className="ant-upload-text">{t('detail.dragDropTitle')}</p>
                     <p className="ant-upload-hint">
-                        {t('detail.dragDropHint')}
+                        {moduleData?.locked ? t('detail.lockedHint') : t('detail.dragDropHintMulti')}
                     </p>
                 </Upload.Dragger>
+            )}
+            {uploadJobs.length > 0 && (
+                <List
+                    size="small"
+                    header={t('detail.uploadListTitle')}
+                    dataSource={uploadJobs}
+                    renderItem={(item) => (
+                        <List.Item>
+                            <Space>
+                                <span>{item.filename}</span>
+                                <Badge status={badgeStatusMap[item.status]} text={t(`detail.uploadStatus.${item.status}`)} />
+                                {item.errorMessage && (
+                                    <Tooltip title={item.errorMessage}>
+                                        <InfoCircleOutlined style={{ color: '#ff4d4f' }} />
+                                    </Tooltip>
+                                )}
+                            </Space>
+                        </List.Item>
+                    )}
+                    style={{ marginBottom: 16 }}
+                />
             )}
             <Table
                 dataSource={artifactsData}

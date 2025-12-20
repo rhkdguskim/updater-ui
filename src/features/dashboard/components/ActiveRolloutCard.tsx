@@ -1,82 +1,41 @@
 import React from 'react';
-import { Card, Statistic, Typography, Flex, Progress, Spin, Empty } from 'antd';
+import { Card, Statistic, Typography, Flex, Progress, Steps } from 'antd';
 import { RocketOutlined } from '@ant-design/icons';
-import { useGetRollouts } from '@/api/generated/rollouts/rollouts';
-import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
-const ActiveRolloutCard: React.FC = () => {
-    const { t } = useTranslation('dashboard');
-    const { data: rolloutsData, isLoading } = useGetRollouts({ q: 'status==running', limit: 1 });
-
-    const activeRollout = rolloutsData?.content?.[0];
-
-    if (isLoading) {
-        return <Card style={{ height: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center' }}><Spin /></Card>;
-    }
-
-    if (!activeRollout) {
-        return (
-            <Card title={t('rollout.activeMonitor')} style={{ height: '100%' }}>
-                <Empty description={t('rollout.noActiveRollout')} />
-            </Card>
-        );
-    }
-
-    // Calculate percentages
-    const total = activeRollout.totalTargets || 1;
-    const successCount = activeRollout.totalTargetsPerStatus?.['finished'] || 0;
-    const errorCount = activeRollout.totalTargetsPerStatus?.['error'] || 0;
-
-    const successPercent = Math.round((successCount / total) * 100);
-    const errorPercent = Math.round((errorCount / total) * 100);
-    const progressPercent = Math.round(((successCount + errorCount) / total) * 100);
-
+export const ActiveRolloutCard: React.FC = () => {
     return (
-        <Card
-            title={`${t('rollout.activeMonitor')}: ${activeRollout.name}`}
-            extra={<RocketOutlined style={{ color: '#1890ff' }} />}
-            style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
-            styles={{ body: { flex: 1, minHeight: 0 } }}
-        >
+        <Card title="Active Rollout: Seoul-Patch-V2" extra={<RocketOutlined style={{ color: '#1890ff' }} />} style={{ height: '100%', display: 'flex', flexDirection: 'column' }} bodyStyle={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-around' }}>
             <div>
                 <Flex justify="space-between">
                     <Text type="secondary">Overall Progress</Text>
-                    <Text strong>{progressPercent}%</Text>
+                    <Text strong>68%</Text>
                 </Flex>
-                <Progress
-                    percent={progressPercent}
-                    success={{ percent: successPercent }}
-                    status="active"
-                    strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }}
+                <Progress percent={68} status="active" strokeColor={{ '0%': '#108ee9', '100%': '#87d068' }} />
+            </div>
+
+            <div style={{ marginTop: 16 }}>
+                <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>Current Group: Phase 2 (Canary)</Text>
+                <Steps
+                    size="small"
+                    current={1}
+                    items={[
+                        { title: 'Pilot', status: 'finish' },
+                        { title: 'Canary', status: 'process' },
+                        { title: 'Full', status: 'wait' },
+                    ]}
                 />
             </div>
 
             <Flex gap="small" style={{ marginTop: 16 }}>
-                <Card size="small" styles={{ body: { padding: 12 } }} style={{ flex: 1, background: '#f6ffed', borderColor: '#b7eb8f' }}>
-                    <Statistic
-                        title="Success"
-                        value={successCount}
-                        suffix={`(${successPercent}%)`}
-                        styles={{ content: { color: '#3f8600', fontSize: 16 } }}
-                    />
+                <Card size="small" style={{ flex: 1, background: '#f6ffed', borderColor: '#b7eb8f' }}>
+                    <Statistic title="Success" value={450} valueStyle={{ color: '#3f8600', fontSize: 16 }} />
                 </Card>
-                <Card size="small" styles={{ body: { padding: 12 } }} style={{ flex: 1, background: '#fff1f0', borderColor: '#ffa39c' }}>
-                    <Statistic
-                        title="Error"
-                        value={errorCount}
-                        suffix={`(${errorPercent}%)`}
-                        styles={{ content: { color: '#cf1322', fontSize: 16 } }}
-                    />
+                <Card size="small" style={{ flex: 1, background: '#fff1f0', borderColor: '#ffa39c' }}>
+                    <Statistic title="Error" value={12} valueStyle={{ color: '#cf1322', fontSize: 16 }} />
                 </Card>
             </Flex>
-
-            <div style={{ marginTop: 'auto', paddingTop: 16 }}>
-                <Text type="secondary" style={{ fontSize: '11px' }}>ID: {activeRollout.id}</Text>
-            </div>
         </Card>
     );
 };
-
-export default ActiveRolloutCard;

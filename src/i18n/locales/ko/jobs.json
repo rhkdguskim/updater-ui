@@ -34,7 +34,10 @@
         "description": "설명",
         "targetFilter": "대상 필터",
         "totalTargets": "전체 대상 수",
-        "deployGroups": "배포 그룹"
+        "deployGroups": "배포 그룹",
+        "confirmWait": "확인 대기 중",
+        "confirmWaitDesc": "이 액션은 진행을 위해 수동 승인이 필요합니다.",
+        "timelineOnlyAction": "타임라인은 액션에 대해서만 제공됩니다."
     },
     "actions": {
         "force": "강제 전환",
@@ -69,5 +72,13 @@
         "denySuccess": "액션을 거부했습니다",
         "rolloutActionSuccess": "롤아웃 작업이 완료되었습니다",
         "rolloutActionError": "롤아웃 업데이트에 실패했습니다"
+    },
+    "logs": {
+        "time": "시간",
+        "type": "유형",
+        "id": "ID",
+        "event": "이벤트",
+        "user": "사용자",
+        "status": "상태"
     }
 }

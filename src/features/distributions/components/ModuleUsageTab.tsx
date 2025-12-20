@@ -12,7 +12,7 @@ interface ModuleUsageTabProps {
 }
 
 const ModuleUsageTab: React.FC<ModuleUsageTabProps> = ({ softwareModuleId }) => {
-    useTranslation(['distributions', 'common']);
+    const { t } = useTranslation('distributions');
     const navigate = useNavigate();
     const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
 
@@ -27,7 +27,7 @@ const ModuleUsageTab: React.FC<ModuleUsageTabProps> = ({ softwareModuleId }) => 
 
     const columns = [
         {
-            title: 'DS Name',
+            title: t('detail.usageColumns.name'),
             dataIndex: 'name',
             key: 'name',
             render: (text: string, record: any) => (
@@ -35,19 +35,19 @@ const ModuleUsageTab: React.FC<ModuleUsageTabProps> = ({ softwareModuleId }) => 
             )
         },
         {
-            title: 'Version',
+            title: t('detail.usageColumns.version'),
             dataIndex: 'version',
             key: 'version',
             render: (v: string) => <Tag color="blue">{v}</Tag>
         },
         {
-            title: 'Type',
+            title: t('detail.usageColumns.type'),
             dataIndex: 'typeName',
             key: 'typeName',
             render: (v: string) => <Tag color="cyan">{v}</Tag>
         },
         {
-            title: 'Last Modified',
+            title: t('detail.usageColumns.lastModified'),
             dataIndex: 'lastModifiedAt',
             key: 'lastModifiedAt',
             render: (val: number) => val ? format(val, 'yyyy-MM-dd HH:mm:ss') : '-'
@@ -55,13 +55,13 @@ const ModuleUsageTab: React.FC<ModuleUsageTabProps> = ({ softwareModuleId }) => 
     ];
 
     if (!data?.total && !isLoading) {
-        return <Empty description="This module is not used in any Distribution Set" />;
+        return <Empty description={t('detail.usageEmpty')} />;
     }
 
     return (
         <div style={{ padding: '16px' }}>
             <div style={{ marginBottom: 16 }}>
-                <Text strong>Distribution Sets using this module:</Text>
+                <Text strong>{t('detail.usageTitle')}</Text>
             </div>
 
             <Table

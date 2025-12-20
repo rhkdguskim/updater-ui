@@ -129,7 +129,6 @@
     "search": {
         "placeholder": "{{field}} 검색",
         "fields": {
-            "controllerId": "컨트롤러 ID",
             "name": "이름",
             "description": "설명"
         }

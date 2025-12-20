@@ -1,6 +1,8 @@
-import React from 'react';
-import { Table, Tag, Typography } from 'antd';
+import React, { useMemo } from 'react';
+import { Table, Tag, Typography, Spin } from 'antd';
 import dayjs from 'dayjs';
+import { useGetActions } from '@/api/generated/actions/actions';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -15,26 +17,42 @@ interface ActivityLog {
 }
 
 const ActivityLogs: React.FC = () => {
-    // This is a placeholder as hawkBit doesn't have a single unified "Activity Log" API 
-    // that captures all high-level job events in one go easily without separate requests.
-    // In a real app, this might pull from a custom backend or audit log API.
+    const { t } = useTranslation('jobs');
+    const { data: actionsData, isLoading } = useGetActions({
+        limit: 50,
+        // Removed sort due to API issues with lastModifiedAt in some versions, sorting client-side
+    }, {
+        query: { refetchInterval: 30000 }
+    });
 
-    const mockLogs: ActivityLog[] = [
-        { id: '1', timestamp: Date.now() - 1000 * 60 * 5, type: 'action', entityId: 101, event: 'Status Changed', user: 'admin', status: 'finished' },
-        { id: '2', timestamp: Date.now() - 1000 * 60 * 15, type: 'rollout', entityId: 50, event: 'Started', user: 'admin', status: 'running' },
-        { id: '3', timestamp: Date.now() - 1000 * 60 * 60, type: 'action', entityId: 102, event: 'Created', user: 'operator', status: 'pending' },
-    ];
+    const logs: ActivityLog[] = useMemo(() => {
+        if (!actionsData?.content) return [];
+
+        return [...actionsData.content]
+            .sort((a, b) => (b.lastModifiedAt || 0) - (a.lastModifiedAt || 0))
+            .map(action => ({
+                id: `action-${action.id}`,
+                timestamp: action.lastModifiedAt || action.createdAt || 0,
+                type: 'action' as const,
+                entityId: action.id!,
+                event: action.status === 'finished' ? 'Completed' :
+                    action.status === 'error' ? 'Failed' :
+                        action.status === 'running' ? 'Progress Update' : 'Status Changed',
+                user: action.lastModifiedBy || action.createdBy || 'system',
+                status: action.status || 'unknown'
+            }));
+    }, [actionsData]);
 
     const columns = [
         {
-            title: 'Time',
+            title: t('logs.time', 'Time'),
             dataIndex: 'timestamp',
             key: 'timestamp',
             render: (ts: number) => dayjs(ts).format('YYYY-MM-DD HH:mm:ss'),
             width: 180,
         },
         {
-            title: 'Type',
+            title: t('logs.type', 'Type'),
             dataIndex: 'type',
             key: 'type',
             render: (type: string) => (
@@ -43,36 +61,45 @@ const ActivityLogs: React.FC = () => {
             width: 100,
         },
         {
-            title: 'ID',
+            title: t('logs.id', 'ID'),
             dataIndex: 'entityId',
             key: 'entityId',
             width: 80,
         },
         {
-            title: 'Event',
+            title: t('logs.event', 'Event'),
             dataIndex: 'event',
             key: 'event',
         },
         {
-            title: 'User',
+            title: t('logs.user', 'User'),
             dataIndex: 'user',
             key: 'user',
             render: (user: string) => <Text strong>{user}</Text>,
         },
         {
-            title: 'Status',
+            title: t('logs.status', 'Status'),
             dataIndex: 'status',
             key: 'status',
-            render: (status: string) => (
-                <Tag color={status === 'finished' ? 'green' : 'orange'}>{status.toUpperCase()}</Tag>
-            ),
+            render: (status: string) => {
+                const colors: Record<string, string> = {
+                    finished: 'green',
+                    running: 'blue',
+                    error: 'red',
+                    pending: 'orange',
+                    scheduled: 'cyan'
+                };
+                return <Tag color={colors[status.toLowerCase()] || 'default'}>{status.toUpperCase()}</Tag>;
+            },
         }
     ];
+
+    if (isLoading) return <div style={{ padding: 24, textAlign: 'center' }}><Spin /></div>;
 
     return (
         <div style={{ padding: '16px 0' }}>
             <Table
-                dataSource={mockLogs}
+                dataSource={logs}
                 columns={columns}
                 rowKey="id"
                 size="small"

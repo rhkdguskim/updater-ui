@@ -213,7 +213,7 @@ const Configuration: React.FC = () => {
         Object.entries(editedValues).forEach(([key, value]) => {
             const originalValue = extractValue(data?.[key as keyof typeof data]);
             if (JSON.stringify(value) !== JSON.stringify(originalValue) && configuredKeys.has(key)) {
-                changedValues[key] = { value };
+                changedValues[key] = value;
             }
         });
 
