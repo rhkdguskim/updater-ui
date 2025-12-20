@@ -1,9 +1,14 @@
 import React from 'react';
 import { Treemap, ResponsiveContainer, Tooltip } from 'recharts';
-import { Card } from 'antd';
+import { Card, Progress, Typography } from 'antd';
+import { useTranslation } from 'react-i18next';
+
+const { Text } = Typography;
 
 interface VersionTreemapProps {
     data: any[];
+    fragmentationScore: number;
+    uniqueVersions: number;
 }
 
 const CustomizedContent: React.FC<any> = (props) => {
@@ -38,9 +43,16 @@ const CustomizedContent: React.FC<any> = (props) => {
     );
 };
 
-export const VersionTreemap: React.FC<VersionTreemapProps> = ({ data }) => {
+export const VersionTreemap: React.FC<VersionTreemapProps> = ({ data, fragmentationScore, uniqueVersions }) => {
+    const { t } = useTranslation('dashboard');
+
     return (
-        <Card title="Firmware Version Map" style={{ height: '100%', display: 'flex', flexDirection: 'column' }} bodyStyle={{ flex: 1, minHeight: 0 }}>
+        <Card title={t('charts.versionMap')} style={{ height: '100%', display: 'flex', flexDirection: 'column' }} bodyStyle={{ flex: 1, minHeight: 0 }}>
+            <div style={{ marginBottom: 12 }}>
+                <Text type="secondary" style={{ fontSize: 12 }}>{t('version.fragmentationTitle')}</Text>
+                <Progress percent={Math.min(100, fragmentationScore)} showInfo={false} size="small" strokeColor={{ from: '#52c41a', to: '#ff4d4f' }} />
+                <Text style={{ fontSize: 12 }}>{t('version.fragmentationLabel', { score: fragmentationScore.toFixed(1), count: uniqueVersions })}</Text>
+            </div>
             <ResponsiveContainer width="100%" height="100%">
                 <Treemap
                     data={data}

@@ -5,7 +5,11 @@
         "onlineTargets": "Online Targets",
         "offlineTargets": "Offline Targets",
         "successRate": "Success Rate (Recent)",
-        "notAvailable": "N/A"
+        "notAvailable": "N/A",
+        "criticalErrors": "Critical Errors",
+        "window24h": "Last 24h window",
+        "realtimeSample": "Realtime sample ({{count}} devices)",
+        "alertBadge": "Alert"
     },
     "charts": {
         "deviceStatus": "Device Status",
@@ -29,7 +33,30 @@
     },
     "rollout": {
         "activeMonitor": "Active Rollout Monitor",
-        "noActiveRollout": "No active rollout currently"
+        "noActiveRollout": "No active rollout currently",
+        "currentRollout": "Current Rollout",
+        "targetsLabel": "{{count}} targets",
+        "updatedAt": "Updated {{value}}",
+        "updatedAtUnknown": "Updated recently",
+        "statusLabel": {
+            "running": "Running",
+            "waiting_for_approval": "Waiting Approval",
+            "ready": "Ready",
+            "scheduled": "Scheduled",
+            "finished": "Finished",
+            "error": "Error"
+        },
+        "progressLabel": "Completion",
+        "timelineLabel": "Stage Timeline",
+        "successCount": "Success",
+        "runningCount": "Running",
+        "errorCount": "Errors",
+        "stages": {
+            "scheduled": "Scheduled",
+            "waiting_for_approval": "Approval",
+            "running": "Running",
+            "finished": "Finished"
+        }
     },
     "status": {
         "in_sync": "In Sync",
@@ -85,5 +112,17 @@
         "count": "Count",
         "percentage": "Percentage",
         "noTypes": "No target types found"
+    },
+    "focus": {
+        "enter": "Enter Focus Mode",
+        "exit": "Exit Focus Mode"
+    },
+    "ticker": {
+        "title": "Live Feed",
+        "empty": "No high-priority events in the last 24h"
+    },
+    "version": {
+        "fragmentationTitle": "Fragmentation Index",
+        "fragmentationLabel": "{{score}}% · {{count}} versions"
     }
 }

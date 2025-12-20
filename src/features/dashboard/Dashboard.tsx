@@ -1,21 +1,29 @@
-import React, { useState, useMemo } from 'react';
-import { Row, Col, Button, Tooltip, Spin } from 'antd';
-import { FullscreenOutlined, FullscreenExitOutlined, CloudServerOutlined, CheckCircleOutlined, WarningOutlined, ClockCircleOutlined } from '@ant-design/icons';
+import React, { useState, useMemo, useRef, useEffect, useCallback } from 'react';
+import { Button, Tooltip, Spin } from 'antd';
+import {
+    FullscreenOutlined,
+    FullscreenExitOutlined,
+    CloudServerOutlined,
+    CheckCircleOutlined,
+    WarningOutlined,
+    ClockCircleOutlined,
+} from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import styled from 'styled-components';
+import dayjs from 'dayjs';
+import { useNavigate } from 'react-router-dom';
 
-// Components
 import {
     KPICard,
     FailureChart,
     VersionTreemap,
     ActiveRolloutCard,
-    LiveTicker
+    LiveTicker,
 } from './components';
 
-// API Hooks
 import { useGetTargets } from '@/api/generated/targets/targets';
 import { useGetActions } from '@/api/generated/actions/actions';
+import type { LiveTickerLog } from './components/LiveTicker';
 
 const DashboardContainer = styled.div<{ $isFocusMode: boolean }>`
     height: ${(props) => (props.$isFocusMode ? '100vh' : 'calc(100vh - 64px)')};
@@ -24,25 +32,48 @@ const DashboardContainer = styled.div<{ $isFocusMode: boolean }>`
     top: 0;
     left: 0;
     z-index: ${(props) => (props.$isFocusMode ? 1000 : 1)};
-    background: #f0f2f5;
+    background: ${(props) => (props.$isFocusMode ? '#0b1120' : '#f0f2f5')};
+    color: ${(props) => (props.$isFocusMode ? '#f8fafc' : 'inherit')};
     padding: 16px;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    display: grid;
+    grid-template-rows: 120px 1fr 48px;
     gap: 16px;
+    overflow: hidden;
+    transition: background 0.3s ease;
+
+    & .ant-card {
+        background: ${(props) => (props.$isFocusMode ? '#182747' : '#fff')};
+        color: ${(props) => (props.$isFocusMode ? '#f8fafc' : 'inherit')};
+        border: none;
+        box-shadow: ${(props) =>
+            props.$isFocusMode ? '0 12px 30px rgba(8, 15, 40, 0.5)' : '0 6px 20px rgba(0, 0, 0, 0.08)'};
+    }
 `;
 
-const TopRow = styled.div`
-    flex: 0 0 100px;
+const KPISection = styled.div`
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    height: 100%;
 `;
 
 const MiddleRow = styled.div`
-    flex: 1;
+    display: grid;
+    grid-template-columns: 35% 30% 35%;
+    gap: 16px;
     min-height: 0;
+
+    @media (max-width: 1200px) {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    & > * {
+        min-height: 0;
+    }
 `;
 
 const BottomRow = styled.div`
-    flex: 0 0 40px;
+    min-height: 0;
 `;
 
 const FloatingActionButton = styled(Button)`
@@ -50,7 +81,7 @@ const FloatingActionButton = styled(Button)`
     top: 16px;
     right: 16px;
     z-index: 1001;
-    opacity: 0.5;
+    opacity: 0.6;
     &:hover {
         opacity: 1;
     }
@@ -58,89 +89,175 @@ const FloatingActionButton = styled(Button)`
 
 const Dashboard: React.FC = () => {
     const { t } = useTranslation('dashboard');
+    const navigate = useNavigate();
     const [isFocusMode, setIsFocusMode] = useState(false);
 
-    // Fetch Base Data without complex sorting/filtering to avoid API errors
-    const { data: targetsData, isLoading: targetsLoading } = useGetTargets({ limit: 100 });
-    const { data: actionsData, isLoading: actionsLoading } = useGetActions({ limit: 100 });
+    const { data: targetsData, isLoading: targetsLoading } = useGetTargets({ limit: 500 });
+    const { data: actionsData, isLoading: actionsLoading } = useGetActions(
+        { limit: 200 },
+        { query: { refetchInterval: 15000 } }
+    );
+
+    const totalTargets = targetsData?.total ?? targetsData?.content?.length ?? 0;
+    const sampleSize = targetsData?.content?.length ?? 0;
+    const onlineSample = targetsData?.content
+        ? targetsData.content.filter((target) => target.pollStatus?.overdue === false).length
+        : 0;
+    const estimatedOnlineTotal =
+        sampleSize > 0 && totalTargets > sampleSize
+            ? Math.round((onlineSample / sampleSize) * totalTargets)
+            : onlineSample;
+    const availability = totalTargets > 0 ? (estimatedOnlineTotal / totalTargets) * 100 : 0;
+
+    const recentActions = useMemo(() => {
+        if (!actionsData?.content) return [];
+        const threshold = dayjs().subtract(24, 'hour');
+        return actionsData.content.filter(
+            (action) => action.createdAt && dayjs(action.createdAt).isAfter(threshold)
+        );
+    }, [actionsData]);
+
+    const pendingActions = useMemo(
+        () =>
+            recentActions.filter((action) =>
+                ['scheduled', 'pending', 'retrieving', 'ready'].includes(action.status?.toLowerCase() || '')
+            ).length,
+        [recentActions]
+    );
+
+    const { finishedCount, errorCount, errorItems } = useMemo(() => {
+        let finished = 0;
+        const errors: typeof recentActions = [];
+        recentActions.forEach((action) => {
+            const status = action.status?.toLowerCase();
+            if (status === 'finished') finished += 1;
+            if (status === 'error' || status === 'failed') {
+                errors.push(action);
+            }
+        });
+
+        return { finishedCount: finished, errorCount: errors.length, errorItems: errors };
+    }, [recentActions]);
+
+    const successRate = finishedCount + errorCount > 0 ? (finishedCount / (finishedCount + errorCount)) * 100 : 0;
+    const criticalErrorCount = errorCount;
+
+    const failureData = useMemo(() => {
+        const bucketCount = 6;
+        const bucketHours = 4;
+        const start = dayjs().subtract(bucketCount * bucketHours, 'hour');
+
+        const buckets = Array.from({ length: bucketCount }, (_, index) => {
+            const bucketStart = start.add(index * bucketHours, 'hour');
+            return {
+                time: bucketStart.format('HH:mm'),
+                timeout: 0,
+                installError: 0,
+                networkError: 0,
+            };
+        });
+
+        const categorizeError = (detail?: string, statusCode?: number) => {
+            const normalized = detail?.toLowerCase() || '';
+            if (normalized.includes('network') || (statusCode && statusCode >= 500)) return 'networkError';
+            if (normalized.includes('install')) return 'installError';
+            if (normalized.includes('timeout') || normalized.includes('time')) return 'timeout';
+            return 'installError';
+        };
+
+        errorItems.forEach((action) => {
+            if (!action.createdAt) return;
+            const created = dayjs(action.createdAt);
+            if (created.isBefore(start)) return;
+            const diffHours = Math.max(created.diff(start, 'hour'), 0);
+            const bucketIndex = Math.min(bucketCount - 1, Math.floor(diffHours / bucketHours));
+            const category = categorizeError(action.detailStatus, action.lastStatusCode);
+            buckets[bucketIndex][category as 'timeout' | 'installError' | 'networkError'] += 1;
+        });
+
+        return buckets;
+    }, [errorItems]);
+
+    const liveLogs = useMemo<LiveTickerLog[]>(() => {
+        return recentActions
+            .slice()
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            .slice(0, 12)
+            .map((action) => {
+                const status = action.status?.toLowerCase() || 'info';
+                const targetId = action._links?.target?.href?.split('/')?.pop();
+                return {
+                    id: action.id || Number(Math.random().toString().slice(2, 8)),
+                    time: action.createdAt ? dayjs(action.createdAt).format('HH:mm:ss') : '--:--',
+                    type: status === 'error' ? 'error' : status === 'finished' ? 'success' : 'info',
+                    message: `${action.rolloutName || 'Action'} #${action.id} • ${status.toUpperCase()} ${targetId ? `@${targetId}` : ''}`,
+                    link: action.id ? `/actions?q=id==${action.id}` : undefined,
+                };
+            });
+    }, [recentActions]);
+
+    const versionDistribution = useMemo(() => {
+        const counts: Record<string, number> = {};
+        targetsData?.content?.forEach((target) => {
+            const descriptor = target.description || target.name || '';
+            const versionMatch = descriptor.match(/v[\d.]+/i);
+            const bucket = versionMatch ? versionMatch[0].toUpperCase() : target.targetTypeName || 'Unknown';
+            counts[bucket] = (counts[bucket] || 0) + 1;
+        });
+        return counts;
+    }, [targetsData]);
+
+    const versionTreemapData = useMemo(() => {
+        const palette = ['#5c67f2', '#38bdf8', '#f472b6', '#34d399', '#facc15'];
+        return Object.entries(versionDistribution)
+            .map(([name, size], index) => ({
+                name,
+                size,
+                fill: palette[index % palette.length],
+            }))
+            .sort((a, b) => b.size - a.size);
+    }, [versionDistribution]);
+
+    const uniqueVersions = Object.keys(versionDistribution).length;
+    const fragmentationScore =
+        totalTargets > 0 ? Math.min(100, (uniqueVersions / totalTargets) * 100) : 0;
+
+    const availabilityTrendRef = useRef<number | null>(null);
+    const [availabilityTrend, setAvailabilityTrend] = useState<number>();
+    useEffect(() => {
+        if (availabilityTrendRef.current !== null && totalTargets > 0) {
+            const delta = estimatedOnlineTotal - availabilityTrendRef.current;
+            setAvailabilityTrend(Number(((delta / totalTargets) * 100).toFixed(1)));
+        }
+        availabilityTrendRef.current = estimatedOnlineTotal;
+    }, [estimatedOnlineTotal, totalTargets]);
+
+    const successTrendRef = useRef<number | null>(null);
+    const [successRateTrend, setSuccessRateTrend] = useState<number>();
+    useEffect(() => {
+        if (successTrendRef.current !== null) {
+            setSuccessRateTrend(Number((successRate - successTrendRef.current).toFixed(1)));
+        }
+        successTrendRef.current = successRate;
+    }, [successRate]);
 
     const toggleFocusMode = () => {
-        setIsFocusMode(!isFocusMode);
+        setIsFocusMode((prev) => !prev);
         if (!isFocusMode) {
-            document.documentElement.requestFullscreen().catch((e) => console.error(e));
+            document.documentElement.requestFullscreen().catch(() => null);
         } else if (document.fullscreenElement) {
-            document.exitFullscreen().catch((e) => console.error(e));
+            document.exitFullscreen().catch(() => null);
         }
     };
 
-    // Calculate Metrics client-side
-    const totalTargets = targetsData?.total || 0;
-    const onlineTargets = useMemo(() => {
-        if (!targetsData?.content) return 0;
-        // If we have total > limit, this is just an estimate from the current page
-        // But for many systems, 100 is a decent sample or the full set
-        return targetsData.content.filter(t => t.pollStatus?.overdue === false).length;
-    }, [targetsData]);
-
-    // Adjust onlineTargets if total is larger - scaling the sample
-    const estimatedOnlineTotal = totalTargets > 100
-        ? Math.round((onlineTargets / 100) * totalTargets)
-        : onlineTargets;
-
-    const availability = totalTargets > 0 ? (estimatedOnlineTotal / totalTargets) * 100 : 0;
-
-    const pendingActions = useMemo(() => {
-        if (!actionsData?.content) return 0;
-        return actionsData.content.filter(a => ['scheduled', 'pending'].includes(a.status?.toLowerCase() || '')).length;
-    }, [actionsData]);
-
-    const successRate = useMemo(() => {
-        if (!actionsData?.content) return 0;
-        const finished = actionsData.content.filter(a => a.status === 'finished').length;
-        const error = actionsData.content.filter(a => a.status === 'error').length;
-        const total = finished + error;
-        return total > 0 ? (finished / total) * 100 : 0;
-    }, [actionsData]);
-
-    // Treemap Data from Target Types
-    const treemapData = useMemo(() => {
-        const types: Record<string, number> = {};
-        targetsData?.content?.forEach(target => {
-            const typeName = target.targetTypeName || 'Unknown';
-            types[typeName] = (types[typeName] || 0) + 1;
-        });
-        const colors = ['#52c41a', '#1890ff', '#faad14', '#ff4d4f', '#722ed1'];
-        return Object.entries(types).map(([name, size], index) => ({
-            name,
-            size,
-            fill: colors[index % colors.length]
-        }));
-    }, [targetsData]);
-
-    // Failure Data 
-    const failureData = useMemo(() => {
-        const errors = actionsData?.content?.filter(a => a.status === 'error') || [];
-        // Distribution of errors (mocked buckets but based on real error count)
-        const count = errors.length;
-        return Array.from({ length: 6 }, (_, i) => ({
-            time: `${i * 4}h`,
-            timeout: i === 5 ? count : 0, // Put real count in the last bucket for visibility
-            installError: 0,
-            networkError: 0,
-        }));
-    }, [actionsData]);
-
-    // Live Ticker Logs
-    const liveLogs = useMemo(() => {
-        return (actionsData?.content || [])
-            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
-            .map(action => ({
-                id: action.id!,
-                time: action.createdAt ? new Date(action.createdAt).toLocaleTimeString() : '-',
-                type: action.status === 'error' ? 'error' : action.status === 'finished' ? 'success' : 'info',
-                message: `Action ${action.id} (${action.status}): Target ${action._links?.target?.href?.split('/').pop() || 'Unknown'}`
-            }));
-    }, [actionsData]);
+    const handleTickerClick = useCallback(
+        (log: LiveTickerLog) => {
+            if (log.link) {
+                navigate(log.link);
+            }
+        },
+        [navigate]
+    );
 
     if (targetsLoading || actionsLoading) {
         return (
@@ -152,7 +269,7 @@ const Dashboard: React.FC = () => {
 
     return (
         <DashboardContainer $isFocusMode={isFocusMode}>
-            <Tooltip title={isFocusMode ? "Exit Focus Mode" : "Enter Focus Mode"}>
+            <Tooltip title={isFocusMode ? t('focus.exit') : t('focus.enter')}>
                 <FloatingActionButton
                     type="primary"
                     shape="circle"
@@ -161,64 +278,60 @@ const Dashboard: React.FC = () => {
                 />
             </Tooltip>
 
-            {/* Top Row: KPIs */}
-            <TopRow>
-                <Row gutter={16} style={{ height: '100%' }}>
-                    <Col span={6} style={{ height: '100%' }}>
-                        <KPICard
-                            title={t('charts.availability')}
-                            value={availability.toFixed(1)}
-                            suffix="%"
-                            icon={<CloudServerOutlined />}
-                            color="#52c41a"
-                        />
-                    </Col>
-                    <Col span={6} style={{ height: '100%' }}>
-                        <KPICard
-                            title={t('charts.successRate')}
-                            value={successRate.toFixed(1)}
-                            suffix="%"
-                            icon={<CheckCircleOutlined />}
-                            color="#1890ff"
-                        />
-                    </Col>
-                    <Col span={6} style={{ height: '100%' }}>
-                        <KPICard
-                            title={t('charts.pendingActions')}
-                            value={pendingActions}
-                            icon={<ClockCircleOutlined />}
-                            color="#faad14"
-                        />
-                    </Col>
-                    <Col span={6} style={{ height: '100%' }}>
-                        <KPICard
-                            title={t('charts.totalTargets')}
-                            value={totalTargets}
-                            icon={<WarningOutlined />}
-                            color="#722ed1"
-                        />
-                    </Col>
-                </Row>
-            </TopRow>
+            <KPISection>
+                <KPICard
+                    title={t('charts.availability')}
+                    value={availability.toFixed(1)}
+                    suffix="%"
+                    trend={availabilityTrend}
+                    color="#52c41a"
+                    icon={<CloudServerOutlined />}
+                    description={t('kpi.realtimeSample', { count: sampleSize })}
+                />
+                <KPICard
+                    title={t('charts.successRate')}
+                    value={successRate.toFixed(1)}
+                    suffix="%"
+                    trend={successRateTrend}
+                    color="#1890ff"
+                    icon={<CheckCircleOutlined />}
+                    description={t('kpi.window24h')}
+                />
+                <KPICard
+                    title={t('charts.pendingActions')}
+                    value={pendingActions}
+                    color="#faad14"
+                    icon={<ClockCircleOutlined />}
+                    description={t('kpi.window24h')}
+                />
+                <KPICard
+                    title={t('kpi.criticalErrors')}
+                    value={criticalErrorCount}
+                    color="#ff4d4f"
+                    icon={<WarningOutlined />}
+                    badgeLabel={criticalErrorCount > 0 ? t('kpi.alertBadge') : undefined}
+                    badgeColor="#ff7875"
+                    description={t('kpi.window24h')}
+                />
+            </KPISection>
 
-            {/* Middle Row: Charts */}
             <MiddleRow>
-                <Row gutter={16} style={{ height: '100%' }}>
-                    <Col span={8} style={{ height: '100%' }}>
-                        <FailureChart data={failureData} />
-                    </Col>
-                    <Col span={8} style={{ height: '100%' }}>
-                        <ActiveRolloutCard />
-                    </Col>
-                    <Col span={8} style={{ height: '100%' }}>
-                        <VersionTreemap data={treemapData} />
-                    </Col>
-                </Row>
+                <FailureChart data={failureData} />
+                <ActiveRolloutCard />
+                <VersionTreemap
+                    data={versionTreemapData}
+                    fragmentationScore={fragmentationScore}
+                    uniqueVersions={uniqueVersions}
+                />
             </MiddleRow>
 
-            {/* Bottom Row: Ticker */}
             <BottomRow>
-                <LiveTicker logs={liveLogs} />
+                <LiveTicker
+                    logs={liveLogs}
+                    title={t('ticker.title')}
+                    emptyText={t('ticker.empty')}
+                    onLogClick={handleTickerClick}
+                />
             </BottomRow>
         </DashboardContainer>
     );
