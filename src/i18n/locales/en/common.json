@@ -3,10 +3,12 @@
     "nav": {
         "dashboard": "Dashboard",
         "targets": "Targets",
-        "distributions": "Distribution Sets",
+        "distributions": "Distributions",
+        "actions": "Actions",
         "rollouts": "Rollouts",
-        "system": "System Settings",
-        "configuration": "Configuration"
+        "system": "System",
+        "configuration": "Configuration",
+        "deployment": "Deployment"
     },
     "actions": {
         "save": "Save",

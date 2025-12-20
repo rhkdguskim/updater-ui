@@ -1,7 +1,12 @@
 {
     "pageTitle": "System Configuration",
     "readOnly": "Read-only",
+    "editMode": "Edit Mode",
     "refresh": "Refresh",
+    "edit": "Edit",
+    "save": "Save Changes",
+    "cancel": "Cancel",
+    "saving": "Saving...",
     "columns": {
         "key": "Configuration Key",
         "value": "Value",
@@ -11,20 +16,52 @@
         "enabled": "Enabled",
         "disabled": "Disabled"
     },
+    "groups": {
+        "pollingConnection": "Polling & Connection",
+        "pollingConnectionDesc": "Device communication and connection settings",
+        "authSecurity": "Authentication & Security",
+        "authSecurityDesc": "Security tokens and authentication methods",
+        "rolloutPolicy": "Rollout Policy",
+        "rolloutPolicyDesc": "Rollout behavior and approval settings",
+        "repoMaintenance": "Repository Maintenance",
+        "repoMaintenanceDesc": "Action cleanup and retention policies",
+        "downloadSettings": "Download Settings",
+        "downloadSettingsDesc": "Artifact download permissions",
+        "assignmentSettings": "Assignment Settings",
+        "assignmentSettingsDesc": "Target assignment configurations"
+    },
     "descriptions": {
         "pollingTime": "Default polling interval for targets (HH:mm:ss)",
         "pollingOverdueTime": "Time after which a target is considered offline (HH:mm:ss)",
+        "minPollingTime": "Minimum allowed polling interval (HH:mm:ss)",
         "authTargetToken": "Enable Target Token authentication",
         "authGatewayToken": "Enable Gateway Token authentication",
+        "authHeader": "Enable Header-based authentication",
+        "authHeaderAuthority": "Header authority name",
+        "authGatewayTokenKey": "Gateway security token key",
+        "authCertificate": "Enable certificate-based authentication",
         "rolloutApproval": "Require approval for rollouts",
-        "actionsAutoclose": "Automatically close finished actions",
+        "rolloutAutostart": "Enable automatic rollout start",
+        "userConfirmationFlow": "Require confirmation for DS assignment",
+        "actionsAutoclose": "Automatically close actions with new DS assignment",
         "maintenanceWindowPollCount": "Number of polls during maintenance window",
         "anonymousDownload": "Allow anonymous artifact downloads",
         "multiAssignments": "Enable multiple distribution set assignments",
         "batchAssignments": "Enable batch assignments",
         "actionCleanupEnabled": "Enable automatic action cleanup",
-        "actionCleanupExpiry": "Action expiry time for cleanup",
-        "actionCleanupStatus": "Action statuses to clean up"
+        "actionCleanupExpiry": "Action expiry time for cleanup (ms)",
+        "actionCleanupStatus": "Action statuses to clean up",
+        "implicitLock": "Implicitly lock DS on assignment"
+    },
+    "validation": {
+        "invalidTime": "Invalid time format. Use HH:mm:ss",
+        "invalidNumber": "Please enter a valid number",
+        "required": "This field is required"
+    },
+    "messages": {
+        "saveSuccess": "Configuration saved successfully",
+        "saveError": "Failed to save configuration",
+        "noChanges": "No changes to save"
     },
     "errors": {
         "loadFailed": "Failed to load configuration",

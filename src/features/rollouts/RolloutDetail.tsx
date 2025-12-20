@@ -21,6 +21,8 @@ import {
     CaretRightOutlined,
     CheckCircleOutlined,
     CloseCircleOutlined,
+    ReloadOutlined,
+    DeleteOutlined,
 } from '@ant-design/icons';
 import {
     useGetRollout,
@@ -30,6 +32,8 @@ import {
     useResume,
     useApprove,
     useDeny,
+    useRetryRollout,
+    useDelete,
 } from '@/api/generated/rollouts/rollouts';
 import type { MgmtRolloutGroup } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -179,6 +183,44 @@ const RolloutDetail: React.FC = () => {
         }
     };
 
+    // Retry mutation
+    const retryMutation = useRetryRollout({
+        mutation: {
+            onSuccess: () => {
+                message.success(t('detail.messages.retrySuccess'));
+                queryClient.invalidateQueries();
+            },
+            onError: (err) => {
+                message.error((err as Error).message || t('detail.messages.retryError'));
+            },
+        },
+    });
+
+    // Delete mutation
+    const deleteMutation = useDelete({
+        mutation: {
+            onSuccess: () => {
+                message.success(t('detail.messages.deleteSuccess'));
+                navigate('/rollouts');
+            },
+            onError: (err) => {
+                message.error((err as Error).message || t('detail.messages.deleteError'));
+            },
+        },
+    });
+
+    const handleRetry = () => {
+        if (rolloutIdNum) {
+            retryMutation.mutate({ rolloutId: rolloutIdNum });
+        }
+    };
+
+    const handleDelete = () => {
+        if (rolloutIdNum) {
+            deleteMutation.mutate({ rolloutId: rolloutIdNum });
+        }
+    };
+
     if (isLoading) {
         return (
             <div style={{ padding: 24, textAlign: 'center' }}>
@@ -208,6 +250,8 @@ const RolloutDetail: React.FC = () => {
     const canPause = rolloutData.status === 'running';
     const canResume = rolloutData.status === 'paused';
     const canApprove = rolloutData.status === 'waiting_for_approval';
+    const canRetry = rolloutData.status === 'error';
+    const canDelete = ['ready', 'finished', 'error'].includes(rolloutData.status || '');
 
     // Calculate overall progress
     const totalTargets = rolloutData.totalTargets || 0;
@@ -337,7 +381,35 @@ const RolloutDetail: React.FC = () => {
                                     </Button>
                                 </>
                             )}
-                            {!canStart && !canPause && !canResume && !canApprove && (
+                            {canRetry && (
+                                <Popconfirm
+                                    title={t('detail.controls.retryConfirm')}
+                                    onConfirm={handleRetry}
+                                >
+                                    <Button
+                                        icon={<ReloadOutlined />}
+                                        loading={retryMutation.isPending}
+                                    >
+                                        {t('detail.controls.retry')}
+                                    </Button>
+                                </Popconfirm>
+                            )}
+                            {canDelete && (
+                                <Popconfirm
+                                    title={t('detail.controls.deleteConfirm')}
+                                    description={t('detail.controls.deleteDesc')}
+                                    onConfirm={handleDelete}
+                                >
+                                    <Button
+                                        danger
+                                        icon={<DeleteOutlined />}
+                                        loading={deleteMutation.isPending}
+                                    >
+                                        {t('detail.controls.delete')}
+                                    </Button>
+                                </Popconfirm>
+                            )}
+                            {!canStart && !canPause && !canResume && !canApprove && !canRetry && !canDelete && (
                                 <Text type="secondary">{t('detail.noActions')}</Text>
                             )}
                         </Space>

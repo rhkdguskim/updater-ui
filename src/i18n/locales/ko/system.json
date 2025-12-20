@@ -1,7 +1,12 @@
 {
     "pageTitle": "시스템 구성",
     "readOnly": "읽기 전용",
+    "editMode": "편집 모드",
     "refresh": "새로고침",
+    "edit": "편집",
+    "save": "변경사항 저장",
+    "cancel": "취소",
+    "saving": "저장 중...",
     "columns": {
         "key": "설정 키",
         "value": "값",
@@ -11,20 +16,52 @@
         "enabled": "활성화됨",
         "disabled": "비활성화됨"
     },
+    "groups": {
+        "pollingConnection": "폴링 및 연결",
+        "pollingConnectionDesc": "디바이스 통신 및 연결 설정",
+        "authSecurity": "인증 및 보안",
+        "authSecurityDesc": "보안 토큰 및 인증 방법",
+        "rolloutPolicy": "롤아웃 정책",
+        "rolloutPolicyDesc": "롤아웃 동작 및 승인 설정",
+        "repoMaintenance": "저장소 유지관리",
+        "repoMaintenanceDesc": "액션 정리 및 보관 정책",
+        "downloadSettings": "다운로드 설정",
+        "downloadSettingsDesc": "아티팩트 다운로드 권한",
+        "assignmentSettings": "할당 설정",
+        "assignmentSettingsDesc": "대상 할당 구성"
+    },
     "descriptions": {
         "pollingTime": "대상의 기본 폴링 간격 (HH:mm:ss)",
         "pollingOverdueTime": "대상이 오프라인으로 간주되는 시간 (HH:mm:ss)",
+        "minPollingTime": "최소 허용 폴링 간격 (HH:mm:ss)",
         "authTargetToken": "대상 토큰 인증 활성화",
         "authGatewayToken": "게이트웨이 토큰 인증 활성화",
+        "authHeader": "헤더 기반 인증 활성화",
+        "authHeaderAuthority": "헤더 권한 이름",
+        "authGatewayTokenKey": "게이트웨이 보안 토큰 키",
+        "authCertificate": "인증서 기반 인증 활성화",
         "rolloutApproval": "롤아웃 승인 필요",
-        "actionsAutoclose": "완료된 액션 자동 종료",
+        "rolloutAutostart": "자동 롤아웃 시작 활성화",
+        "userConfirmationFlow": "DS 할당 시 확인 필요",
+        "actionsAutoclose": "새 DS 할당 시 액션 자동 종료",
         "maintenanceWindowPollCount": "유지보수 창 중 폴링 횟수",
         "anonymousDownload": "익명 아티팩트 다운로드 허용",
         "multiAssignments": "다중 배포 세트 할당 활성화",
         "batchAssignments": "일괄 할당 활성화",
         "actionCleanupEnabled": "자동 액션 정리 활성화",
-        "actionCleanupExpiry": "정리를 위한 액션 만료 시간",
-        "actionCleanupStatus": "정리할 액션 상태"
+        "actionCleanupExpiry": "정리를 위한 액션 만료 시간 (ms)",
+        "actionCleanupStatus": "정리할 액션 상태",
+        "implicitLock": "할당 시 DS 암시적 잠금"
+    },
+    "validation": {
+        "invalidTime": "잘못된 시간 형식입니다. HH:mm:ss 형식을 사용하세요",
+        "invalidNumber": "유효한 숫자를 입력하세요",
+        "required": "필수 입력 항목입니다"
+    },
+    "messages": {
+        "saveSuccess": "설정이 성공적으로 저장되었습니다",
+        "saveError": "설정 저장에 실패했습니다",
+        "noChanges": "저장할 변경사항이 없습니다"
     },
     "errors": {
         "loadFailed": "설정 로드 실패",

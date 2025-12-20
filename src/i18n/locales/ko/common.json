@@ -4,9 +4,11 @@
         "dashboard": "대시보드",
         "targets": "타겟 관리",
         "distributions": "배포 세트",
+        "actions": "액션",
         "rollouts": "롤아웃",
-        "system": "시스템 설정",
-        "configuration": "환경 설정"
+        "system": "시스템",
+        "configuration": "환경 설정",
+        "deployment": "배포 관리"
     },
     "actions": {
         "save": "저장",

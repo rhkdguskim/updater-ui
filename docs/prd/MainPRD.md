@@ -59,8 +59,9 @@ Management API를 통해서만 동작한다.
 * Distribution / Artifact 관리
 * Direct Assignment
 * Action 상태 추적
-* System Configuration (Read-only)
-* Rollout / Action / Tag / Filter 조회 기능
+* **System Configuration (Management)**
+* **Rollout 생성 및 제어 (Creation & Control)**
+* Tag / Filter 조회 기능
 
 ### 제외 (Out of Scope, Phase 2+)
 
@@ -265,19 +266,20 @@ Management API를 통해서만 동작한다.
 
 ---
 
-## FR-05 System Configuration (Read-only)
+## FR-05 System Configuration Management
 
 ### 목적
 
-* 시스템 정책 확인용
+* 시스템 정책 확인 및 수정
 
 ### API
 
 * `GET /rest/v1/system/configs`
+* `PUT /rest/v1/system/configs`
 
 ### AC
 
-* [x] Read-only
+* [ ] Edit Capability
 * [x] Admin 전용
 * [x] 실패 시 에러 표시
 

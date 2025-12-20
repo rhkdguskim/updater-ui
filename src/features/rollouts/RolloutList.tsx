@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Card, Table, Tag, Space, Button, Select, Typography, Progress } from 'antd';
-import { ReloadOutlined } from '@ant-design/icons';
+import { ReloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useGetRollouts } from '@/api/generated/rollouts/rollouts';
 import type { MgmtRolloutResponseBody } from '@/api/generated/model';
 import type { TableProps } from 'antd';
 import { useTranslation } from 'react-i18next';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 const { Title } = Typography;
 const { Option } = Select;
@@ -36,6 +37,8 @@ const getStatusColor = (status?: string) => {
 const RolloutList: React.FC = () => {
     const { t } = useTranslation('rollouts');
     const navigate = useNavigate();
+    const { role } = useAuthStore();
+    const isAdmin = role === 'Admin';
     const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
     const [statusFilter, setStatusFilter] = useState<string>('');
 
@@ -120,13 +123,24 @@ const RolloutList: React.FC = () => {
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Title level={2} style={{ margin: 0 }}>{t('pageTitle')}</Title>
-                    <Button
-                        icon={<ReloadOutlined />}
-                        onClick={() => refetch()}
-                        loading={isLoading}
-                    >
-                        {t('refresh')}
-                    </Button>
+                    <Space>
+                        {isAdmin && (
+                            <Button
+                                type="primary"
+                                icon={<PlusOutlined />}
+                                onClick={() => navigate('/rollouts/create')}
+                            >
+                                {t('createRollout')}
+                            </Button>
+                        )}
+                        <Button
+                            icon={<ReloadOutlined />}
+                            onClick={() => refetch()}
+                            loading={isLoading}
+                        >
+                            {t('refresh')}
+                        </Button>
+                    </Space>
                 </div>
 
                 <Card>

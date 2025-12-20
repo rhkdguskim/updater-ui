@@ -1,6 +1,7 @@
 {
     "pageTitle": "Rollouts",
     "refresh": "Refresh",
+    "createRollout": "Create Rollout",
     "columns": {
         "id": "ID",
         "name": "Name",
@@ -54,7 +55,12 @@
             "pauseConfirm": "Pause this rollout?",
             "resume": "Resume",
             "approve": "Approve",
-            "deny": "Deny"
+            "deny": "Deny",
+            "retry": "Retry",
+            "retryConfirm": "Retry this rollout?",
+            "delete": "Delete",
+            "deleteConfirm": "Delete this rollout?",
+            "deleteDesc": "This action cannot be undone."
         },
         "messages": {
             "startSuccess": "Rollout started",
@@ -66,7 +72,72 @@
             "approveSuccess": "Rollout approved",
             "approveError": "Failed to approve rollout",
             "denySuccess": "Rollout denied",
-            "denyError": "Failed to deny rollout"
+            "denyError": "Failed to deny rollout",
+            "retrySuccess": "Rollout retry initiated",
+            "retryError": "Failed to retry rollout",
+            "deleteSuccess": "Rollout deleted",
+            "deleteError": "Failed to delete rollout"
+        }
+    },
+    "wizard": {
+        "title": "Create Rollout",
+        "steps": {
+            "basicInfo": "Basic Info",
+            "distributionSet": "Distribution Set",
+            "targetFilter": "Target Filter",
+            "groupSettings": "Group Settings",
+            "review": "Review"
+        },
+        "basicInfo": {
+            "title": "Basic Information",
+            "name": "Rollout Name",
+            "namePlaceholder": "Enter rollout name",
+            "nameRequired": "Please enter a rollout name",
+            "description": "Description",
+            "descriptionPlaceholder": "Enter description (optional)"
+        },
+        "distributionSet": {
+            "title": "Select Distribution Set",
+            "selectDS": "Select a Distribution Set",
+            "selected": "Selected",
+            "noSelection": "No distribution set selected",
+            "selectRequired": "Please select a distribution set"
+        },
+        "targetFilter": {
+            "title": "Target Filter",
+            "filterQuery": "Target Filter Query (FIQL)",
+            "filterPlaceholder": "e.g., name==device* or leave empty for all targets",
+            "preview": "Preview Targets",
+            "targetCount": "Matching Targets: {{count}}"
+        },
+        "groupSettings": {
+            "title": "Group Settings",
+            "amountGroups": "Number of Groups",
+            "successThreshold": "Success Threshold (%)",
+            "errorThreshold": "Error Threshold (%)",
+            "startImmediately": "Start immediately after creation"
+        },
+        "review": {
+            "title": "Review & Create",
+            "summary": "Rollout Summary",
+            "name": "Name",
+            "description": "Description",
+            "distributionSet": "Distribution Set",
+            "targetFilter": "Target Filter",
+            "groups": "Groups",
+            "successThreshold": "Success Threshold",
+            "errorThreshold": "Error Threshold",
+            "allTargets": "All Targets"
+        },
+        "buttons": {
+            "next": "Next",
+            "previous": "Previous",
+            "create": "Create Rollout",
+            "cancel": "Cancel"
+        },
+        "messages": {
+            "createSuccess": "Rollout created successfully",
+            "createError": "Failed to create rollout"
         }
     }
 }

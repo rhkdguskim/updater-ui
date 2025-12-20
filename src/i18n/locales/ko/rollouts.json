@@ -1,6 +1,7 @@
 {
     "pageTitle": "롤아웃",
     "refresh": "새로고침",
+    "createRollout": "롤아웃 생성",
     "columns": {
         "id": "ID",
         "name": "이름",
@@ -54,7 +55,12 @@
             "pauseConfirm": "이 롤아웃을 일시정지하시겠습니까?",
             "resume": "재개",
             "approve": "승인",
-            "deny": "거부"
+            "deny": "거부",
+            "retry": "재시도",
+            "retryConfirm": "이 롤아웃을 재시도하시겠습니까?",
+            "delete": "삭제",
+            "deleteConfirm": "이 롤아웃을 삭제하시겠습니까?",
+            "deleteDesc": "이 작업은 취소할 수 없습니다."
         },
         "messages": {
             "startSuccess": "롤아웃이 시작되었습니다",
@@ -66,7 +72,72 @@
             "approveSuccess": "롤아웃이 승인되었습니다",
             "approveError": "롤아웃 승인에 실패했습니다",
             "denySuccess": "롤아웃이 거부되었습니다",
-            "denyError": "롤아웃 거부에 실패했습니다"
+            "denyError": "롤아웃 거부에 실패했습니다",
+            "retrySuccess": "롤아웃 재시도가 시작되었습니다",
+            "retryError": "롤아웃 재시도에 실패했습니다",
+            "deleteSuccess": "롤아웃이 삭제되었습니다",
+            "deleteError": "롤아웃 삭제에 실패했습니다"
+        }
+    },
+    "wizard": {
+        "title": "롤아웃 생성",
+        "steps": {
+            "basicInfo": "기본 정보",
+            "distributionSet": "배포 세트",
+            "targetFilter": "대상 필터",
+            "groupSettings": "그룹 설정",
+            "review": "검토"
+        },
+        "basicInfo": {
+            "title": "기본 정보",
+            "name": "롤아웃 이름",
+            "namePlaceholder": "롤아웃 이름을 입력하세요",
+            "nameRequired": "롤아웃 이름을 입력해주세요",
+            "description": "설명",
+            "descriptionPlaceholder": "설명을 입력하세요 (선택사항)"
+        },
+        "distributionSet": {
+            "title": "배포 세트 선택",
+            "selectDS": "배포 세트를 선택하세요",
+            "selected": "선택됨",
+            "noSelection": "선택된 배포 세트가 없습니다",
+            "selectRequired": "배포 세트를 선택해주세요"
+        },
+        "targetFilter": {
+            "title": "대상 필터",
+            "filterQuery": "대상 필터 쿼리 (FIQL)",
+            "filterPlaceholder": "예: name==device* 또는 전체 대상은 비워두세요",
+            "preview": "대상 미리보기",
+            "targetCount": "일치하는 대상: {{count}}개"
+        },
+        "groupSettings": {
+            "title": "그룹 설정",
+            "amountGroups": "그룹 수",
+            "successThreshold": "성공 임계값 (%)",
+            "errorThreshold": "오류 임계값 (%)",
+            "startImmediately": "생성 후 즉시 시작"
+        },
+        "review": {
+            "title": "검토 및 생성",
+            "summary": "롤아웃 요약",
+            "name": "이름",
+            "description": "설명",
+            "distributionSet": "배포 세트",
+            "targetFilter": "대상 필터",
+            "groups": "그룹 수",
+            "successThreshold": "성공 임계값",
+            "errorThreshold": "오류 임계값",
+            "allTargets": "전체 대상"
+        },
+        "buttons": {
+            "next": "다음",
+            "previous": "이전",
+            "create": "롤아웃 생성",
+            "cancel": "취소"
+        },
+        "messages": {
+            "createSuccess": "롤아웃이 성공적으로 생성되었습니다",
+            "createError": "롤아웃 생성에 실패했습니다"
         }
     }
 }

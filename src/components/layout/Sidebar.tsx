@@ -1,6 +1,7 @@
 import React from 'react';
 import { Layout, Menu, type MenuProps } from 'antd';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import {
     MdDashboard,
     MdDevices,
@@ -26,49 +27,50 @@ const LogoContainer = styled.div`
 const Sidebar: React.FC = () => {
     const navigate = useNavigate();
     const location = useLocation();
+    const { t } = useTranslation('common');
 
     const menuItems: MenuProps['items'] = [
         {
             key: '/',
             icon: <MdDashboard />,
-            label: 'Dashboard',
+            label: t('nav.dashboard'),
         },
         {
             key: 'deployment',
-            label: 'Deployment',
+            label: t('nav.deployment'),
             type: 'group',
             children: [
                 {
                     key: '/targets',
                     icon: <MdDevices />,
-                    label: 'Targets',
+                    label: t('nav.targets'),
                 },
                 {
                     key: '/distributions',
                     icon: <MdInventory />,
-                    label: 'Distributions',
+                    label: t('nav.distributions'),
                 },
                 {
                     key: '/actions',
                     icon: <MdRocketLaunch />,
-                    label: 'Actions',
+                    label: t('nav.actions'),
                 },
                 {
                     key: '/rollouts',
                     icon: <MdRocketLaunch />,
-                    label: 'Rollouts',
+                    label: t('nav.rollouts'),
                 },
             ],
         },
         {
             key: 'system',
-            label: 'System',
+            label: t('nav.system'),
             type: 'group',
             children: [
                 {
                     key: '/system/config',
                     icon: <MdSettings />,
-                    label: 'Configuration',
+                    label: t('nav.configuration'),
                 },
             ],
         },
