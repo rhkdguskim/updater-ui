@@ -1,1 +1,60 @@
+services:
+  # hawkBit Update Server
+  hawkbit:
+    image: hawkbit/hawkbit-update-server:latest
+    container_name: hawkbit-server
+    platform: linux/amd64
+    ports:
+      - "8081:8080" # Management API & UI & DDI
+    environment:
+      # PostgreSQL Database Configuration
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/hawkbit
+      - SPRING_DATASOURCE_USERNAME=hawkbit
+      - SPRING_DATASOURCE_PASSWORD=hawkbit
+      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+      - SPRING_JPA_DATABASE=POSTGRESQL
 
+      # Security - DDI Authentication
+      - HAWKBIT_SERVER_DDI_SECURITY_AUTHENTICATION_ANONYMOUS_ENABLED=false
+      - HAWKBIT_SERVER_DDI_SECURITY_AUTHENTICATION_TARGETTOKEN_ENABLED=true
+      - HAWKBIT_SERVER_DDI_SECURITY_AUTHENTICATION_GATEWAYTOKEN_ENABLED=true
+
+      # Allow anonymous artifact download
+      - HAWKBIT_SERVER_DOWNLOAD_ANONYMOUS_ENABLED=true
+
+      # Demo mode
+      - HAWKBIT_SERVER_DEMO_DATA_ENABLED=true
+    volumes:
+      - hawkbit-data:/opt/hawkbit/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/actuator/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: hawkbit-postgres
+    environment:
+      - POSTGRES_DB=hawkbit
+      - POSTGRES_USER=hawkbit
+      - POSTGRES_PASSWORD=hawkbit
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U hawkbit" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  hawkbit-data:
+  postgres-data:
