@@ -15,11 +15,24 @@
         "actionStatus": "Action Status",
         "total": "total",
         "recentActions": "Recent Actions",
-        "activeRollouts": "Active Rollouts"
+        "activeRollouts": "Active Rollouts",
+        "jobProgress": {
+            "title": "Job Progress Feedback",
+            "actionsTitle": "Action Progress",
+            "actionsSummary": "Finished {{finished}} / {{total}} total · Running {{running}} · Pending {{pending}}",
+            "successRate": "Success {{percent}}%",
+            "rolloutsTitle": "Rollout Progress",
+            "rolloutsSummary": "Delivered {{finished}} / {{total}} targets",
+            "rolloutsPercent": "{{percent}}% complete",
+            "waitingApproval": "Waiting approval: {{count}}",
+            "errors": "Errors: {{count}}"
+        }
     },
     "table": {
+        "id": "ID",
         "name": "Name",
         "target": "Target",
+        "distribution": "Distribution",
         "status": "Status",
         "time": "Time",
         "progress": "Progress"
@@ -137,6 +150,9 @@
         "overview": "Overview",
         "timeline": "Timeline",
         "logs": "Activity Logs"
+    },
+    "timeline": {
+        "empty": "No status history found"
     },
     "detail": {
         "placeholder": "Select an Action or Rollout from the tree to view details.",

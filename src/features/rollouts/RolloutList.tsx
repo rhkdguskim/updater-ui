@@ -35,7 +35,7 @@ const getStatusColor = (status?: string) => {
 };
 
 const RolloutList: React.FC = () => {
-    const { t } = useTranslation('rollouts');
+    const { t } = useTranslation(['rollouts', 'common']);
     const navigate = useNavigate();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
@@ -49,6 +49,12 @@ const RolloutList: React.FC = () => {
         limit: pagination.pageSize,
         q: statusFilter ? `status==${statusFilter}` : undefined,
     });
+
+    const getStatusLabel = (status?: string) => {
+        if (!status) return t('common:status.unknown', { defaultValue: 'UNKNOWN' });
+        const key = status.toLowerCase();
+        return t(`common:status.${key}`, { defaultValue: status.replace(/_/g, ' ').toUpperCase() });
+    };
 
     const columns: TableProps<MgmtRolloutResponseBody>['columns'] = [
         {
@@ -69,7 +75,7 @@ const RolloutList: React.FC = () => {
             width: 150,
             render: (status: string) => (
                 <Tag color={getStatusColor(status)}>
-                    {status?.toUpperCase().replace(/_/g, ' ')}
+                    {getStatusLabel(status)}
                 </Tag>
             ),
         },
@@ -187,4 +193,3 @@ const RolloutList: React.FC = () => {
 };
 
 export default RolloutList;
-

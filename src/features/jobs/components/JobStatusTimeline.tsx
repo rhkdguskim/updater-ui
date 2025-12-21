@@ -1,7 +1,8 @@
 import React from 'react';
-import { Timeline, Spin, Tag, Typography, Empty, Space } from 'antd';
+import { Timeline, Spin, Tag, Typography, Empty, Space, Card } from 'antd';
 import { useGetActionStatusList } from '@/api/generated/targets/targets';
 import dayjs from 'dayjs';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -20,12 +21,20 @@ const statusColorMap: Record<string, string> = {
 };
 
 const JobStatusTimeline: React.FC<JobStatusTimelineProps> = ({ targetId, actionId }) => {
+    const { t } = useTranslation('jobs');
     const { data: statusData, isLoading } = useGetActionStatusList(targetId, actionId);
+
+    const getStatusLabel = (status?: string) => {
+        if (!status) return t('status.unknown', { defaultValue: 'UNKNOWN' });
+        const key = status.toLowerCase();
+        const translated = t(`status.${key}`, { defaultValue: '' });
+        return translated || status.toUpperCase();
+    };
 
     if (isLoading) return <div style={{ padding: '20px', textAlign: 'center' }}><Spin /></div>;
 
     if (!statusData?.content || statusData.content.length === 0) {
-        return <Empty description="No status history found" style={{ margin: '40px 0' }} />;
+        return <Empty description={t('timeline.empty', 'No status history found')} style={{ margin: '40px 0' }} />;
     }
 
     // Sort by timestamp if not already
@@ -42,9 +51,9 @@ const JobStatusTimeline: React.FC<JobStatusTimelineProps> = ({ targetId, actionI
                             <Space direction="vertical" size={2}>
                                 <Space>
                                     <Tag color={statusColorMap[item.type || ''] || 'default'}>
-                                        {item.type?.toUpperCase()}
+                                        {getStatusLabel(item.type)}
                                     </Tag>
-                                    <Text strong>{item.type}</Text>
+                                    <Text strong>{getStatusLabel(item.type)}</Text>
                                 </Space>
                                 {item.messages && item.messages.length > 0 && (
                                     <div style={{ marginTop: 4 }}>
@@ -64,8 +73,5 @@ const JobStatusTimeline: React.FC<JobStatusTimelineProps> = ({ targetId, actionI
         </div>
     );
 };
-
-// Internal Card for Timeline to show more info
-import { Card } from 'antd';
 
 export default JobStatusTimeline;

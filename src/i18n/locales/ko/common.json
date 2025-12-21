@@ -52,7 +52,18 @@
         "error": "오류",
         "canceled": "취소됨",
         "inSync": "동기화됨",
-        "unknown": "알 수 없음"
+        "unknown": "알 수 없음",
+        "scheduled": "예약됨",
+        "paused": "일시정지",
+        "waiting_for_approval": "승인 대기",
+        "waiting_for_confirmation": "확인 대기",
+        "wait_for_confirmation": "확인 대기",
+        "ready": "준비됨",
+        "creating": "생성 중",
+        "starting": "시작 중",
+        "stopped": "중지됨",
+        "canceling": "취소 중",
+        "retrieving": "수신 중"
     },
     "messages": {
         "success": "성공적으로 처리되었습니다.",

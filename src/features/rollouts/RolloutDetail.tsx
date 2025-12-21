@@ -70,7 +70,7 @@ const getStatusColor = (status?: string) => {
 };
 
 const RolloutDetail: React.FC = () => {
-    const { t } = useTranslation('rollouts');
+    const { t } = useTranslation(['rollouts', 'common']);
     const { rolloutId } = useParams<{ rolloutId: string }>();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
@@ -257,7 +257,20 @@ const RolloutDetail: React.FC = () => {
     const totalTargets = rolloutData.totalTargets || 0;
     const statusPerTarget = rolloutData.totalTargetsPerStatus as Record<string, number> || {};
     const finishedTargets = statusPerTarget.finished || 0;
-    const overallProgress = totalTargets > 0 ? Math.round((finishedTargets / totalTargets) * 100) : 0;
+    let overallProgress = totalTargets > 0 ? Math.round((finishedTargets / totalTargets) * 100) : 0;
+
+    // If status is finished or error (stopped), show 100% or actual calculation?
+    // User requested "ended means 100%", assuming successful finish.
+    // If it's truly 'finished' (not error), it implies completion.
+    if (rolloutData.status === 'finished') {
+        overallProgress = 100;
+    }
+
+    const getStatusLabel = (status?: string) => {
+        if (!status) return t('common:status.unknown', { defaultValue: 'UNKNOWN' });
+        const key = status.toLowerCase();
+        return t(`common:status.${key}`, { defaultValue: status.replace(/_/g, ' ').toUpperCase() });
+    };
 
     const groupColumns: TableProps<MgmtRolloutGroup>['columns'] = [
         {
@@ -278,7 +291,7 @@ const RolloutDetail: React.FC = () => {
             width: 120,
             render: (status: string) => (
                 <Tag color={getStatusColor(status)}>
-                    {status?.toUpperCase()}
+                    {getStatusLabel(status)}
                 </Tag>
             ),
         },
@@ -293,10 +306,18 @@ const RolloutDetail: React.FC = () => {
             key: 'progress',
             width: 200,
             render: (_, record) => {
-                const rec = record as unknown as { totalTargets?: number; totalTargetsPerStatus?: Record<string, number> };
+                const rec = record as unknown as {
+                    totalTargets?: number;
+                    totalTargetsPerStatus?: Record<string, number>;
+                    status?: string;
+                };
                 const total = rec.totalTargets || 0;
                 const finished = rec.totalTargetsPerStatus?.finished || 0;
-                const percent = total > 0 ? Math.round((finished / total) * 100) : 0;
+                let percent = total > 0 ? Math.round((finished / total) * 100) : 0;
+
+                if (rec.status === 'finished') {
+                    percent = 100;
+                }
                 return <Progress percent={percent} size="small" />;
             },
         },
@@ -317,7 +338,7 @@ const RolloutDetail: React.FC = () => {
                         {rolloutData.name}
                     </Title>
                     <Tag color={getStatusColor(rolloutData.status)} style={{ fontSize: 14 }}>
-                        {rolloutData.status?.toUpperCase().replace(/_/g, ' ')}
+                        {getStatusLabel(rolloutData.status)}
                     </Tag>
                 </Space>
 
@@ -423,7 +444,7 @@ const RolloutDetail: React.FC = () => {
                         <Descriptions.Item label={t('detail.labels.name')}>{rolloutData.name}</Descriptions.Item>
                         <Descriptions.Item label={t('detail.labels.status')}>
                             <Tag color={getStatusColor(rolloutData.status)}>
-                                {rolloutData.status?.toUpperCase().replace(/_/g, ' ')}
+                                {getStatusLabel(rolloutData.status)}
                             </Tag>
                         </Descriptions.Item>
                         <Descriptions.Item label={t('detail.labels.totalTargets')}>

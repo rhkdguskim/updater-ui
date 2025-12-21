@@ -15,11 +15,24 @@
         "actionStatus": "액션 상태",
         "total": "총",
         "recentActions": "최근 액션",
-        "activeRollouts": "활성 롤아웃"
+        "activeRollouts": "활성 롤아웃",
+        "jobProgress": {
+            "title": "Job 진행 상황",
+            "actionsTitle": "액션 진행률",
+            "actionsSummary": "완료 {{finished}} / 총 {{total}} · 실행 {{running}} · 대기 {{pending}}",
+            "successRate": "성공률 {{percent}}%",
+            "rolloutsTitle": "롤아웃 진행률",
+            "rolloutsSummary": "배포 완료 {{finished}} / 총 {{total}} 대상",
+            "rolloutsPercent": "{{percent}}% 완료",
+            "waitingApproval": "승인 대기 {{count}}건",
+            "errors": "오류 {{count}}건"
+        }
     },
     "table": {
+        "id": "ID",
         "name": "이름",
         "target": "타겟",
+        "distribution": "배포 세트",
         "status": "상태",
         "time": "시간",
         "progress": "진행률"
@@ -137,6 +150,9 @@
         "overview": "개요",
         "timeline": "타임라인",
         "logs": "활동 로그"
+    },
+    "timeline": {
+        "empty": "상태 이력이 없습니다."
     },
     "detail": {
         "placeholder": "좌측 트리에서 액션 또는 롤아웃을 선택하세요.",

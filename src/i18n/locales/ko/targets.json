@@ -40,7 +40,8 @@
         "targetType": "타겟 유형",
         "tags": "태그",
         "forceType": "강제 유형",
-        "started": "시작일"
+        "started": "시작일",
+        "devices": "기기"
     },
     "form": {
         "controllerId": "컨트롤러 ID",

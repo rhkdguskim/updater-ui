@@ -32,7 +32,7 @@ const getStatusColor = (status?: string) => {
 };
 
 const ActionList: React.FC = () => {
-    const { t } = useTranslation('actions');
+    const { t } = useTranslation(['actions', 'common']);
     const navigate = useNavigate();
     const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
     const [statusFilter, setStatusFilter] = useState<string[]>([]);
@@ -72,6 +72,18 @@ const ActionList: React.FC = () => {
         }
     );
 
+    const getStatusLabel = (status?: string) => {
+        if (!status) return t('common:status.unknown', { defaultValue: 'UNKNOWN' });
+        const key = status.toLowerCase();
+        return t(`common:status.${key}`, { defaultValue: status.replace(/_/g, ' ').toUpperCase() });
+    };
+
+    const getTypeLabel = (type?: string) => {
+        if (!type) return '-';
+        const key = type.toLowerCase();
+        return t(`actions:typeLabels.${key}`, { defaultValue: type.toUpperCase() });
+    };
+
     const columns: TableProps<MgmtAction>['columns'] = [
         {
             title: t('columns.id'),
@@ -86,7 +98,7 @@ const ActionList: React.FC = () => {
             width: 150,
             render: (status: string) => (
                 <Tag color={getStatusColor(status)}>
-                    {status?.toUpperCase()}
+                    {getStatusLabel(status)}
                 </Tag>
             ),
         },
@@ -97,7 +109,7 @@ const ActionList: React.FC = () => {
             width: 120,
             render: (type: string) => (
                 <Tag color={type === 'forced' ? 'red' : 'blue'}>
-                    {type?.toUpperCase()}
+                    {getTypeLabel(type)}
                 </Tag>
             ),
         },
@@ -206,4 +218,3 @@ const ActionList: React.FC = () => {
 };
 
 export default ActionList;
-

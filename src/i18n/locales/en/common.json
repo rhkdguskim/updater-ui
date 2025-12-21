@@ -52,7 +52,18 @@
         "error": "Error",
         "canceled": "Canceled",
         "inSync": "In Sync",
-        "unknown": "Unknown"
+        "unknown": "Unknown",
+        "scheduled": "Scheduled",
+        "paused": "Paused",
+        "waiting_for_approval": "Waiting Approval",
+        "waiting_for_confirmation": "Waiting Confirmation",
+        "wait_for_confirmation": "Waiting Confirmation",
+        "ready": "Ready",
+        "creating": "Creating",
+        "starting": "Starting",
+        "stopped": "Stopped",
+        "canceling": "Canceling",
+        "retrieving": "Retrieving"
     },
     "messages": {
         "success": "Operation completed successfully.",

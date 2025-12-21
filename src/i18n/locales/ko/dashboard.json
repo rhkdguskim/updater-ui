@@ -48,6 +48,7 @@
     "recentActions": {
         "title": "최근 액션 (24시간)",
         "target": "타겟",
+        "distribution": "배포 세트",
         "status": "상태",
         "time": "시간",
         "empty": "최근 액션이 없습니다"
@@ -140,7 +141,14 @@
     },
     "ticker": {
         "title": "라이브 피드",
-        "empty": "최근 24시간 치명 이벤트 없음"
+        "empty": "최근 24시간 치명 이벤트 없음",
+        "type": {
+            "action": "액션",
+            "rollout": "롤아웃",
+            "system": "시스템",
+            "alert": "알림",
+            "info": "정보"
+        }
     },
     "version": {
         "fragmentationTitle": "파편화 지수",

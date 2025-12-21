@@ -11,7 +11,14 @@
     },
     "forceTypes": {
         "soft": "Soft",
-        "hard": "Hard"
+        "hard": "Hard",
+        "forced": "Forced"
+    },
+    "typeLabels": {
+        "forced": "Forced",
+        "soft": "Soft",
+        "download": "Download",
+        "install": "Install"
     },
     "filter": {
         "searchPlaceholder": "Search by target...",
@@ -42,6 +49,7 @@
         "noStatusHistory": "No status history available",
         "errorBannerTitle": "Error Occurred",
         "noActions": "No actions available for this status",
+        "liveTag": "LIVE",
         "labels": {
             "id": "ID",
             "status": "Status",

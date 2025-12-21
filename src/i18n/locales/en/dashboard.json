@@ -48,6 +48,7 @@
     "recentActions": {
         "title": "Recent Actions (24h)",
         "target": "Target",
+        "distribution": "Distribution",
         "status": "Status",
         "time": "Time",
         "empty": "No recent actions"
@@ -140,7 +141,14 @@
     },
     "ticker": {
         "title": "Live Feed",
-        "empty": "No high-priority events in the last 24h"
+        "empty": "No high-priority events in the last 24h",
+        "type": {
+            "action": "Action",
+            "rollout": "Rollout",
+            "system": "System",
+            "alert": "Alert",
+            "info": "Info"
+        }
     },
     "version": {
         "fragmentationTitle": "Fragmentation Index",

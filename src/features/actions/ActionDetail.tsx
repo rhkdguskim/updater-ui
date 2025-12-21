@@ -58,18 +58,38 @@ const getStatusColor = (status?: string) => {
 };
 
 const ActionDetail: React.FC = () => {
-    const { t } = useTranslation('actions');
+    const { t } = useTranslation(['actions', 'common']);
     const { actionId } = useParams<{ actionId: string }>();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
 
+    const getStatusLabel = (status?: string) => {
+        if (!status) return t('common:status.unknown', { defaultValue: 'UNKNOWN' });
+        const key = status.toLowerCase();
+        return t(`common:status.${key}`, { defaultValue: status.replace(/_/g, ' ').toUpperCase() });
+    };
+
+    const getTypeLabel = (type?: string) => {
+        if (!type) return '-';
+        const key = type.toLowerCase();
+        return t(`actions:typeLabels.${key}`, { defaultValue: type.toUpperCase() });
+    };
+
+    const getForceTypeLabel = (forceType?: string) => {
+        if (!forceType) return '-';
+        const key = forceType.toLowerCase();
+        return t(`actions:forceTypes.${key}`, { defaultValue: forceType.toUpperCase() });
+    };
+
     const actionIdNum = parseInt(actionId || '0', 10);
 
     // Fetch action details
     // Auto-refresh for running actions
     const isRunning = (status?: string) => ['running', 'pending', 'canceling'].includes(status || '');
+
+
 
     const { data: actionData, isLoading, error } = useGetAction1(actionIdNum, {
         query: {
@@ -221,10 +241,10 @@ const ActionDetail: React.FC = () => {
                         {t('detail.pageTitle')} #{actionData.id}
                     </Title>
                     <Tag color={getStatusColor(actionData.status)} style={{ fontSize: 14 }}>
-                        {actionData.status?.toUpperCase()}
+                        {getStatusLabel(actionData.status)}
                     </Tag>
                     {isRunning(actionData.status) && (
-                        <Tag color="blue">LIVE</Tag>
+                        <Tag color="blue">{t('detail.liveTag', 'LIVE')}</Tag>
                     )}
                 </Space>
 
@@ -310,16 +330,16 @@ const ActionDetail: React.FC = () => {
                         <Descriptions.Item label={t('detail.labels.id')}>{actionData.id}</Descriptions.Item>
                         <Descriptions.Item label={t('detail.labels.status')}>
                             <Tag color={getStatusColor(actionData.status)}>
-                                {actionData.status?.toUpperCase()}
+                                {getStatusLabel(actionData.status)}
                             </Tag>
                         </Descriptions.Item>
                         <Descriptions.Item label={t('detail.labels.type')}>
                             <Tag color={actionData.type === 'forced' ? 'red' : 'blue'}>
-                                {actionData.type?.toUpperCase()}
+                                {getTypeLabel(actionData.type)}
                             </Tag>
                         </Descriptions.Item>
                         <Descriptions.Item label={t('detail.labels.forceType')}>
-                            {actionData.forceType || '-'}
+                            {getForceTypeLabel(actionData.forceType)}
                         </Descriptions.Item>
                         <Descriptions.Item label={t('detail.labels.createdAt')}>
                             {actionData.createdAt
@@ -357,7 +377,7 @@ const ActionDetail: React.FC = () => {
                                 children: (
                                     <div>
                                         <Tag color={getStatusColor(status.type)}>
-                                            {status.type?.toUpperCase()}
+                                            {getStatusLabel(status.type)}
                                         </Tag>
                                         {status.messages && status.messages.length > 0 && (
                                             <div style={{ marginTop: 8 }}>
@@ -382,4 +402,3 @@ const ActionDetail: React.FC = () => {
 };
 
 export default ActionDetail;
-

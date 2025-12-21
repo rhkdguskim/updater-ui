@@ -40,7 +40,8 @@
         "targetType": "Target Type",
         "tags": "Tags",
         "forceType": "Force Type",
-        "started": "Started"
+        "started": "Started",
+        "devices": "devices"
     },
     "form": {
         "controllerId": "Controller ID",

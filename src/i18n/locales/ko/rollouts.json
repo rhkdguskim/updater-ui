@@ -13,7 +13,8 @@
         "activeRollouts": "활성 롤아웃",
         "noRollouts": "롤아웃이 없습니다",
         "noActiveRollouts": "활성 롤아웃이 없습니다",
-        "createFirst": "첫 롤아웃 생성"
+        "createFirst": "첫 롤아웃 생성",
+        "allTargets": "전체 대상"
     },
     "refresh": "새로고침",
     "columns": {
@@ -143,6 +144,8 @@
             "preview": "대상 미리보기",
             "targetCount": "일치하는 대상: {{count}}개",
             "required": "대상 필터(FIQL)를 입력해주세요.",
+            "allTargets": "모든 대상에 배포 (필터 없음)",
+            "allTargetsHint": "모든 등록된 대상에 배포됩니다.",
             "previewColumns": {
                 "controllerId": "컨트롤러 ID",
                 "name": "이름",

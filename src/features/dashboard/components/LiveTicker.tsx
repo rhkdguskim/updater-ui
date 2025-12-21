@@ -1,6 +1,7 @@
 import React from 'react';
 import styled, { css, keyframes } from 'styled-components';
 import { Tag } from 'antd';
+import { useTranslation } from 'react-i18next';
 
 const scroll = keyframes`
   0% { transform: translateX(100%); }
@@ -72,7 +73,10 @@ export interface LiveTickerProps {
     onLogClick?: (log: LiveTickerLog) => void;
 }
 
-export const LiveTicker: React.FC<LiveTickerProps> = ({ logs, title = 'LIVE FEED', emptyText, onLogClick }) => {
+export const LiveTicker: React.FC<LiveTickerProps> = ({ logs, title, emptyText, onLogClick }) => {
+    const { t } = useTranslation('dashboard');
+    const resolvedTitle = title ?? t('ticker.title', 'Live Feed');
+    const resolvedEmpty = emptyText ?? t('ticker.empty', 'No high-priority events in the last 24h');
     const getTypeColor = (type: string) => {
         switch (type) {
             case 'error': return 'red';
@@ -82,6 +86,9 @@ export const LiveTicker: React.FC<LiveTickerProps> = ({ logs, title = 'LIVE FEED
         }
     };
 
+    const getTypeLabel = (type: string) =>
+        t(`ticker.type.${type}`, { defaultValue: type.toUpperCase() });
+
     const handleLogInteraction = (log: LiveTickerLog) => {
         if (onLogClick) {
             onLogClick(log);
@@ -89,10 +96,10 @@ export const LiveTicker: React.FC<LiveTickerProps> = ({ logs, title = 'LIVE FEED
     };
 
     return (
-        <TickerContainer role="region" aria-label={title}>
-            <TickerTitle>{title}</TickerTitle>
+        <TickerContainer role="region" aria-label={resolvedTitle}>
+            <TickerTitle>{resolvedTitle}</TickerTitle>
             <TickerContent $isPaused={logs.length === 0}>
-                {logs.length === 0 && <EmptyTickerMessage>{emptyText}</EmptyTickerMessage>}
+                {logs.length === 0 && <EmptyTickerMessage>{resolvedEmpty}</EmptyTickerMessage>}
                 {logs.map((log) => (
                     <LogItem
                         key={log.id}
@@ -108,7 +115,7 @@ export const LiveTicker: React.FC<LiveTickerProps> = ({ logs, title = 'LIVE FEED
                         }}
                     >
                         <Tag color={getTypeColor(log.type)} style={{ marginRight: 8 }}>{log.time}</Tag>
-                        [{log.type.toUpperCase()}] {log.message}
+                        [{getTypeLabel(log.type)}] {log.message}
                     </LogItem>
                 ))}
             </TickerContent>

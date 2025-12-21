@@ -120,7 +120,7 @@ const statusColorMap: Record<string, string> = {
 };
 
 const RolloutsOverview: React.FC = () => {
-    const { t } = useTranslation('rollouts');
+    const { t } = useTranslation(['rollouts', 'common']);
     const navigate = useNavigate();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
@@ -141,12 +141,18 @@ const RolloutsOverview: React.FC = () => {
     // Active rollouts (running or paused)
     const activeRollouts = rollouts.filter(r => r.status === 'running' || r.status === 'paused');
 
+    const getStatusLabel = (status?: string) => {
+        if (!status) return t('common:status.unknown', { defaultValue: 'UNKNOWN' });
+        const key = status.toLowerCase();
+        return t(`common:status.${key}`, { defaultValue: status.replace(/_/g, ' ').toUpperCase() });
+    };
+
     const pieData = [
-        { name: 'Running', value: runningCount, color: COLORS.running },
-        { name: 'Finished', value: finishedCount, color: COLORS.finished },
-        { name: 'Paused', value: pausedCount, color: COLORS.paused },
-        { name: 'Error', value: errorCount, color: COLORS.error },
-        { name: 'Scheduled', value: scheduledCount, color: COLORS.scheduled },
+        { name: t('overview.running', 'Running'), value: runningCount, color: COLORS.running },
+        { name: t('overview.finished', 'Finished'), value: finishedCount, color: COLORS.finished },
+        { name: t('common:status.paused', 'Paused'), value: pausedCount, color: COLORS.paused },
+        { name: t('overview.errorStopped', 'Error'), value: errorCount, color: COLORS.error },
+        { name: t('common:status.scheduled', 'Scheduled'), value: scheduledCount, color: COLORS.scheduled },
     ].filter(d => d.value > 0);
 
     return (
@@ -344,11 +350,11 @@ const RolloutsOverview: React.FC = () => {
                                                 <Flex align="center" gap={8}>
                                                     <Text strong>{rollout.name}</Text>
                                                     <Tag color={statusColorMap[rollout.status || ''] || 'default'}>
-                                                        {rollout.status?.toUpperCase()}
+                                                        {getStatusLabel(rollout.status)}
                                                     </Tag>
                                                 </Flex>
                                                 <Text type="secondary" style={{ fontSize: 12 }}>
-                                                    {rollout.targetFilterQuery || 'All targets'}
+                                                    {rollout.targetFilterQuery || t('overview.allTargets', 'All targets')}
                                                 </Text>
                                             </div>
                                             <Progress

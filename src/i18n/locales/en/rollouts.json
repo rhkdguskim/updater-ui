@@ -1,5 +1,21 @@
 {
     "pageTitle": "Rollouts",
+    "overview": {
+        "title": "Rollout Management",
+        "subtitle": "Deployment rollout overview and monitoring",
+        "totalRollouts": "Total Rollouts",
+        "running": "Running",
+        "finished": "Finished",
+        "errorStopped": "Error/Stopped",
+        "createRollout": "Create Rollout",
+        "viewAll": "View All",
+        "statusDistribution": "Status Distribution",
+        "activeRollouts": "Active Rollouts",
+        "noRollouts": "No rollouts yet",
+        "noActiveRollouts": "No active rollouts",
+        "createFirst": "Create First Rollout",
+        "allTargets": "All targets"
+    },
     "refresh": "Refresh",
     "createRollout": "Create Rollout",
     "columns": {
@@ -129,6 +145,8 @@
             "preview": "Preview Targets",
             "targetCount": "Matching Targets: {{count}}",
             "required": "Please enter a target filter query (FIQL).",
+            "allTargets": "Deploy to all targets (no filter)",
+            "allTargetsHint": "Rollout will be deployed to all registered targets.",
             "previewColumns": {
                 "controllerId": "Controller ID",
                 "name": "Name",

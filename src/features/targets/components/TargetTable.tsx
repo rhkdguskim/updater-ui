@@ -238,15 +238,10 @@ const TargetTable: React.FC<TargetTableProps> = ({
     ];
 
     const handleTableChange: TableProps<MgmtTarget>['onChange'] = (
-        paginationConfig,
+        _,
         filters,
         sorter
     ) => {
-        // Handle pagination
-        if (paginationConfig.current && paginationConfig.pageSize) {
-            onPaginationChange(paginationConfig.current, paginationConfig.pageSize);
-        }
-
         // Handle sorting
         const sortResult = Array.isArray(sorter) ? sorter[0] : sorter;
         if (sortResult?.field && sortResult.order) {
@@ -280,6 +275,8 @@ const TargetTable: React.FC<TargetTableProps> = ({
                 showSizeChanger: true,
                 pageSizeOptions: ['10', '20', '50'],
                 showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} targets`,
+                onChange: (page, pageSize) => onPaginationChange(page, pageSize),
+                onShowSizeChange: (_current, size) => onPaginationChange(1, size),
             }}
             onChange={handleTableChange}
             scroll={{ x: 1000 }}

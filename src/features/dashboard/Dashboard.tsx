@@ -156,8 +156,31 @@ const getActionStatusColor = (status?: string) => {
     return 'default';
 };
 
+import { Spin } from 'antd';
+import { useGetAction1 } from '@/api/generated/actions/actions';
+
+// Helper component to fetch distribution set info
+const DistributionCell = ({ actionId }: { actionId?: number }) => {
+    const navigate = useNavigate();
+    const { data, isLoading } = useGetAction1(actionId!, { query: { enabled: !!actionId } });
+
+    if (!actionId) return <Typography.Text>-</Typography.Text>;
+    if (isLoading) return <Spin size="small" />;
+
+    const href = data?._links?.distributionSet?.href || data?._links?.softwareModule?.href;
+    const dsId = href?.split('/').pop();
+
+    if (!dsId) return <Typography.Text>-</Typography.Text>;
+
+    return (
+        <a onClick={() => navigate(`/distributions/${dsId}`)} style={{ cursor: 'pointer' }}>
+            {dsId}
+        </a>
+    );
+};
+
 const Dashboard: React.FC = () => {
-    const { t } = useTranslation('dashboard');
+    const { t } = useTranslation(['dashboard', 'common']);
     const navigate = useNavigate();
 
     const { data: targetsData, isLoading: targetsLoading, refetch: refetchTargets } = useGetTargets({ limit: 500 });
@@ -213,6 +236,12 @@ const Dashboard: React.FC = () => {
         .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
         .slice(0, 8);
 
+    const getStatusLabel = (status?: string) => {
+        if (!status) return t('common:status.unknown', { defaultValue: 'UNKNOWN' });
+        const key = status.toLowerCase();
+        return t(`common:status.${key}`, { defaultValue: status.replace(/_/g, ' ').toUpperCase() });
+    };
+
     const columns = [
         {
             title: 'ID',
@@ -225,9 +254,28 @@ const Dashboard: React.FC = () => {
             title: t('recentActions.target', 'Target'),
             key: 'target',
             render: (_: unknown, record: MgmtAction) => {
-                const targetId = record._links?.target?.href?.split('/').pop();
-                return targetId || '-';
+                // Try to get from direct link first, then parse from self link
+                // Format: .../targets/{controllerId}/actions/{actionId}
+                let targetId = record._links?.target?.href?.split('/').pop();
+                if (!targetId && record._links?.self?.href) {
+                    const match = record._links.self.href.match(/targets\/([^/]+)\/actions/);
+                    if (match) targetId = match[1];
+                }
+
+                if (!targetId) return '-';
+                return (
+                    <a onClick={() => navigate(`/targets/${targetId}`)} style={{ cursor: 'pointer' }}>
+                        {targetId}
+                    </a>
+                );
             },
+        },
+        {
+            title: t('recentActions.distribution', 'Distribution'),
+            key: 'distribution',
+            render: (_: unknown, record: MgmtAction) => (
+                <DistributionCell actionId={record.id} />
+            ),
         },
         {
             title: t('recentActions.status', 'Status'),
@@ -235,7 +283,7 @@ const Dashboard: React.FC = () => {
             width: 120,
             render: (_: unknown, record: MgmtAction) => (
                 <Tag color={getActionStatusColor(record.status)}>
-                    {record.status?.toUpperCase() || 'UNKNOWN'}
+                    {getStatusLabel(record.status)}
                 </Tag>
             ),
         },

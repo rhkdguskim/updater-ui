@@ -46,6 +46,7 @@ interface WizardFormData {
 }
 
 interface TargetFilterBuilderState {
+    allTargets: boolean;
     tags: number[];
     tagMode: 'any' | 'all';
     targetTypes: string[];
@@ -65,6 +66,11 @@ const buildClauseWithMode = (field: string, values: Array<string | number>, mode
 };
 
 const buildFiqlFromBuilder = (state: TargetFilterBuilderState) => {
+    // All targets - use wildcard
+    if (state.allTargets) {
+        return 'controllerId==*';
+    }
+
     const clauses: string[] = [];
     const tagClause = buildClauseWithMode('tags.id', state.tags, state.tagMode);
     if (tagClause) clauses.push(tagClause);
@@ -105,6 +111,7 @@ const RolloutWizard: React.FC = () => {
     });
     const [filterMode, setFilterMode] = useState<'builder' | 'advanced'>('builder');
     const [builderState, setBuilderState] = useState<TargetFilterBuilderState>({
+        allTargets: false,
         tags: [],
         tagMode: 'any',
         targetTypes: [],
@@ -215,9 +222,14 @@ const RolloutWizard: React.FC = () => {
             }
             setCurrentStep(currentStep + 1);
         } else if (currentStep === 2) {
-            if (!formData.targetFilterQuery?.trim()) {
+            // If neither allTargets is checked nor manual filter provided
+            if (!builderState.allTargets && !formData.targetFilterQuery?.trim()) {
                 message.warning(t('wizard.targetFilter.required'));
                 return;
+            }
+            // If allTargets is checked but no query was generated, set wildcard
+            if (builderState.allTargets && !formData.targetFilterQuery?.trim()) {
+                setFormData((prev) => ({ ...prev, targetFilterQuery: 'controllerId==*' }));
             }
             setCurrentStep(currentStep + 1);
         } else if (currentStep === 3) {
@@ -236,18 +248,22 @@ const RolloutWizard: React.FC = () => {
     };
 
     const handleCreate = () => {
-        if (!formData.targetFilterQuery?.trim()) {
+        if (!builderState.allTargets && !formData.targetFilterQuery?.trim()) {
             message.warning(t('wizard.targetFilter.required'));
             setCurrentStep(2);
             return;
         }
+
+        const finalQuery = builderState.allTargets && !formData.targetFilterQuery?.trim()
+            ? 'controllerId==*'
+            : formData.targetFilterQuery?.trim();
 
         createMutation.mutate({
             data: {
                 name: formData.name,
                 description: formData.description || undefined,
                 distributionSetId: formData.distributionSetId,
-                targetFilterQuery: formData.targetFilterQuery.trim(),
+                targetFilterQuery: finalQuery,
                 amountGroups: formData.amountGroups,
                 successCondition: {
                     condition: 'THRESHOLD',
@@ -363,97 +379,113 @@ const RolloutWizard: React.FC = () => {
                 </Space>
                 {filterMode === 'builder' ? (
                     <Form layout="vertical">
-                        <Form.Item label={t('wizard.targetFilter.tags')}>
-                            <Select
-                                mode="multiple"
-                                allowClear
-                                loading={targetTagsLoading}
-                                placeholder={t('wizard.targetFilter.tagsPlaceholder')}
-                                value={builderState.tags}
-                                onChange={(values: number[]) => setBuilderState((prev) => ({ ...prev, tags: values }))}
-                                options={(targetTagsData?.content || []).map((tag) => ({
-                                    label: tag.name,
-                                    value: tag.id,
+                        <Form.Item>
+                            <Checkbox
+                                checked={builderState.allTargets}
+                                onChange={(e) => setBuilderState((prev) => ({
+                                    ...prev,
+                                    allTargets: e.target.checked,
+                                    // Clear other filters when all targets selected
+                                    ...(e.target.checked ? { tags: [], targetTypes: [], statuses: [], controllerQuery: '', searchKeyword: '' } : {})
                                 }))}
-                            />
-                            {builderState.tags.length > 1 && (
-                                <Radio.Group
-                                    value={builderState.tagMode}
-                                    onChange={(e: RadioChangeEvent) =>
-                                        setBuilderState((prev) => ({ ...prev, tagMode: e.target.value as 'any' | 'all' }))
-                                    }
-                                    style={{ marginTop: 8 }}
-                                >
-                                    <Radio value="any">{t('wizard.targetFilter.anyTag')}</Radio>
-                                    <Radio value="all">{t('wizard.targetFilter.allTag')}</Radio>
-                                </Radio.Group>
-                            )}
+                            >
+                                <strong>{t('wizard.targetFilter.allTargets', '모든 대상에 배포 (필터 없음)')}</strong>
+                            </Checkbox>
                         </Form.Item>
-                        <Form.Item label={t('wizard.targetFilter.targetTypes')}>
-                            <Select
-                                mode="multiple"
-                                allowClear
-                                loading={targetTypesLoading}
-                                placeholder={t('wizard.targetFilter.targetTypePlaceholder')}
-                                value={builderState.targetTypes}
-                                onChange={(values: string[]) =>
-                                    setBuilderState((prev) => ({ ...prev, targetTypes: values }))
-                                }
-                                options={(targetTypesData?.content || []).map((type) => ({
-                                    label: type.name,
-                                    value: type.key,
-                                }))}
-                            />
-                            {builderState.targetTypes.length > 1 && (
-                                <Radio.Group
-                                    value={builderState.targetTypeMode}
-                                    onChange={(e: RadioChangeEvent) =>
-                                        setBuilderState((prev) => ({
-                                            ...prev,
-                                            targetTypeMode: e.target.value as 'any' | 'all',
-                                        }))
-                                    }
-                                    style={{ marginTop: 8 }}
-                                >
-                                    <Radio value="any">{t('wizard.targetFilter.anyType')}</Radio>
-                                    <Radio value="all">{t('wizard.targetFilter.allType')}</Radio>
-                                </Radio.Group>
-                            )}
-                        </Form.Item>
-                        <Form.Item label={t('wizard.targetFilter.status')}>
-                            <Checkbox.Group
-                                options={[
-                                    { label: t('wizard.targetFilter.statusOnline'), value: 'online' },
-                                    { label: t('wizard.targetFilter.statusOffline'), value: 'offline' },
-                                ]}
-                                value={builderState.statuses}
-                                onChange={(values) =>
-                                    setBuilderState((prev) => ({
-                                        ...prev,
-                                        statuses: values as Array<'online' | 'offline'>,
-                                    }))
-                                }
-                            />
-                        </Form.Item>
-                        <Form.Item label={t('wizard.targetFilter.controllerId')}>
-                            <Input
-                                placeholder={t('wizard.targetFilter.controllerPlaceholder')}
-                                value={builderState.controllerQuery}
-                                onChange={(e) =>
-                                    setBuilderState((prev) => ({ ...prev, controllerQuery: e.target.value }))
-                                }
-                            />
-                        </Form.Item>
-                        <Form.Item label={t('wizard.targetFilter.nameKeyword')}>
-                            <Input
-                                placeholder={t('wizard.targetFilter.namePlaceholder')}
-                                value={builderState.searchKeyword}
-                                onChange={(e) =>
-                                    setBuilderState((prev) => ({ ...prev, searchKeyword: e.target.value }))
-                                }
-                            />
-                        </Form.Item>
-                        <Alert type="info" message={t('wizard.targetFilter.builderHint')} />
+                        {!builderState.allTargets && (
+                            <>
+                                <Form.Item label={t('wizard.targetFilter.tags')}>
+                                    <Select
+                                        mode="multiple"
+                                        allowClear
+                                        loading={targetTagsLoading}
+                                        placeholder={t('wizard.targetFilter.tagsPlaceholder')}
+                                        value={builderState.tags}
+                                        onChange={(values: number[]) => setBuilderState((prev) => ({ ...prev, tags: values }))}
+                                        options={(targetTagsData?.content || []).map((tag) => ({
+                                            label: tag.name,
+                                            value: tag.id,
+                                        }))}
+                                    />
+                                    {builderState.tags.length > 1 && (
+                                        <Radio.Group
+                                            value={builderState.tagMode}
+                                            onChange={(e: RadioChangeEvent) =>
+                                                setBuilderState((prev) => ({ ...prev, tagMode: e.target.value as 'any' | 'all' }))
+                                            }
+                                            style={{ marginTop: 8 }}
+                                        >
+                                            <Radio value="any">{t('wizard.targetFilter.anyTag')}</Radio>
+                                            <Radio value="all">{t('wizard.targetFilter.allTag')}</Radio>
+                                        </Radio.Group>
+                                    )}
+                                </Form.Item>
+                                <Form.Item label={t('wizard.targetFilter.targetTypes')}>
+                                    <Select
+                                        mode="multiple"
+                                        allowClear
+                                        loading={targetTypesLoading}
+                                        placeholder={t('wizard.targetFilter.targetTypePlaceholder')}
+                                        value={builderState.targetTypes}
+                                        onChange={(values: string[]) =>
+                                            setBuilderState((prev) => ({ ...prev, targetTypes: values }))
+                                        }
+                                        options={(targetTypesData?.content || []).map((type) => ({
+                                            label: type.name,
+                                            value: type.key,
+                                        }))}
+                                    />
+                                    {builderState.targetTypes.length > 1 && (
+                                        <Radio.Group
+                                            value={builderState.targetTypeMode}
+                                            onChange={(e: RadioChangeEvent) =>
+                                                setBuilderState((prev) => ({
+                                                    ...prev,
+                                                    targetTypeMode: e.target.value as 'any' | 'all',
+                                                }))
+                                            }
+                                            style={{ marginTop: 8 }}
+                                        >
+                                            <Radio value="any">{t('wizard.targetFilter.anyType')}</Radio>
+                                            <Radio value="all">{t('wizard.targetFilter.allType')}</Radio>
+                                        </Radio.Group>
+                                    )}
+                                </Form.Item>
+                                <Form.Item label={t('wizard.targetFilter.status')}>
+                                    <Checkbox.Group
+                                        options={[
+                                            { label: t('wizard.targetFilter.statusOnline'), value: 'online' },
+                                            { label: t('wizard.targetFilter.statusOffline'), value: 'offline' },
+                                        ]}
+                                        value={builderState.statuses}
+                                        onChange={(values) =>
+                                            setBuilderState((prev) => ({
+                                                ...prev,
+                                                statuses: values as Array<'online' | 'offline'>,
+                                            }))
+                                        }
+                                    />
+                                </Form.Item>
+                                <Form.Item label={t('wizard.targetFilter.controllerId')}>
+                                    <Input
+                                        placeholder={t('wizard.targetFilter.controllerPlaceholder')}
+                                        value={builderState.controllerQuery}
+                                        onChange={(e) =>
+                                            setBuilderState((prev) => ({ ...prev, controllerQuery: e.target.value }))
+                                        }
+                                    />
+                                </Form.Item>
+                                <Form.Item label={t('wizard.targetFilter.nameKeyword')}>
+                                    <Input
+                                        placeholder={t('wizard.targetFilter.namePlaceholder')}
+                                        value={builderState.searchKeyword}
+                                        onChange={(e) =>
+                                            setBuilderState((prev) => ({ ...prev, searchKeyword: e.target.value }))
+                                        }
+                                    />
+                                </Form.Item>
+                            </>)}
+                        <Alert type="info" message={builderState.allTargets ? t('wizard.targetFilter.allTargetsHint', '모든 등록된 대상에 배포됩니다.') : t('wizard.targetFilter.builderHint')} />
                     </Form>
                 ) : (
                     <Form layout="vertical">

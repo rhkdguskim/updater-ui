@@ -1,7 +1,8 @@
 import React from 'react';
-import { Card, Row, Col, Typography, Statistic, Button, Flex, Skeleton, Table, Tag, Progress } from 'antd';
+import { Card, Row, Col, Typography, Statistic, Button, Flex, Skeleton, Table, Tag, Progress, Spin } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import styled, { keyframes } from 'styled-components';
 import {
     ThunderboltOutlined,
@@ -13,7 +14,7 @@ import {
 } from '@ant-design/icons';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 
-import { useGetActions } from '@/api/generated/actions/actions';
+import { useGetActions, useGetAction1 } from '@/api/generated/actions/actions';
 import { useGetRollouts } from '@/api/generated/rollouts/rollouts';
 import type { MgmtAction, MgmtRolloutResponseBody } from '@/api/generated/model';
 import dayjs from 'dayjs';
@@ -22,6 +23,27 @@ import relativeTime from 'dayjs/plugin/relativeTime';
 dayjs.extend(relativeTime);
 
 const { Title, Text } = Typography;
+
+// Helper component to fetch distribution set info
+const DistributionCell = ({ actionId }: { actionId?: number }) => {
+    const navigate = useNavigate();
+    const { data, isLoading } = useGetAction1(actionId!, { query: { enabled: !!actionId } });
+
+    if (!actionId) return <Text>-</Text>;
+    if (isLoading) return <Spin size="small" />;
+
+    const href = data?._links?.distributionSet?.href || data?._links?.softwareModule?.href;
+    const dsId = href?.split('/').pop();
+
+    if (!dsId) return <Text>-</Text>;
+
+    return (
+        <a onClick={() => navigate(`/distributions/${dsId}`)} style={{ cursor: 'pointer' }}>
+            {dsId}
+        </a>
+    );
+};
+
 
 // Animations
 const fadeInUp = keyframes`
@@ -166,6 +188,13 @@ const getRolloutStatusColor = (status?: string) => {
     return 'default';
 };
 
+const getStatusLabel = (status: string | undefined, t: TFunction<'jobs'>) => {
+    if (!status) return t('status.unknown', { defaultValue: 'UNKNOWN' });
+    const key = status.toLowerCase();
+    const translated = t(`status.${key}`, { defaultValue: '' });
+    return translated || status.toUpperCase();
+};
+
 const JobManagement: React.FC = () => {
     const { t } = useTranslation('jobs');
     const navigate = useNavigate();
@@ -194,12 +223,17 @@ const JobManagement: React.FC = () => {
     const errorCount = recentActions.filter(a =>
         ['error', 'failed'].includes(a.status?.toLowerCase() || '')
     ).length;
+    const successRate = finishedCount + errorCount > 0
+        ? Math.round((finishedCount / (finishedCount + errorCount)) * 100)
+        : null;
 
     // Rollouts stats
     const rollouts = rolloutsData?.content || [];
     const activeRollouts = rollouts.filter(r =>
         ['running', 'waiting_for_approval', 'ready'].includes(r.status?.toLowerCase() || '')
     ).length;
+
+    const totalActions = recentActions.length;
 
     // Pie chart data for action status
     const actionStatusData = [
@@ -208,6 +242,20 @@ const JobManagement: React.FC = () => {
         { name: t('status.finished', 'Finished'), value: finishedCount, color: COLORS.finished },
         { name: t('status.error', 'Error'), value: errorCount, color: COLORS.error },
     ].filter(d => d.value > 0);
+    const actionCompletionPercent = totalActions > 0 ? Math.round((finishedCount / totalActions) * 100) : 0;
+
+    const totalRolloutTargets = rollouts.reduce((sum, rollout) => sum + (rollout.totalTargets || 0), 0);
+    const finishedRolloutTargets = rollouts.reduce(
+        (sum, rollout) => sum + (rollout.totalTargetsPerStatus?.finished || 0),
+        0
+    );
+    const rolloutProgressPercent = totalRolloutTargets > 0
+        ? Math.round((finishedRolloutTargets / totalRolloutTargets) * 100)
+        : 0;
+    const waitingApprovalCount = rollouts.filter(r => r.status?.toLowerCase() === 'waiting_for_approval').length;
+    const rolloutIssueCount = rollouts.filter(r =>
+        ['error', 'stopped'].includes(r.status?.toLowerCase() || '')
+    ).length;
 
     // Recent actions table
     const recentActionsTable = [...recentActions]
@@ -222,7 +270,7 @@ const JobManagement: React.FC = () => {
 
     const actionColumns = [
         {
-            title: 'ID',
+            title: t('table.id', 'ID'),
             dataIndex: 'id',
             key: 'id',
             width: 80,
@@ -232,9 +280,28 @@ const JobManagement: React.FC = () => {
             title: t('table.target', 'Target'),
             key: 'target',
             render: (_: unknown, record: MgmtAction) => {
-                const targetId = record._links?.target?.href?.split('/').pop();
-                return targetId || '-';
+                // Try to get from direct link first, then parse from self link
+                // Format: .../targets/{controllerId}/actions/{actionId}
+                let targetId = record._links?.target?.href?.split('/').pop();
+                if (!targetId && record._links?.self?.href) {
+                    const match = record._links.self.href.match(/targets\/([^/]+)\/actions/);
+                    if (match) targetId = match[1];
+                }
+
+                if (!targetId) return '-';
+                return (
+                    <a onClick={() => navigate(`/targets/${targetId}`)} style={{ cursor: 'pointer' }}>
+                        {targetId}
+                    </a>
+                );
             },
+        },
+        {
+            title: t('table.distribution', 'Distribution'),
+            key: 'distribution',
+            render: (_: unknown, record: MgmtAction) => (
+                <DistributionCell actionId={record.id} />
+            ),
         },
         {
             title: t('table.status', 'Status'),
@@ -242,7 +309,7 @@ const JobManagement: React.FC = () => {
             width: 120,
             render: (_: unknown, record: MgmtAction) => (
                 <Tag color={getActionStatusColor(record.status)}>
-                    {record.status?.toUpperCase() || 'UNKNOWN'}
+                    {getStatusLabel(record.status, t)}
                 </Tag>
             ),
         },
@@ -268,7 +335,7 @@ const JobManagement: React.FC = () => {
             width: 120,
             render: (_: unknown, record: MgmtRolloutResponseBody) => (
                 <Tag color={getRolloutStatusColor(record.status)}>
-                    {record.status?.toUpperCase() || 'UNKNOWN'}
+                    {getStatusLabel(record.status, t)}
                 </Tag>
             ),
         },
@@ -284,8 +351,6 @@ const JobManagement: React.FC = () => {
             },
         },
     ];
-
-    const totalActions = recentActions.length;
 
     return (
         <PageContainer>
@@ -405,7 +470,7 @@ const JobManagement: React.FC = () => {
 
             {/* Charts Row */}
             <Row gutter={[16, 16]} style={{ flex: 1, minHeight: 0 }}>
-                <Col xs={24} lg={8} style={{ display: 'flex' }}>
+                <Col xs={24} lg={8} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <ChartCard
                         style={{ flex: 1 }}
                         title={
@@ -465,11 +530,65 @@ const JobManagement: React.FC = () => {
                             </Flex>
                         )}
                     </ChartCard>
+                    <ChartCard title={t('chart.jobProgress.title', 'Job Progress')} $delay={6} style={{ flex: 1 }}>
+                        <Flex vertical gap={16}>
+                            <div>
+                                <Flex justify="space-between" align="center" style={{ marginBottom: 8 }}>
+                                    <Text strong>{t('chart.jobProgress.actionsTitle', 'Action Progress')}</Text>
+                                    {successRate !== null && (
+                                        <Tag color={successRate >= 90 ? 'green' : successRate >= 70 ? 'gold' : 'red'}>
+                                            {t('chart.jobProgress.successRate', { percent: successRate })}
+                                        </Tag>
+                                    )}
+                                </Flex>
+                                <Progress
+                                    percent={actionCompletionPercent}
+                                    size="small"
+                                    status={successRate !== null && successRate < 60 ? 'exception' : undefined}
+                                />
+                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                    {t('chart.jobProgress.actionsSummary', {
+                                        finished: finishedCount,
+                                        total: totalActions,
+                                        running: runningCount,
+                                        pending: pendingCount,
+                                    })}
+                                </Text>
+                            </div>
+                            <div>
+                                <Flex justify="space-between" align="center" style={{ marginBottom: 8 }}>
+                                    <Text strong>{t('chart.jobProgress.rolloutsTitle', 'Rollout Progress')}</Text>
+                                    <Tag color="blue">
+                                        {t('chart.jobProgress.rolloutsPercent', { percent: rolloutProgressPercent })}
+                                    </Tag>
+                                </Flex>
+                                <Progress percent={rolloutProgressPercent} size="small" />
+                                <Flex align="center" gap={8} wrap>
+                                    <Text type="secondary" style={{ fontSize: 12 }}>
+                                        {t('chart.jobProgress.rolloutsSummary', {
+                                            finished: finishedRolloutTargets,
+                                            total: totalRolloutTargets,
+                                        })}
+                                    </Text>
+                                    {waitingApprovalCount > 0 && (
+                                        <Tag color="gold">
+                                            {t('chart.jobProgress.waitingApproval', { count: waitingApprovalCount })}
+                                        </Tag>
+                                    )}
+                                    {rolloutIssueCount > 0 && (
+                                        <Tag color="red">
+                                            {t('chart.jobProgress.errors', { count: rolloutIssueCount })}
+                                        </Tag>
+                                    )}
+                                </Flex>
+                            </div>
+                        </Flex>
+                    </ChartCard>
                 </Col>
                 <Col xs={24} lg={16} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     <ChartCard
                         title={t('chart.recentActions', 'Recent Actions')}
-                        $delay={6}
+                        $delay={7}
                         style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
                         bodyStyle={{ flex: 1, overflow: 'auto', padding: '8px 12px' }}
                     >
@@ -490,7 +609,7 @@ const JobManagement: React.FC = () => {
                     {activeRolloutsTable.length > 0 && (
                         <ChartCard
                             title={t('chart.activeRollouts', 'Active Rollouts')}
-                            $delay={7}
+                            $delay={8}
                             style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
                             bodyStyle={{ flex: 1, overflow: 'auto', padding: '8px 12px' }}
                         >

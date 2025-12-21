@@ -55,7 +55,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({
     canForce,
     canCancel,
 }) => {
-    const { t } = useTranslation('targets');
+    const { t } = useTranslation(['targets', 'actions', 'common']);
     if (loading) {
         return <Skeleton active paragraph={{ rows: 8 }} />;
     }
@@ -74,9 +74,12 @@ const ActionsTab: React.FC<ActionsTabProps> = ({
             waiting: 'warning',
             canceled: 'default',
         };
+        const label = status
+            ? t(`common:status.${status.toLowerCase()}`, { defaultValue: status.toUpperCase() })
+            : t('common:status.unknown');
         return (
             <Tag icon={icon} color={colorMap[status || ''] || 'default'}>
-                {status ? t(`status.${status}`, { defaultValue: status.toUpperCase() }) : t('status.unknown')}
+                {label}
             </Tag>
         );
     };
@@ -86,6 +89,12 @@ const ActionsTab: React.FC<ActionsTabProps> = ({
             return <Tag color="orange">{t('assign.forced')}</Tag>;
         }
         return <Tag>{t('assign.soft')}</Tag>;
+    };
+
+    const getTypeLabel = (type?: string) => {
+        if (!type) return '-';
+        const key = type.toLowerCase();
+        return t(`actions:typeLabels.${key}`, { defaultValue: type.toUpperCase() });
     };
 
     const columns: TableProps<MgmtAction>['columns'] = [
@@ -108,7 +117,7 @@ const ActionsTab: React.FC<ActionsTabProps> = ({
             dataIndex: 'type',
             key: 'type',
             width: 100,
-            render: (type: string) => <Tag>{type?.toUpperCase()}</Tag>,
+            render: (type: string) => <Tag>{getTypeLabel(type)}</Tag>,
         },
         {
             title: t('table.forceType'),
