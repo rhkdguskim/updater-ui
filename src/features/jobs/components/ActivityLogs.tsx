@@ -11,7 +11,7 @@ interface ActivityLog {
     timestamp: number;
     type: 'action' | 'rollout';
     entityId: number;
-    event: string;
+    eventKey: 'completed' | 'failed' | 'progress' | 'statusChanged';
     user: string;
     status: string;
 }
@@ -25,6 +25,24 @@ const ActivityLogs: React.FC = () => {
         query: { refetchInterval: 30000 }
     });
 
+    const statusColors: Record<string, string> = {
+        finished: 'green',
+        running: 'blue',
+        error: 'red',
+        pending: 'orange',
+        scheduled: 'cyan',
+        waiting_for_approval: 'orange',
+        waiting_for_confirmation: 'orange',
+        paused: 'volcano',
+    };
+
+    const getStatusLabel = (status?: string) => {
+        if (!status) return t('status.unknown', { defaultValue: 'UNKNOWN' });
+        const key = status.toLowerCase();
+        const translated = t(`status.${key}`, { defaultValue: '' });
+        return translated || status.toUpperCase();
+    };
+
     const logs: ActivityLog[] = useMemo(() => {
         if (!actionsData?.content) return [];
 
@@ -35,9 +53,14 @@ const ActivityLogs: React.FC = () => {
                 timestamp: action.lastModifiedAt || action.createdAt || 0,
                 type: 'action' as const,
                 entityId: action.id!,
-                event: action.status === 'finished' ? 'Completed' :
-                    action.status === 'error' ? 'Failed' :
-                        action.status === 'running' ? 'Progress Update' : 'Status Changed',
+                eventKey:
+                    action.status === 'finished'
+                        ? 'completed'
+                        : action.status === 'error'
+                            ? 'failed'
+                            : action.status === 'running'
+                                ? 'progress'
+                                : 'statusChanged',
                 user: action.lastModifiedBy || action.createdBy || 'system',
                 status: action.status || 'unknown'
             }));
@@ -56,7 +79,9 @@ const ActivityLogs: React.FC = () => {
             dataIndex: 'type',
             key: 'type',
             render: (type: string) => (
-                <Tag color={type === 'action' ? 'blue' : 'purple'}>{type.toUpperCase()}</Tag>
+                <Tag color={type === 'action' ? 'blue' : 'purple'}>
+                    {t(`logs.typeLabels.${type}`, { defaultValue: type.toUpperCase() })}
+                </Tag>
             ),
             width: 100,
         },
@@ -68,8 +93,9 @@ const ActivityLogs: React.FC = () => {
         },
         {
             title: t('logs.event', 'Event'),
-            dataIndex: 'event',
-            key: 'event',
+            dataIndex: 'eventKey',
+            key: 'eventKey',
+            render: (eventKey: ActivityLog['eventKey']) => t(`logs.events.${eventKey}`),
         },
         {
             title: t('logs.user', 'User'),
@@ -81,16 +107,11 @@ const ActivityLogs: React.FC = () => {
             title: t('logs.status', 'Status'),
             dataIndex: 'status',
             key: 'status',
-            render: (status: string) => {
-                const colors: Record<string, string> = {
-                    finished: 'green',
-                    running: 'blue',
-                    error: 'red',
-                    pending: 'orange',
-                    scheduled: 'cyan'
-                };
-                return <Tag color={colors[status.toLowerCase()] || 'default'}>{status.toUpperCase()}</Tag>;
-            },
+            render: (status: string) => (
+                <Tag color={statusColors[status.toLowerCase()] || 'default'}>
+                    {getStatusLabel(status)}
+                </Tag>
+            ),
         }
     ];
 

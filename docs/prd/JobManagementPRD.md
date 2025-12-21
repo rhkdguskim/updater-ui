@@ -68,7 +68,7 @@ Action과 Rollout을 단일 Job 영역에서 운영·추적할 수 있는 통합
 
 ### 3.5 Activity Log & Notifications
 - Job 전반에 대한 이벤트 로그(생성, 상태 변경, 승인, 실패).
-- @mention 또는 Tag 기반 구독 알림 (토스트 + 이메일/웹훅 옵션).
+- @mention 또는 Tag 기반 구독 알림 **UI 힌트**만 제공하며, 실제 이메일/웹훅 전송은 범위에서 제외. (토스트, 배지, 인앱 알림까지만 지원)
 - Log 필터: 엔터티 종류(Action/Rollout), 상태, 시간.
 
 ## 4. UI/UX 요구사항
@@ -86,6 +86,7 @@ Action과 Rollout을 단일 Job 영역에서 운영·추적할 수 있는 통합
 
 ## 5. 데이터 패칭 전략
 - Job Tree 데이터: `GET /rest/v1/actions`, `GET /rest/v1/rollouts`를 병렬 요청 후 클라이언트에서 트리 구조 생성.
+- Saved Segment(가상 Job) 정의는 로컬 스토리지/클라이언트 상태로만 관리하고, 서버와의 동기화 계획은 없다.
 - Polling:
   - Actions: 10초(상태 반영).
   - Rollouts: 15~30초.

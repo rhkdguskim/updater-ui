@@ -365,7 +365,7 @@ const CreateSegmentModal: React.FC<CreateSegmentModalProps> = ({ open, onClose, 
                         mode="multiple"
                         allowClear
                         options={STATUS_OPTIONS.map((status) => ({
-                            label: status.toUpperCase(),
+                            label: getStatusLabel(status, t),
                             value: status,
                         }))}
                         placeholder={t('segments.modal.statusPlaceholder')}
@@ -1212,7 +1212,7 @@ const JobManagement: React.FC = () => {
                         >
                             {STATUS_OPTIONS.map((status) => (
                                 <Select.Option key={status} value={status}>
-                                    {status.toUpperCase()}
+                                    {getStatusLabel(status, t)}
                                 </Select.Option>
                             ))}
                         </Select>

@@ -53,7 +53,7 @@
   - Target/Action KPI: 10초.
   - Rollout/Distribution 지표: 30초 (또는 사용자가 새로고침 버튼으로 즉시 갱신).
   - 지연 Action 리스트: 15초.
-* **Batch Fetch**: Target Type/Tag 커버리지는 `GET /targets`에 `groupBy` 옵션이 없으므로, React Query에서 Promise.all로 Target Type·Tag 목록을 받아오고, FIQL 쿼리(예: `targetType.id=={id}`)로 count만 요청(`limit=1`). 결과는 메모이제이션하여 과도한 호출을 방지한다.
+* **Batch Fetch**: Target Type/Tag 커버리지는 `GET /targets`에 `groupBy` 옵션이 없으므로, React Query에서 Promise.all로 Target Type·Tag 목록을 받아오고, FIQL 쿼리(예: `targettype.key=={key}`)로 count만 요청(`limit=1`). 결과는 메모이제이션하여 과도한 호출을 방지한다.
 * **Derived Metrics**: Action Funnel, Forced 비율, 지연 시간 등은 클라이언트에서 계산하되, 계산에 필요한 raw 데이터(예: status timestamps)는 100건 단위로만 요청하여 성능을 유지한다.
 * **Error Handling**: 지표별 독립 에러 카드. 중요 카드(Offline 비율, Rollout Waiting)는 실패 시 재시도 버튼과 상세 로그 버튼 제공.
 
@@ -75,8 +75,8 @@
 | **Offline** | `GET /rest/v1/targets` | `q=pollStatus.overdue==true` & take `total` |
 | **Action Success / Funnel** | `GET /rest/v1/actions` | `q=createdAt>=now-24h` + `status` 분류 |
 | **Action Status Timeline** | `GET /rest/v1/actions/{actionId}/status` | SLA 계산용 timestamps |
-| **Target Type Coverage** | `GET /rest/v1/targettypes` + `GET /rest/v1/targets?q=targetType.id=={id}` | 각 Type 별 count |
-| **Target Tag Coverage** | `GET /rest/v1/targettags` + `GET /rest/v1/targets?q=tag.id=={id}` | Tag 별 count |
+| **Target Type Coverage** | `GET /rest/v1/targettypes` + `GET /rest/v1/targets?q=targettype.key=={key}` | 각 Type 별 count |
+| **Target Tag Coverage** | `GET /rest/v1/targettags` + `GET /rest/v1/targets?q=tags.id=={id}` | Tag 별 count |
 | **Distribution Set Readiness** | `GET /rest/v1/distributionsets`, `GET /rest/v1/distributionsettypes`, `GET /rest/v1/distributionsettags` | Type/Tag 조합, mandatory module 여부 |
 | **Rollout Status & Groups** | `GET /rest/v1/rollouts`, `GET /rest/v1/rollouts/{id}/deploygroups` | 상태별 count, group progress |
 

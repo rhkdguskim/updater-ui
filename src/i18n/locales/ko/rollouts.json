@@ -105,11 +105,35 @@
         },
         "targetFilter": {
             "title": "대상 필터",
+            "builderMode": "간편 필터 빌더",
+            "advancedMode": "고급 FIQL",
+            "tags": "타겟 태그",
+            "tagsPlaceholder": "태그를 선택하세요",
+            "anyTag": "선택한 태그 중 하나라도 포함",
+            "allTag": "선택한 태그 모두 포함",
+            "targetTypes": "타겟 타입",
+            "targetTypePlaceholder": "타겟 타입을 선택하세요",
+            "anyType": "선택한 타입 중 하나라도 일치",
+            "allType": "선택한 타입 모두 일치",
+            "status": "디바이스 상태",
+            "statusOnline": "온라인",
+            "statusOffline": "오프라인",
+            "controllerId": "컨트롤러 ID 포함",
+            "controllerPlaceholder": "예: device-",
+            "nameKeyword": "디바이스 이름 포함",
+            "namePlaceholder": "키워드를 입력하세요",
+            "builderHint": "태그, 타입, 상태를 조합하여 배포 대상을 정의하세요.",
+            "advancedHint": "FIQL 문법으로 직접 입력합니다. 예: tags.id==1;targettype.key==gateway",
             "filterQuery": "대상 필터 쿼리 (FIQL)",
             "filterPlaceholder": "예: name==device*",
             "preview": "대상 미리보기",
             "targetCount": "일치하는 대상: {{count}}개",
-            "required": "대상 필터(FIQL)를 입력해주세요."
+            "required": "대상 필터(FIQL)를 입력해주세요.",
+            "previewColumns": {
+                "controllerId": "컨트롤러 ID",
+                "name": "이름",
+                "type": "타입"
+            }
         },
         "groupSettings": {
             "title": "그룹 설정",

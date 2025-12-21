@@ -16,16 +16,21 @@ import {
     Spin,
     Alert,
     Checkbox,
+    Select,
+    Radio,
 } from 'antd';
-import { ArrowLeftOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, SearchOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { useCreate, useStart } from '@/api/generated/rollouts/rollouts';
 import { useGetDistributionSets } from '@/api/generated/distribution-sets/distribution-sets';
 import { useGetTargets } from '@/api/generated/targets/targets';
+import { useGetTargetTags } from '@/api/generated/target-tags/target-tags';
+import { useGetTargetTypes } from '@/api/generated/target-types/target-types';
 import type { MgmtDistributionSet } from '@/api/generated/model';
 import { useQueryClient } from '@tanstack/react-query';
+import type { RadioChangeEvent } from 'antd/es/radio';
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 const { TextArea } = Input;
 
 interface WizardFormData {
@@ -39,6 +44,48 @@ interface WizardFormData {
     errorThreshold: number;
     startImmediately: boolean;
 }
+
+interface TargetFilterBuilderState {
+    tags: number[];
+    tagMode: 'any' | 'all';
+    targetTypes: string[];
+    targetTypeMode: 'any' | 'all';
+    statuses: Array<'online' | 'offline'>;
+    controllerQuery: string;
+    searchKeyword: string;
+}
+
+const buildClauseWithMode = (field: string, values: Array<string | number>, mode: 'any' | 'all') => {
+    if (!values.length) return '';
+    const operator = mode === 'any' ? ',' : ';';
+    if (values.length === 1) {
+        return `${field}==${values[0]}`;
+    }
+    return `(${values.map((value) => `${field}==${value}`).join(operator)})`;
+};
+
+const buildFiqlFromBuilder = (state: TargetFilterBuilderState) => {
+    const clauses: string[] = [];
+    const tagClause = buildClauseWithMode('tags.id', state.tags, state.tagMode);
+    if (tagClause) clauses.push(tagClause);
+    const typeClause = buildClauseWithMode('targettype.key', state.targetTypes, state.targetTypeMode);
+    if (typeClause) clauses.push(typeClause);
+
+    if (state.statuses.length && state.statuses.length < 2) {
+        const status = state.statuses[0];
+        clauses.push(status === 'online' ? 'pollStatus.overdue==false' : 'pollStatus.overdue==true');
+    } else if (state.statuses.length === 2) {
+        // both selected => no filter needed
+    }
+
+    if (state.controllerQuery.trim()) {
+        clauses.push(`controllerId==*${state.controllerQuery.trim()}*`);
+    }
+    if (state.searchKeyword.trim()) {
+        clauses.push(`name==*${state.searchKeyword.trim()}*`);
+    }
+    return clauses.join(';');
+};
 
 const RolloutWizard: React.FC = () => {
     const { t } = useTranslation('rollouts');
@@ -56,6 +103,22 @@ const RolloutWizard: React.FC = () => {
         errorThreshold: 20,
         startImmediately: false,
     });
+    const [filterMode, setFilterMode] = useState<'builder' | 'advanced'>('builder');
+    const [builderState, setBuilderState] = useState<TargetFilterBuilderState>({
+        tags: [],
+        tagMode: 'any',
+        targetTypes: [],
+        targetTypeMode: 'any',
+        statuses: [],
+        controllerQuery: '',
+        searchKeyword: '',
+    });
+    React.useEffect(() => {
+        if (filterMode === 'builder') {
+            const fiql = buildFiqlFromBuilder(builderState);
+            setFormData((prev) => ({ ...prev, targetFilterQuery: fiql }));
+        }
+    }, [builderState, filterMode]);
 
     // Form instances for each step
     const [basicInfoForm] = Form.useForm();
@@ -66,10 +129,14 @@ const RolloutWizard: React.FC = () => {
         limit: 100,
     });
 
+    // Fetch target metadata for builder
+    const { data: targetTagsData, isLoading: targetTagsLoading } = useGetTargetTags({ limit: 200 });
+    const { data: targetTypesData, isLoading: targetTypesLoading } = useGetTargetTypes({ limit: 200 });
+
     // Fetch target count for preview
     const { data: targetPreviewData, isLoading: targetPreviewLoading, refetch: refetchTargets } = useGetTargets(
         {
-            limit: 1,
+            limit: 5,
             q: formData.targetFilterQuery || undefined,
         },
         { query: { enabled: false } }
@@ -268,31 +335,158 @@ const RolloutWizard: React.FC = () => {
     );
 
     // Step 3: Target Filter
-    const renderTargetFilterStep = () => (
-        <Card title={t('wizard.targetFilter.title')}>
-            <Form layout="vertical">
-                <Form.Item label={t('wizard.targetFilter.filterQuery')}>
-                    <Input
-                        value={formData.targetFilterQuery}
-                        onChange={(e) =>
-                            setFormData((prev) => ({ ...prev, targetFilterQuery: e.target.value }))
-                        }
-                        placeholder={t('wizard.targetFilter.filterPlaceholder')}
-                    />
-                </Form.Item>
-                <Space>
-                    <Button onClick={handlePreviewTargets} loading={targetPreviewLoading}>
+    const renderTargetFilterStep = () => {
+        const previewTargets = targetPreviewData?.content || [];
+        return (
+            <Card title={t('wizard.targetFilter.title')}>
+                <Space style={{ marginBottom: 16 }} wrap>
+                    <Button
+                        type={filterMode === 'builder' ? 'primary' : 'default'}
+                        onClick={() => setFilterMode('builder')}
+                    >
+                        {t('wizard.targetFilter.builderMode')}
+                    </Button>
+                    <Button
+                        type={filterMode === 'advanced' ? 'primary' : 'default'}
+                        onClick={() => setFilterMode('advanced')}
+                    >
+                        {t('wizard.targetFilter.advancedMode')}
+                    </Button>
+                    <Button onClick={handlePreviewTargets} loading={targetPreviewLoading} icon={<SearchOutlined />}>
                         {t('wizard.targetFilter.preview')}
                     </Button>
                     {targetPreviewData && (
-                        <Text>
+                        <Tag color="blue">
                             {t('wizard.targetFilter.targetCount', { count: targetPreviewData.total || 0 })}
-                        </Text>
+                        </Tag>
                     )}
                 </Space>
-            </Form>
-        </Card>
-    );
+                {filterMode === 'builder' ? (
+                    <Form layout="vertical">
+                        <Form.Item label={t('wizard.targetFilter.tags')}>
+                            <Select
+                                mode="multiple"
+                                allowClear
+                                loading={targetTagsLoading}
+                                placeholder={t('wizard.targetFilter.tagsPlaceholder')}
+                                value={builderState.tags}
+                                onChange={(values: number[]) => setBuilderState((prev) => ({ ...prev, tags: values }))}
+                                options={(targetTagsData?.content || []).map((tag) => ({
+                                    label: tag.name,
+                                    value: tag.id,
+                                }))}
+                            />
+                            {builderState.tags.length > 1 && (
+                                <Radio.Group
+                                    value={builderState.tagMode}
+                                    onChange={(e: RadioChangeEvent) =>
+                                        setBuilderState((prev) => ({ ...prev, tagMode: e.target.value as 'any' | 'all' }))
+                                    }
+                                    style={{ marginTop: 8 }}
+                                >
+                                    <Radio value="any">{t('wizard.targetFilter.anyTag')}</Radio>
+                                    <Radio value="all">{t('wizard.targetFilter.allTag')}</Radio>
+                                </Radio.Group>
+                            )}
+                        </Form.Item>
+                        <Form.Item label={t('wizard.targetFilter.targetTypes')}>
+                            <Select
+                                mode="multiple"
+                                allowClear
+                                loading={targetTypesLoading}
+                                placeholder={t('wizard.targetFilter.targetTypePlaceholder')}
+                                value={builderState.targetTypes}
+                                onChange={(values: string[]) =>
+                                    setBuilderState((prev) => ({ ...prev, targetTypes: values }))
+                                }
+                                options={(targetTypesData?.content || []).map((type) => ({
+                                    label: type.name,
+                                    value: type.key,
+                                }))}
+                            />
+                            {builderState.targetTypes.length > 1 && (
+                                <Radio.Group
+                                    value={builderState.targetTypeMode}
+                                    onChange={(e: RadioChangeEvent) =>
+                                        setBuilderState((prev) => ({
+                                            ...prev,
+                                            targetTypeMode: e.target.value as 'any' | 'all',
+                                        }))
+                                    }
+                                    style={{ marginTop: 8 }}
+                                >
+                                    <Radio value="any">{t('wizard.targetFilter.anyType')}</Radio>
+                                    <Radio value="all">{t('wizard.targetFilter.allType')}</Radio>
+                                </Radio.Group>
+                            )}
+                        </Form.Item>
+                        <Form.Item label={t('wizard.targetFilter.status')}>
+                            <Checkbox.Group
+                                options={[
+                                    { label: t('wizard.targetFilter.statusOnline'), value: 'online' },
+                                    { label: t('wizard.targetFilter.statusOffline'), value: 'offline' },
+                                ]}
+                                value={builderState.statuses}
+                                onChange={(values) =>
+                                    setBuilderState((prev) => ({
+                                        ...prev,
+                                        statuses: values as Array<'online' | 'offline'>,
+                                    }))
+                                }
+                            />
+                        </Form.Item>
+                        <Form.Item label={t('wizard.targetFilter.controllerId')}>
+                            <Input
+                                placeholder={t('wizard.targetFilter.controllerPlaceholder')}
+                                value={builderState.controllerQuery}
+                                onChange={(e) =>
+                                    setBuilderState((prev) => ({ ...prev, controllerQuery: e.target.value }))
+                                }
+                            />
+                        </Form.Item>
+                        <Form.Item label={t('wizard.targetFilter.nameKeyword')}>
+                            <Input
+                                placeholder={t('wizard.targetFilter.namePlaceholder')}
+                                value={builderState.searchKeyword}
+                                onChange={(e) =>
+                                    setBuilderState((prev) => ({ ...prev, searchKeyword: e.target.value }))
+                                }
+                            />
+                        </Form.Item>
+                        <Alert type="info" message={t('wizard.targetFilter.builderHint')} />
+                    </Form>
+                ) : (
+                    <Form layout="vertical">
+                        <Form.Item label={t('wizard.targetFilter.filterQuery')}>
+                            <TextArea
+                                rows={4}
+                                value={formData.targetFilterQuery}
+                                onChange={(e) =>
+                                    setFormData((prev) => ({ ...prev, targetFilterQuery: e.target.value }))
+                                }
+                                placeholder={t('wizard.targetFilter.filterPlaceholder')}
+                            />
+                        </Form.Item>
+                        <Alert type="info" message={t('wizard.targetFilter.advancedHint')} />
+                    </Form>
+                )}
+                {previewTargets.length > 0 && (
+                    <Table
+                        style={{ marginTop: 16 }}
+                        size="small"
+                        rowKey="controllerId"
+                        pagination={false}
+                        dataSource={previewTargets}
+                        columns={[
+                            { title: t('wizard.targetFilter.previewColumns.controllerId'), dataIndex: 'controllerId' },
+                            { title: t('wizard.targetFilter.previewColumns.name'), dataIndex: 'name' },
+                            { title: t('wizard.targetFilter.previewColumns.type'), dataIndex: 'targetTypeName' },
+                        ]}
+                    />
+                )}
+            </Card>
+        );
+    };
 
     // Step 4: Group Settings
     const renderGroupSettingsStep = () => (

@@ -105,11 +105,35 @@
         },
         "targetFilter": {
             "title": "Target Filter",
+            "builderMode": "Simple Filter Builder",
+            "advancedMode": "Advanced FIQL",
+            "tags": "Target Tags",
+            "tagsPlaceholder": "Select tags",
+            "anyTag": "Match any selected tag",
+            "allTag": "Match all selected tags",
+            "targetTypes": "Target Types",
+            "targetTypePlaceholder": "Select target types",
+            "anyType": "Match any selected type",
+            "allType": "Match all selected types",
+            "status": "Device Status",
+            "statusOnline": "Online",
+            "statusOffline": "Offline",
+            "controllerId": "Controller ID contains",
+            "controllerPlaceholder": "e.g., device-",
+            "nameKeyword": "Device name contains",
+            "namePlaceholder": "Enter keyword",
+            "builderHint": "Combine tags, target types, and device status to define rollout scope.",
+            "advancedHint": "Enter FIQL manually. Example: tags.id==1;targettype.key==gateway",
             "filterQuery": "Target Filter Query (FIQL)",
             "filterPlaceholder": "e.g., name==device*",
             "preview": "Preview Targets",
             "targetCount": "Matching Targets: {{count}}",
-            "required": "Please enter a target filter query (FIQL)."
+            "required": "Please enter a target filter query (FIQL).",
+            "previewColumns": {
+                "controllerId": "Controller ID",
+                "name": "Name",
+                "type": "Type"
+            }
         },
         "groupSettings": {
             "title": "Group Settings",

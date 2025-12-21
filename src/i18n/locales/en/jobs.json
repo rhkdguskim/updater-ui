@@ -9,6 +9,99 @@
         "refresh": "Refresh",
         "search": "Search jobs..."
     },
+    "filters": {
+        "status": "Filter by status",
+        "reset": "Reset filters",
+        "timeOptions": {
+            "24h": "Last 24h",
+            "7d": "Last 7 days",
+            "30d": "Last 30 days",
+            "all": "All time"
+        },
+        "scope": {
+            "all": "All jobs",
+            "action": "Action scope",
+            "rollout": "Rollout scope"
+        }
+    },
+    "segments": {
+        "title": "Saved Segments",
+        "add": "New Segment",
+        "empty": "No saved segments yet.",
+        "node": "SEGMENT",
+        "delete": "Delete segment",
+        "deleteConfirm": "Remove segment “{{name}}”?",
+        "deleteConfirmOk": "Remove",
+        "deleteConfirmCancel": "Cancel",
+        "toast": {
+            "saved": "Segment saved",
+            "deleted": "Segment deleted"
+        },
+        "modal": {
+            "title": "Save Job Segment",
+            "save": "Save",
+            "cancel": "Cancel",
+            "name": "Segment name",
+            "nameRequired": "Name is required",
+            "namePlaceholder": "e.g., Factory-A Rollouts",
+            "description": "Description",
+            "descriptionPlaceholder": "Optional description",
+            "scope": "Scope",
+            "scopeAll": "Actions & Rollouts",
+            "scopeActions": "Actions only",
+            "scopeRollouts": "Rollouts only",
+            "scopeLabel": {
+                "all": "Actions & Rollouts",
+                "actions": "Actions",
+                "rollouts": "Rollouts"
+            },
+            "statusFilters": "Statuses",
+            "statusPlaceholder": "Select statuses",
+            "timeWindow": "Time window",
+            "query": "Keyword filter",
+            "queryPlaceholder": "Search by ID, target, or rollout"
+        },
+        "detail": {
+            "scope": "Scope",
+            "status": "Status Filter",
+            "timeWindow": "Time Window",
+            "query": "Query",
+            "anyStatus": "Any status",
+            "anyQuery": "Any keyword"
+        },
+        "metrics": {
+            "actions": "Matching actions",
+            "runningActions": "Running actions",
+            "blockedActions": "Failed actions",
+            "rollouts": "Matching rollouts",
+            "waitingRollouts": "Approval pending"
+        }
+    },
+    "context": {
+        "globalTitle": "All Jobs",
+        "globalView": "All scopes",
+        "segmentView": "Segment scope",
+        "currentAction": "Action #{{id}}",
+        "currentRollout": "Rollout #{{id}}",
+        "statusTag": "Status: {{value}}",
+        "timeTag": "Time: {{value}}",
+        "scopeTag": "Scope: {{value}}",
+        "queryTag": "Query: {{value}}"
+    },
+    "status": {
+        "running": "Running",
+        "pending": "Pending",
+        "waiting_for_approval": "Waiting Approval",
+        "waiting_for_confirmation": "Waiting Confirmation",
+        "scheduled": "Scheduled",
+        "paused": "Paused",
+        "finished": "Finished",
+        "error": "Error",
+        "canceled": "Canceled",
+        "retrieving": "Retrieving",
+        "pending_approval": "Pending Approval",
+        "unknown": "Unknown"
+    },
     "dashboard": {
         "title": "Job Dashboard",
         "openActions": "Open Actions",
@@ -31,6 +124,7 @@
         "forceType": "Force Type",
         "createdAt": "Created At",
         "lastModified": "Last Modified",
+        "lastStatusCode": "Last Status Code",
         "description": "Description",
         "targetFilter": "Target Filter",
         "totalTargets": "Total Targets",
@@ -61,6 +155,10 @@
         "submit": "Create",
         "cancel": "Cancel",
         "success": "Action created successfully",
+        "targets": "Devices",
+        "targetsPlaceholder": "Select one or more devices",
+        "targetsRequired": "Please select at least one device",
+        "successMulti": "{{count}} action(s) created successfully",
         "controllerPlaceholder": "Enter target controller ID"
     },
     "messages": {
@@ -79,6 +177,16 @@
         "id": "ID",
         "event": "Event",
         "user": "User",
-        "status": "Status"
+        "status": "Status",
+        "events": {
+            "completed": "Completed",
+            "failed": "Failed",
+            "progress": "In Progress",
+            "statusChanged": "Status updated"
+        },
+        "typeLabels": {
+            "action": "Action",
+            "rollout": "Rollout"
+        }
     }
 }
