@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Table, Card, Tag, Tooltip, Space, Button, message, Modal } from 'antd';
+import { Table, Card, Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,23 @@ import CreateSoftwareModuleModal from './components/CreateSoftwareModuleModal';
 import { format } from 'date-fns';
 
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
+
+const { Title } = Typography;
+
+const PageContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+`;
+
+const HeaderRow = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+`;
 
 const SoftwareModuleList: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -190,48 +207,58 @@ const SoftwareModuleList: React.FC = () => {
     ];
 
     return (
-        <Card>
-            <DistributionSearchBar
-                type="module"
-                onSearch={handleSearch}
-                onRefresh={refetch}
-                onAdd={() => setIsCreateModalVisible(true)}
-                canAdd={isAdmin}
-                loading={isLoading}
-            />
-            {selectedModuleIds.length > 0 && isAdmin && (
-                <Space style={{ marginBottom: 16 }}>
-                    <span>{t('list.selectedCount', { count: selectedModuleIds.length })}</span>
-                    <Button danger onClick={handleBulkDelete} icon={<DeleteOutlined />}>
-                        {t('actions.deleteSelected')}
-                    </Button>
-                </Space>
-            )}
-            <Table
-                columns={columns}
-                dataSource={data?.content || []}
-                rowKey="id"
-                pagination={{
-                    ...pagination,
-                    total: data?.total || 0,
-                    showSizeChanger: true,
-                }}
-                loading={isLoading}
-                onChange={handleTableChange}
-                rowSelection={{
-                    selectedRowKeys: selectedModuleIds,
-                    onChange: (keys) => setSelectedModuleIds(keys as number[]),
-                }}
-            />
-            <CreateSoftwareModuleModal
-                visible={isCreateModalVisible}
-                onCancel={() => setIsCreateModalVisible(false)}
-                onSuccess={() => {
-                    setIsCreateModalVisible(false);
-                    refetch();
-                }}
-            />
-        </Card>
+        <PageContainer>
+            <HeaderRow>
+                <Title level={2} style={{ margin: 0 }}>
+                    {t('moduleList.title')}
+                </Title>
+            </HeaderRow>
+
+            <Card>
+                <DistributionSearchBar
+                    type="module"
+                    onSearch={handleSearch}
+                    onRefresh={refetch}
+                    onAdd={() => setIsCreateModalVisible(true)}
+                    canAdd={isAdmin}
+                    loading={isLoading}
+                />
+                {selectedModuleIds.length > 0 && isAdmin && (
+                    <Space style={{ marginTop: 16, marginBottom: 16 }} wrap>
+                        <span style={{ marginRight: 8 }}>
+                            {t('moduleList.selectedCount', { count: selectedModuleIds.length })}
+                        </span>
+                        <Button danger onClick={handleBulkDelete} icon={<DeleteOutlined />}>
+                            {t('actions.deleteSelected')}
+                        </Button>
+                    </Space>
+                )}
+                <Table
+                    columns={columns}
+                    dataSource={data?.content || []}
+                    rowKey="id"
+                    pagination={{
+                        ...pagination,
+                        total: data?.total || 0,
+                        showSizeChanger: true,
+                    }}
+                    loading={isLoading}
+                    onChange={handleTableChange}
+                    rowSelection={{
+                        selectedRowKeys: selectedModuleIds,
+                        onChange: (keys) => setSelectedModuleIds(keys as number[]),
+                    }}
+                />
+                <CreateSoftwareModuleModal
+                    visible={isCreateModalVisible}
+                    onCancel={() => setIsCreateModalVisible(false)}
+                    onSuccess={() => {
+                        setIsCreateModalVisible(false);
+                        refetch();
+                    }}
+                />
+            </Card>
+        </PageContainer>
     );
 };
 

@@ -1,6 +1,7 @@
 {
     "pageTitle": "배포 관리",
     "list": {
+        "title": "배포 세트",
         "columns": {
             "name": "이름",
             "version": "버전",
@@ -25,6 +26,10 @@
             "version": "버전",
             "description": "설명"
         }
+    },
+    "moduleList": {
+        "title": "소프트웨어 모듈",
+        "selectedCount": "{{count}}개 모듈 선택됨"
     },
     "tags": {
         "complete": "완료",
@@ -227,7 +232,8 @@
         "assignTags": "태그 할당",
         "unassignTags": "태그 제거",
         "tagAssignSuccess": "{{count}}개 배포 세트에 태그가 할당되었습니다",
-        "tagUnassignSuccess": "{{count}}개 배포 세트에서 태그가 제거되었습니다"
+        "tagUnassignSuccess": "{{count}}개 배포 세트에서 태그가 제거되었습니다",
+        "manageTags": "태그 관리"
     },
     "dsTypesAndTags": {
         "title": "배포 세트 유형 & 태그"

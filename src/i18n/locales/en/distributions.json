@@ -1,6 +1,7 @@
 {
     "pageTitle": "Distributions Management",
     "list": {
+        "title": "Distribution Sets",
         "columns": {
             "name": "Name",
             "version": "Version",
@@ -25,6 +26,10 @@
             "version": "Version",
             "description": "Description"
         }
+    },
+    "moduleList": {
+        "title": "Software Modules",
+        "selectedCount": "{{count}} modules selected"
     },
     "tags": {
         "complete": "Complete",
@@ -227,7 +232,8 @@
         "assignTags": "Assign Tags",
         "unassignTags": "Remove Tags",
         "tagAssignSuccess": "Tags assigned to {{count}} distribution set(s)",
-        "tagUnassignSuccess": "Tags removed from {{count}} distribution set(s)"
+        "tagUnassignSuccess": "Tags removed from {{count}} distribution set(s)",
+        "manageTags": "Manage Tags"
     },
     "dsTypesAndTags": {
         "title": "Distribution Set Types & Tags"

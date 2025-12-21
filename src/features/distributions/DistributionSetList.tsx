@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
-import { Table, Card, Tag, Tooltip, Space, Button, message, Modal } from 'antd';
+import { Table, Card, Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
 import type { TableProps } from 'antd';
-import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
+import { EyeOutlined, DeleteOutlined, TagOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import {
     useGetDistributionSets,
@@ -12,12 +12,28 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import DistributionSearchBar from './components/DistributionSearchBar';
 import CreateDistributionSetWizard from './components/CreateDistributionSetWizard';
 import { format } from 'date-fns';
-import { TagOutlined } from '@ant-design/icons';
 import { DistributionSetTagsCell } from './components/DistributionSetTagsCell';
 
 import { useTranslation } from 'react-i18next';
+import styled from 'styled-components';
 
 import BulkManageSetTagsModal from './components/BulkManageSetTagsModal';
+
+const { Title } = Typography;
+
+const PageContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+`;
+
+const HeaderRow = styled.div`
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+`;
 
 const DistributionSetList: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -182,68 +198,70 @@ const DistributionSetList: React.FC = () => {
     ];
 
     return (
-        <Card>
-            <DistributionSearchBar
-                type="set"
-                onSearch={handleSearch}
-                onRefresh={refetch}
-                onAdd={() => setIsCreateModalVisible(true)}
-                canAdd={isAdmin}
-                loading={isLoading}
-            />
+        <PageContainer>
+            <HeaderRow>
+                <Title level={2} style={{ margin: 0 }}>
+                    {t('list.title')}
+                </Title>
+            </HeaderRow>
 
-            <Space style={{ marginBottom: 16 }}>
-                <Button
-                    icon={<TagOutlined />}
-                    onClick={() => navigate('/distributions/sets/bulk-assign')}
-                >
-                    {t('bulkAssignment.title') || 'Bulk Assignment'}
-                </Button>
+            <Card>
+                <DistributionSearchBar
+                    type="set"
+                    onSearch={handleSearch}
+                    onRefresh={refetch}
+                    onAdd={() => setIsCreateModalVisible(true)}
+                    canAdd={isAdmin}
+                    loading={isLoading}
+                />
+
                 {selectedSetIds.length > 0 && (
-                    <>
-                        <span>{t('list.selectedCount', { count: selectedSetIds.length })}</span>
-                        <Button onClick={() => setBulkTagsModalOpen(true)}>
+                    <Space style={{ marginTop: 16, marginBottom: 16 }} wrap>
+                        <span style={{ marginRight: 8 }}>
+                            {t('bulkAssignment.selectedSets', { count: selectedSetIds.length })}
+                        </span>
+                        <Button icon={<TagOutlined />} onClick={() => setBulkTagsModalOpen(true)}>
                             {t('bulkAssignment.manageTags')}
                         </Button>
-                    </>
+                    </Space>
                 )}
-            </Space>
 
-            <Table
-                columns={columns}
-                dataSource={data?.content || []}
-                rowKey="id"
-                pagination={{
-                    ...pagination,
-                    total: data?.total || 0,
-                    showSizeChanger: true,
-                }}
-                loading={isLoading}
-                onChange={handleTableChange}
-                rowSelection={{
-                    selectedRowKeys: selectedSetIds,
-                    onChange: (keys) => setSelectedSetIds(keys as number[]),
-                }}
-            />
-            <CreateDistributionSetWizard
-                visible={isCreateModalVisible}
-                onCancel={() => setIsCreateModalVisible(false)}
-                onSuccess={() => {
-                    setIsCreateModalVisible(false);
-                    refetch();
-                }}
-            />
-            <BulkManageSetTagsModal
-                open={bulkTagsModalOpen}
-                setIds={selectedSetIds}
-                onCancel={() => setBulkTagsModalOpen(false)}
-                onSuccess={() => {
-                    setBulkTagsModalOpen(false);
-                    setSelectedSetIds([]);
-                    refetch();
-                }}
-            />
-        </Card>
+                <Table
+                    columns={columns}
+                    dataSource={data?.content || []}
+                    rowKey="id"
+                    pagination={{
+                        ...pagination,
+                        total: data?.total || 0,
+                        showSizeChanger: true,
+                    }}
+                    loading={isLoading}
+                    onChange={handleTableChange}
+                    rowSelection={{
+                        selectedRowKeys: selectedSetIds,
+                        onChange: (keys) => setSelectedSetIds(keys as number[]),
+                    }}
+                />
+                <CreateDistributionSetWizard
+                    visible={isCreateModalVisible}
+                    onCancel={() => setIsCreateModalVisible(false)}
+                    onSuccess={() => {
+                        setIsCreateModalVisible(false);
+                        refetch();
+                    }}
+                />
+                <BulkManageSetTagsModal
+                    open={bulkTagsModalOpen}
+                    setIds={selectedSetIds}
+                    onCancel={() => setBulkTagsModalOpen(false)}
+                    onSuccess={() => {
+                        setBulkTagsModalOpen(false);
+                        setSelectedSetIds([]);
+                        refetch();
+                    }}
+                />
+            </Card>
+        </PageContainer>
     );
 };
 

@@ -274,7 +274,7 @@ const TargetList: React.FC = () => {
                 {selectedTargetIds.length > 0 && (
                     <Space style={{ marginTop: 16, marginBottom: 16 }} wrap>
                         <span style={{ marginRight: 8 }}>
-                            {t('list.selectedCount', { count: selectedTargetIds.length })}
+                            {t('bulkAssign.selectedCount', { count: selectedTargetIds.length })}
                         </span>
                         <Button onClick={() => setBulkTagsModalOpen(true)}>
                             {t('bulkAssign.assignTag')}
