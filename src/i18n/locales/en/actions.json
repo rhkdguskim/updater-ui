@@ -6,8 +6,10 @@
         "id": "ID",
         "status": "Status",
         "type": "Type",
+        "target": "Target",
         "distributionSet": "Distribution Set",
         "forceType": "Force Type",
+        "createdAt": "Created",
         "actions": "Actions"
     },
     "forceTypes": {
@@ -70,6 +72,19 @@
         "view": "View",
         "addAction": "Add Action",
         "addActionComingSoon": "Action creation will be available soon."
+    },
+    "polling": {
+        "live": "Live (5s)",
+        "idle": "Idle (30s)"
+    },
+    "lastUpdated": "Updated",
+    "bulk": {
+        "selected": "{{count}} selected",
+        "cancel": "Bulk Cancel",
+        "force": "Bulk Force",
+        "cancelConfirm": "Cancel selected actions?",
+        "cancelComingSoon": "Bulk cancel will be available soon.",
+        "clearSelection": "Clear Selection"
     },
     "detail": {
         "pageTitle": "Action Details",

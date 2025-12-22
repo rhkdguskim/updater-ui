@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 
 const { Title } = Typography;
 
@@ -28,6 +29,7 @@ const StyledTitle = styled(Title)`
 `;
 
 const LoginPage: React.FC = () => {
+    const { t } = useTranslation('auth');
     const [loading, setLoading] = useState(false);
     const login = useAuthStore((state) => state.login);
     const navigate = useNavigate();
@@ -47,7 +49,7 @@ const LoginPage: React.FC = () => {
         }
 
         if (!isValid) {
-            message.error('아이디 또는 비밀번호가 올바르지 않습니다.');
+            message.error(t('messages.loginFailed'));
             setLoading(false);
             return;
         }
@@ -67,10 +69,10 @@ const LoginPage: React.FC = () => {
 
             // Login successful: Store original username (for Role) and the fixed API token
             login(username, apiToken);
-            message.success('Login successful');
+            message.success(t('messages.loginSuccess'));
             navigate('/');
         } catch (error: any) {
-            message.error('Server connection failed. Please check the backend.');
+            message.error(t('messages.serverError'));
         } finally {
             setLoading(false);
         }
@@ -79,7 +81,7 @@ const LoginPage: React.FC = () => {
     return (
         <Container>
             <FormContainer>
-                <StyledTitle level={3}>Mirero Product Manager</StyledTitle>
+                <StyledTitle level={3}>{t('login.mireroProductManager')}</StyledTitle>
                 <Form
                     name="login_form"
                     initialValues={{ remember: true }}
@@ -88,19 +90,19 @@ const LoginPage: React.FC = () => {
                 >
                     <Form.Item
                         name="username"
-                        rules={[{ required: true, message: 'Please input your Username!' }]}
+                        rules={[{ required: true, message: t('login.usernameRequired') }]}
                     >
-                        <Input prefix={<UserOutlined />} placeholder="Username" />
+                        <Input prefix={<UserOutlined />} placeholder={t('login.username')} />
                     </Form.Item>
                     <Form.Item
                         name="password"
-                        rules={[{ required: true, message: 'Please input your Password!' }]}
+                        rules={[{ required: true, message: t('login.passwordRequired') }]}
                     >
-                        <Input.Password prefix={<LockOutlined />} placeholder="Password" />
+                        <Input.Password prefix={<LockOutlined />} placeholder={t('login.password')} />
                     </Form.Item>
                     <Form.Item>
                         <Button type="primary" htmlType="submit" style={{ width: '100%' }} loading={loading}>
-                            Log in
+                            {t('login.submit')}
                         </Button>
                     </Form.Item>
                 </Form>

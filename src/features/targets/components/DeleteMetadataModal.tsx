@@ -1,9 +1,8 @@
 import React from 'react';
-import { Modal, Typography, Space } from 'antd';
+import { Modal, Space } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import type { MgmtMetadata } from '@/api/generated/model';
-
-const { Text } = Typography;
 
 interface DeleteMetadataModalProps {
     open: boolean;
@@ -20,26 +19,26 @@ const DeleteMetadataModal: React.FC<DeleteMetadataModalProps> = ({
     onConfirm,
     onCancel,
 }) => {
+    const { t } = useTranslation('targets');
     return (
         <Modal
             title={
                 <Space>
                     <ExclamationCircleOutlined style={{ color: '#ff4d4f' }} />
-                    <span>Delete Metadata</span>
+                    <span>{t('metadata.deleteTitle')}</span>
                 </Space>
             }
             open={open}
             onOk={onConfirm}
             onCancel={onCancel}
-            okText="Delete"
+            okText={t('actions.delete', { ns: 'common' })}
             okButtonProps={{ danger: true }}
             confirmLoading={loading}
         >
             <p>
-                Are you sure you want to delete the metadata entry{' '}
-                <Text strong>"{metadata?.key}"</Text>?
+                {t('metadata.deleteConfirm', { key: metadata?.key })}
             </p>
-            <p>This action cannot be undone.</p>
+            <p>{t('metadata.deleteDesc')}</p>
         </Modal>
     );
 };

@@ -124,7 +124,7 @@ const BulkDeleteTargetModal: React.FC<BulkDeleteTargetModalProps> = ({
                                         <li key={idx}>{err}</li>
                                     ))}
                                     {errors.length > 5 && (
-                                        <li>...and {errors.length - 5} more</li>
+                                        <li>{t('bulkDelete.andMore', { count: errors.length - 5 })}</li>
                                     )}
                                 </ul>
                             }

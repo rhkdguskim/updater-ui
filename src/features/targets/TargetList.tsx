@@ -297,7 +297,7 @@ const TargetList: React.FC = () => {
         return (
             <Alert
                 type="error"
-                message="Failed to load targets"
+                message={t('messages.loadFailed')}
                 description={(targetsError as Error).message}
                 showIcon
             />

@@ -1,22 +1,22 @@
 import React from 'react';
-import { Card, Row, Col, Typography, Statistic, Button, Flex, Skeleton, Table, Tag, Progress } from 'antd';
+import { Card, Row, Col, Typography, Button, Flex, Skeleton, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled, { keyframes } from 'styled-components';
 import {
-    CheckCircleOutlined,
-    CloseCircleOutlined,
-    QuestionCircleOutlined,
     ReloadOutlined,
+    SyncOutlined,
+    WifiOutlined,
 } from '@ant-design/icons';
-import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 
 import { useGetTargets } from '@/api/generated/targets/targets';
-import type { MgmtTarget } from '@/api/generated/model';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
 dayjs.extend(relativeTime);
+
+import { AirportSlideList } from '@/components/common';
 
 const { Title, Text } = Typography;
 
@@ -29,9 +29,10 @@ const fadeInUp = keyframes`
 const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     height: 100%;
-    overflow: hidden;
+    min-height: 100%;
+    overflow: auto;
     animation: ${fadeInUp} 0.5s ease-out;
 `;
 
@@ -39,7 +40,7 @@ const PageHeader = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 4px 0;
 `;
 
 const HeaderContent = styled.div`
@@ -63,44 +64,18 @@ const GradientTitle = styled(Title)`
         background-clip: text;
     }
 `;
-
-const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number }>`
-    border: none;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-    animation: ${fadeInUp} 0.5s ease-out;
-    animation-delay: ${props => (props.$delay || 0) * 0.1}s;
-    animation-fill-mode: both;
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 4px;
-        background: ${props => props.$accentColor || 'var(--gradient-primary)'};
-    }
-
-    .dark-mode & {
-        background: rgba(30, 41, 59, 0.9);
-    }
-`;
-
 const ChartCard = styled(Card) <{ $delay?: number }>`
     border: none;
-    border-radius: 20px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     animation: ${fadeInUp} 0.5s ease-out;
     animation-delay: ${props => (props.$delay || 0) * 0.1}s;
     animation-fill-mode: both;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     
     .ant-card-head {
         border-bottom: 1px solid rgba(0, 0, 0, 0.04);
@@ -110,6 +85,13 @@ const ChartCard = styled(Card) <{ $delay?: number }>`
         font-size: 15px;
         font-weight: 600;
         color: #334155;
+    }
+    
+    .ant-card-body {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
     }
 
     .dark-mode & {
@@ -125,41 +107,50 @@ const ChartCard = styled(Card) <{ $delay?: number }>`
     }
 `;
 
-
-const BigNumber = styled.div`
-    font-size: 48px;
-    font-weight: 700;
-    line-height: 1;
-    margin-bottom: 8px;
+const ChartLegendItem = styled(Flex)`
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+        background: rgba(0, 0, 0, 0.05);
+    }
 `;
 
 const COLORS = {
-    online: '#10b981',
-    offline: '#ef4444',
-    neverConnected: '#94a3b8',
-    primary: '#6366f1',
+    // Update Status Colors
+    inSync: '#10b981',   // Green - 동기화됨
+    pending: '#3b82f6',  // Blue - 대기 중
+    error: '#ef4444',    // Red - 오류
+    unknown: '#94a3b8',  // Gray - 알 수 없음
+    // Connectivity Colors
+    online: '#10b981',   // Green - 온라인
+    offline: '#f59e0b',  // Orange - 오프라인
 };
 
 const TargetsOverview: React.FC = () => {
     const { t } = useTranslation('targets');
     const navigate = useNavigate();
 
-    // Fetch all targets for monitoring
     const { data: allTargets, isLoading, refetch } = useGetTargets({ limit: 500 });
 
     const targets = allTargets?.content || [];
-    const totalCount = allTargets?.total ?? 0;
 
-    // Client-side offline check: use nextExpectedRequestAt from system config
+    // Offline check
     const isOverdueByExpectedTime = (pollStatus?: { nextExpectedRequestAt?: number }) => {
         if (!pollStatus?.nextExpectedRequestAt) return false;
         return Date.now() > pollStatus.nextExpectedRequestAt;
     };
 
-    // Calculate status counts with both server overdue flag AND expected time check
-    const neverConnectedCount = targets.filter(t =>
-        !t.pollStatus || t.pollStatus.lastRequestAt === undefined
-    ).length;
+    // --- Update Status (Provisioning) ---
+    const inSyncCount = targets.filter(t => t.updateStatus === 'in_sync').length;
+    const pendingCount = targets.filter(t => t.updateStatus === 'pending').length;
+    const errorCount = targets.filter(t => t.updateStatus === 'error').length;
+    const unknownCount = targets.filter(t => !t.updateStatus || t.updateStatus === 'unknown' || t.updateStatus === 'registered').length;
+
+    // --- Connectivity Status ---
     const onlineCount = targets.filter(t =>
         t.pollStatus?.lastRequestAt !== undefined &&
         !t.pollStatus?.overdue &&
@@ -169,64 +160,45 @@ const TargetsOverview: React.FC = () => {
         t.pollStatus?.lastRequestAt !== undefined &&
         (t.pollStatus?.overdue || isOverdueByExpectedTime(t.pollStatus))
     ).length;
+    const neverConnectedCount = targets.filter(t =>
+        !t.pollStatus || t.pollStatus.lastRequestAt === undefined
+    ).length;
 
-    const onlinePercentage = totalCount > 0 ? Math.round((onlineCount / totalCount) * 100) : 0;
-
-    const pieData = [
-        { name: 'Online', value: onlineCount || 0, color: COLORS.online },
-        { name: 'Offline', value: offlineCount || 0, color: COLORS.offline },
-        { name: 'Never Connected', value: neverConnectedCount || 0, color: COLORS.neverConnected },
+    // Pie Data for Connectivity
+    const connectivityPieData = [
+        { name: t('status.online', 'Online'), value: onlineCount, color: COLORS.online },
+        { name: t('status.offline', 'Offline'), value: offlineCount, color: COLORS.offline },
+        { name: t('status.neverConnected', 'Never Connected'), value: neverConnectedCount, color: COLORS.unknown },
     ].filter(d => d.value > 0);
 
-    // Get status label - uses nextExpectedRequestAt from polling config
-    const getStatusTag = (target: MgmtTarget) => {
-        if (!target.pollStatus || target.pollStatus.lastRequestAt === undefined) {
-            return <Tag color="default">{t('status.neverConnected')}</Tag>;
-        }
-        if (target.pollStatus.overdue || isOverdueByExpectedTime(target.pollStatus)) {
-            return <Tag color="red">{t('status.offline')}</Tag>;
-        }
-        return <Tag color="green">{t('status.online')}</Tag>;
-    };
+    // Pie Data for Update Status
+    const updateStatusPieData = [
+        { name: t('status.inSync', 'In Sync'), value: inSyncCount, color: COLORS.inSync },
+        { name: t('status.pending', 'Pending'), value: pendingCount, color: COLORS.pending },
+        { name: t('status.error', 'Error'), value: errorCount, color: COLORS.error },
+        { name: t('status.unknown', 'Unknown'), value: unknownCount, color: COLORS.unknown },
+    ].filter(d => d.value > 0);
 
-    // Recent activity - last 10 devices with activity
+    // Recent activity
     const recentDevices = [...targets]
         .filter(t => t.pollStatus?.lastRequestAt)
         .sort((a, b) => (b.pollStatus?.lastRequestAt || 0) - (a.pollStatus?.lastRequestAt || 0))
         .slice(0, 8);
 
-    const columns = [
-        {
-            title: t('table.name'),
-            dataIndex: 'name',
-            key: 'name',
-            render: (_: string, record: MgmtTarget) => (
-                <div>
-                    <Text strong>{record.name || record.controllerId}</Text>
-                    {record.ipAddress && (
-                        <div>
-                            <Text type="secondary" style={{ fontSize: 12 }}>{record.ipAddress}</Text>
-                        </div>
-                    )}
-                </div>
-            ),
-        },
-        {
-            title: t('table.status'),
-            key: 'status',
-            width: 120,
-            render: (_: unknown, record: MgmtTarget) => getStatusTag(record),
-        },
-        {
-            title: t('overview.lastPoll'),
-            key: 'lastPoll',
-            width: 150,
-            render: (_: unknown, record: MgmtTarget) =>
-                record.pollStatus?.lastRequestAt
-                    ? dayjs(record.pollStatus.lastRequestAt).fromNow()
-                    : <Text type="secondary">-</Text>,
-        },
-    ];
+    // Custom Legend Renderer for Pie Chart
+    const renderCustomLegend = (data: { name: string; value: number; color: string }[]) => (
+        <Flex vertical gap={6} style={{ marginTop: 12 }}>
+            {data.map(entry => (
+                <ChartLegendItem key={entry.name} align="center" justify="space-between">
+                    <Flex align="center" gap={8}>
+                        <div style={{ width: 12, height: 12, borderRadius: 3, background: entry.color }} />
+                        <Text style={{ fontSize: 13 }}>{entry.name}</Text>
+                    </Flex>
+                    <Text strong style={{ fontSize: 14, color: entry.color }}>{entry.value}</Text>
+                </ChartLegendItem>
+            ))}
+        </Flex>
+    );
 
     return (
         <PageContainer>
@@ -248,149 +220,143 @@ const TargetsOverview: React.FC = () => {
                 </Button>
             </PageHeader>
 
-            {/* Status Overview Cards */}
-            <Row gutter={[20, 20]}>
-                <Col xs={24} sm={8}>
-                    <StatsCard $accentColor="linear-gradient(135deg, #10b981 0%, #34d399 100%)" $delay={1}>
-                        {isLoading ? <Skeleton active paragraph={{ rows: 1 }} /> : (
-                            <Flex justify="space-between" align="center">
-                                <div>
-                                    <Text type="secondary" style={{ fontSize: 14, fontWeight: 600 }}>
-                                        {t('status.online')}
-                                    </Text>
-                                    <BigNumber style={{ color: COLORS.online }}>{onlineCount}</BigNumber>
-                                    <Progress
-                                        percent={onlinePercentage}
-                                        size="small"
-                                        strokeColor={COLORS.online}
-                                        showInfo={false}
-                                        style={{ width: 120 }}
-                                    />
-                                </div>
-                                <CheckCircleOutlined style={{ fontSize: 48, color: COLORS.online, opacity: 0.3 }} />
-                            </Flex>
-                        )}
-                    </StatsCard>
-                </Col>
-                <Col xs={24} sm={8}>
-                    <StatsCard $accentColor="linear-gradient(135deg, #ef4444 0%, #f87171 100%)" $delay={2}>
-                        {isLoading ? <Skeleton active paragraph={{ rows: 1 }} /> : (
-                            <Flex justify="space-between" align="center">
-                                <div>
-                                    <Text type="secondary" style={{ fontSize: 14, fontWeight: 600 }}>
-                                        {t('status.offline')}
-                                    </Text>
-                                    <BigNumber style={{ color: COLORS.offline }}>{offlineCount}</BigNumber>
-                                    <Text type="secondary" style={{ fontSize: 12 }}>
-                                        {totalCount > 0 ? `${Math.round((offlineCount / totalCount) * 100)}% of devices` : '-'}
-                                    </Text>
-                                </div>
-                                <CloseCircleOutlined style={{ fontSize: 48, color: COLORS.offline, opacity: 0.3 }} />
-                            </Flex>
-                        )}
-                    </StatsCard>
-                </Col>
-                <Col xs={24} sm={8}>
-                    <StatsCard $accentColor="linear-gradient(135deg, #94a3b8 0%, #64748b 100%)" $delay={3}>
-                        {isLoading ? <Skeleton active paragraph={{ rows: 1 }} /> : (
-                            <Flex justify="space-between" align="center">
-                                <div>
-                                    <Text type="secondary" style={{ fontSize: 14, fontWeight: 600 }}>
-                                        {t('status.neverConnected')}
-                                    </Text>
-                                    <BigNumber style={{ color: COLORS.neverConnected }}>{neverConnectedCount}</BigNumber>
-                                    <Text type="secondary" style={{ fontSize: 12 }}>
-                                        Awaiting first connection
-                                    </Text>
-                                </div>
-                                <QuestionCircleOutlined style={{ fontSize: 48, color: COLORS.neverConnected, opacity: 0.3 }} />
-                            </Flex>
-                        )}
-                    </StatsCard>
-                </Col>
-            </Row>
-
-            {/* Charts and Table Row */}
-            <Row gutter={[20, 20]} style={{ flex: 1, minHeight: 0 }}>
-                <Col xs={24} lg={8} style={{ display: 'flex' }}>
+            {/* Row 1: Connectivity + Update Status Charts */}
+            <Row gutter={[16, 16]}>
+                {/* Connectivity Distribution */}
+                <Col xs={24} md={12}>
                     <ChartCard
-                        style={{ flex: 1 }}
                         title={
-                            <Flex justify="space-between" align="center">
-                                <span>{t('overview.deviceStatusDistribution')}</span>
-                                <Statistic
-                                    value={totalCount}
-                                    suffix={t('table.devices', 'devices')}
-                                    valueStyle={{ fontSize: 14, fontWeight: 600 }}
-                                />
+                            <Flex align="center" gap={8}>
+                                <WifiOutlined style={{ color: COLORS.online }} />
+                                <span>{t('overview.connectivityStatus', 'Connectivity Status')}</span>
                             </Flex>
                         }
-                        $delay={4}
+                        $delay={1}
                     >
                         {isLoading ? (
-                            <Skeleton.Avatar active size={180} shape="circle" style={{ margin: '20px auto', display: 'block' }} />
+                            <Skeleton.Avatar active size={150} shape="circle" style={{ margin: '20px auto', display: 'block' }} />
                         ) : (
-                            <div style={{ position: 'relative' }}>
-                                <ResponsiveContainer width="100%" height={220}>
+                            <div>
+                                <ResponsiveContainer width="100%" height={200}>
                                     <PieChart>
                                         <Pie
-                                            data={pieData}
-                                            innerRadius={60}
-                                            outerRadius={80}
+                                            data={connectivityPieData}
+                                            innerRadius={55}
+                                            outerRadius={75}
                                             paddingAngle={3}
                                             dataKey="value"
                                             strokeWidth={0}
                                         >
-                                            {pieData.map((entry, index) => (
+                                            {connectivityPieData.map((entry, index) => (
                                                 <Cell key={`cell-${index}`} fill={entry.color} />
                                             ))}
                                         </Pie>
+                                        <RechartsTooltip />
                                     </PieChart>
                                 </ResponsiveContainer>
-                                <div style={{
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '50%',
-                                    transform: 'translate(-50%, -50%)',
-                                    textAlign: 'center'
-                                }}>
-                                    <div style={{ fontSize: 28, fontWeight: 700, color: COLORS.online }}>{onlinePercentage}%</div>
-                                    <div style={{ fontSize: 11, color: '#64748b' }}>Online</div>
-                                </div>
-                                {/* Legend */}
-                                <Flex justify="center" gap={16} style={{ marginTop: 8 }}>
-                                    <Flex align="center" gap={6}>
-                                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: COLORS.online }} />
-                                        <Text style={{ fontSize: 12 }}>{t('status.online')}</Text>
-                                    </Flex>
-                                    <Flex align="center" gap={6}>
-                                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: COLORS.offline }} />
-                                        <Text style={{ fontSize: 12 }}>{t('status.offline')}</Text>
-                                    </Flex>
-                                    <Flex align="center" gap={6}>
-                                        <div style={{ width: 10, height: 10, borderRadius: '50%', background: COLORS.neverConnected }} />
-                                        <Text style={{ fontSize: 12 }}>{t('status.neverConnected')}</Text>
-                                    </Flex>
-                                </Flex>
+                                {renderCustomLegend(connectivityPieData)}
                             </div>
                         )}
                     </ChartCard>
                 </Col>
-                <Col xs={24} lg={16} style={{ display: 'flex' }}>
-                    <ChartCard title={t('overview.recentActivity')} $delay={5} style={{ flex: 1, display: 'flex', flexDirection: 'column' }} bodyStyle={{ flex: 1, overflow: 'auto', padding: '12px' }}>
-                        <Table
-                            dataSource={recentDevices}
-                            columns={columns}
-                            rowKey="controllerId"
-                            size="small"
-                            pagination={false}
-                            loading={isLoading}
-                            locale={{ emptyText: t('messages.noData', { ns: 'common' }) }}
-                            onRow={(record) => ({
-                                onClick: () => navigate(`/targets/${record.controllerId}`),
-                                style: { cursor: 'pointer' }
-                            })}
-                        />
+
+                {/* Update Status Distribution */}
+                <Col xs={24} md={12}>
+                    <ChartCard
+                        title={
+                            <Flex align="center" gap={8}>
+                                <SyncOutlined style={{ color: COLORS.pending }} />
+                                <span>{t('overview.updateStatusDistribution', 'Update Status')}</span>
+                            </Flex>
+                        }
+                        $delay={2}
+                    >
+                        {isLoading ? (
+                            <Skeleton.Avatar active size={150} shape="circle" style={{ margin: '20px auto', display: 'block' }} />
+                        ) : (
+                            <div>
+                                <ResponsiveContainer width="100%" height={200}>
+                                    <PieChart>
+                                        <Pie
+                                            data={updateStatusPieData}
+                                            innerRadius={55}
+                                            outerRadius={75}
+                                            paddingAngle={3}
+                                            dataKey="value"
+                                            strokeWidth={0}
+                                        >
+                                            {updateStatusPieData.map((entry, index) => (
+                                                <Cell key={`cell-${index}`} fill={entry.color} />
+                                            ))}
+                                        </Pie>
+                                        <RechartsTooltip />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                                {renderCustomLegend(updateStatusPieData)}
+                            </div>
+                        )}
+                    </ChartCard>
+                </Col>
+            </Row>
+
+            {/* Row 2: Recent Activity (Airport-style sliding) */}
+            <Row gutter={[16, 16]} style={{ flex: 1 }}>
+                <Col xs={24}>
+                    <ChartCard
+                        title={t('overview.recentActivity', 'Recent Device Activity')}
+                        $delay={3}
+                        style={{ height: '100%' }}
+                        styles={{ body: { padding: '12px', flex: 1, overflow: 'hidden' } }}
+                    >
+                        {isLoading ? (
+                            <Skeleton active paragraph={{ rows: 6 }} />
+                        ) : recentDevices.length > 0 ? (
+                            <AirportSlideList
+                                items={recentDevices}
+                                itemHeight={52}
+                                visibleCount={6}
+                                interval={3000}
+                                renderItem={(record) => (
+                                    <Flex
+                                        key={record.controllerId}
+                                        align="center"
+                                        justify="space-between"
+                                        style={{
+                                            padding: '10px 16px',
+                                            borderBottom: '1px solid rgba(0,0,0,0.04)',
+                                            cursor: 'pointer',
+                                            height: '100%',
+                                            background: 'rgba(0,0,0,0.01)',
+                                            borderRadius: 6,
+                                            marginBottom: 4,
+                                        }}
+                                        onClick={() => navigate(`/targets/${record.controllerId}`)}
+                                    >
+                                        <Flex align="center" gap={16} style={{ flex: 1 }}>
+                                            <WifiOutlined style={{
+                                                fontSize: 16,
+                                                color: record.pollStatus?.overdue ? COLORS.offline : COLORS.online
+                                            }} />
+                                            <Text strong style={{ fontSize: 14 }}>
+                                                {record.name || record.controllerId}
+                                            </Text>
+                                            {record.ipAddress && (
+                                                <Text type="secondary" style={{ fontSize: 12 }}>
+                                                    {record.ipAddress}
+                                                </Text>
+                                            )}
+                                        </Flex>
+                                        <Tag color={record.pollStatus?.overdue ? 'red' : 'green'} style={{ margin: 0 }}>
+                                            {record.pollStatus?.overdue ? t('status.offline', 'Offline') : t('status.online', 'Online')}
+                                        </Tag>
+                                    </Flex>
+                                )}
+                            />
+                        ) : (
+                            <Flex justify="center" align="center" style={{ height: '100%' }}>
+                                <Text type="secondary">{t('messages.noData', { ns: 'common' })}</Text>
+                            </Flex>
+                        )}
                     </ChartCard>
                 </Col>
             </Row>

@@ -110,7 +110,7 @@ const AdvancedDSBuilderModal: React.FC<AdvancedDSBuilderModalProps> = ({
     ];
 
     const tabItems = [
-        { label: 'All', key: 'all' },
+        { label: t('builder.allModules'), key: 'all' },
         ...smTypes.map((type) => ({
             label: type.name || '',
             key: type.key || ''
@@ -119,7 +119,7 @@ const AdvancedDSBuilderModal: React.FC<AdvancedDSBuilderModalProps> = ({
 
     return (
         <Modal
-            title="Advanced Distribution Set Builder"
+            title={t('builder.title')}
             open={visible}
             onOk={handleOk}
             onCancel={onCancel}
@@ -130,7 +130,7 @@ const AdvancedDSBuilderModal: React.FC<AdvancedDSBuilderModalProps> = ({
             <Row gutter={24}>
                 {/* Left Column: Basic Info */}
                 <Col span={10}>
-                    <Title level={5}>Basic Information</Title>
+                    <Title level={5}>{t('builder.basicInfo')}</Title>
                     <Divider style={{ margin: '12px 0' }} />
                     <Form form={form} layout="vertical">
                         <Form.Item
@@ -170,15 +170,15 @@ const AdvancedDSBuilderModal: React.FC<AdvancedDSBuilderModalProps> = ({
                 {/* Right Column: Module Composition */}
                 <Col span={14}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Title level={5}>Module Composition</Title>
-                        <Text type="secondary">{selectedModuleIds.length} modules selected</Text>
+                        <Title level={5}>{t('builder.moduleComposition')}</Title>
+                        <Text type="secondary">{t('moduleList.selectedCount', { count: selectedModuleIds.length })}</Text>
                     </div>
                     <Divider style={{ margin: '12px 0' }} />
 
                     <Space direction="vertical" style={{ width: '100%' }} size="middle">
                         <Input
                             prefix={<SearchOutlined />}
-                            placeholder="Search software modules..."
+                            placeholder={t('builder.searchPlaceholder')}
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
                         />
@@ -207,7 +207,7 @@ const AdvancedDSBuilderModal: React.FC<AdvancedDSBuilderModalProps> = ({
 
                         {selectedModules.length > 0 && (
                             <div style={{ background: '#f5f5f5', padding: '12px', borderRadius: '8px' }}>
-                                <Text strong>Selection Preview:</Text>
+                                <Text strong>{t('builder.selectionPreview')}</Text>
                                 <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                                     {selectedModules.map(m => (
                                         <Tag

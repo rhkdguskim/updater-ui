@@ -1,11 +1,26 @@
 {
     "title": "Job Management",
     "subtitle": "Actions and rollouts overview",
+    "operationsTitle": "Task Management Monitoring",
+    "operationsSubtitle": "Real-time rollout deployment tracking and action status monitoring",
+    "lastUpdated": "Updated",
+    "monitoring": "Monitoring",
+    "polling": {
+        "fast": "Live (5s)",
+        "slow": "Idle (30s)"
+    },
     "kpi": {
         "running": "Running",
         "pending": "Pending",
         "completed": "Completed",
         "activeRollouts": "Active Rollouts",
+        "waitingApproval": "Waiting Approval",
+        "criticalAlerts": "Critical Alerts",
+        "successRate": "Success Rate",
+        "runningActions": "running",
+        "requiresReview": "Requires review",
+        "immediateAttention": "Needs attention",
+        "allClear": "All clear",
         "actions": "actions",
         "awaitingAction": "awaiting action",
         "last24h": "last 24h",
@@ -13,8 +28,11 @@
     },
     "chart": {
         "actionStatus": "Action Status",
+        "rolloutStatus": "Rollout Status",
+        "liveRollouts": "Live Rollout Monitor",
+        "actionSummary": "Action Summary (24h)",
         "total": "total",
-        "recentActions": "Recent Actions",
+        "recentActions": "Recent Actions (24h)",
         "activeRollouts": "Active Rollouts",
         "jobProgress": {
             "title": "Job Progress Feedback",
@@ -28,14 +46,25 @@
             "errors": "Errors: {{count}}"
         }
     },
+    "quickAccess": {
+        "rollouts": "Rollouts",
+        "rolloutsDesc": "Manage rollout deployments",
+        "actions": "Actions",
+        "actionsDesc": "Track device actions",
+        "total": "total",
+        "last24h": "last 24h",
+        "viewAll": "View All"
+    },
     "table": {
         "id": "ID",
         "name": "Name",
         "target": "Target",
+        "targets": "Targets",
         "distribution": "Distribution",
         "status": "Status",
         "time": "Time",
-        "progress": "Progress"
+        "progress": "Progress",
+        "actions": "Actions"
     },
     "tree": {
         "actions": "Actions",
@@ -178,7 +207,9 @@
         "cancel": "Cancel",
         "confirm": "Confirm",
         "deny": "Deny",
-        "openDetail": "Open Detail"
+        "openDetail": "Open Detail",
+        "refresh": "Refresh",
+        "view": "View"
     },
     "rollouts": {
         "start": "Start",
@@ -202,7 +233,9 @@
         "controllerPlaceholder": "Enter target controller ID"
     },
     "messages": {
-        "noActions": "No actions in last 24h",
+        "noActions": "No recent actions",
+        "noRollouts": "No rollouts",
+        "noActiveRollouts": "No active rollouts",
         "actionSelect": "Please select an action.",
         "rolloutSelect": "Please select a rollout.",
         "forceSuccess": "Action forced successfully",

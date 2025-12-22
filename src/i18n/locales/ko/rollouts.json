@@ -16,7 +16,8 @@
         "noRollouts": "롤아웃이 없습니다",
         "noActiveRollouts": "활성 롤아웃이 없습니다",
         "createFirst": "첫 롤아웃 생성",
-        "allTargets": "전체 대상"
+        "allTargets": "전체 대상",
+        "total": "전체"
     },
     "refresh": "새로고침",
     "columns": {

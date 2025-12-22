@@ -60,7 +60,12 @@
         "name": "Name",
         "namePlaceholder": "Enter display name (optional)",
         "description": "Description",
-        "descriptionPlaceholder": "Enter description (optional)"
+        "descriptionPlaceholder": "Enter description (optional)",
+        "validation": {
+            "controllerIdPattern": "Only alphanumeric characters, underscores, and hyphens allowed",
+            "nameMaxLength": "Name cannot exceed 128 characters",
+            "descriptionMaxLength": "Description cannot exceed 512 characters"
+        }
     },
     "modal": {
         "createTitle": "Add New Target",
@@ -84,10 +89,12 @@
         "notFound": "Target not found.",
         "deleteFailed": "Failed to delete target.",
         "createFailed": "Failed to create target.",
-        "targetExists": "Target with this Controller ID already exists."
+        "targetExists": "Target with this Controller ID already exists.",
+        "loadFailed": "Failed to load targets."
     },
     "assign": {
         "title": "Assign Distribution Set",
+        "targetLabel": "Assigning to target: ",
         "selectDS": "Select Distribution Set",
         "assignType": "Assignment Type",
         "soft": "Soft",
@@ -141,8 +148,13 @@
         "notRequested": "Not Requested",
         "targetType": "Target Type",
         "deviceStatusDistribution": "Device Status Distribution",
+        "connectivityStatus": "Connectivity Status",
+        "updateStatusDistribution": "Update Status",
+        "totalDevices": "Total Devices",
         "recentActivity": "Recent Device Activity",
-        "awaitingConnection": "Awaiting first connection"
+        "awaitingConnection": "Awaiting first connection",
+        "percentOfDevices": "{{percent}}% of devices",
+        "noDescription": "No description"
     },
     "status": {
         "inSync": "In Sync",
@@ -150,7 +162,9 @@
         "error": "Error",
         "unknown": "Unknown",
         "online": "Online",
-        "offline": "Offline"
+        "offline": "Offline",
+        "neverConnected": "Never Connected",
+        "connectivity": "Connectivity"
     },
     "actions": {
         "viewDetails": "View Details",
@@ -200,6 +214,10 @@
         "value": "Value",
         "noMetadata": "No metadata found",
         "add": "Add Metadata",
+        "edit": "Edit Metadata",
+        "deleteTitle": "Delete Metadata",
+        "deleteConfirm": "Are you sure you want to delete the metadata entry '{{key}}'?",
+        "deleteDesc": "This action cannot be undone.",
         "emptyText": "No metadata. Click 'Add Metadata' to create."
     },
     "tags": {
@@ -266,7 +284,8 @@
         "success": "Successfully deleted {{count}} target(s).",
         "partialSuccess": "Deleted {{success}} target(s). {{failed}} failed.",
         "failed": "Failed to delete targets.",
-        "errorTitle": "Some deletions failed"
+        "errorTitle": "Some deletions failed",
+        "andMore": "...and {{count}} more"
     },
     "savedFilters": {
         "title": "Saved Filters",

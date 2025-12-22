@@ -77,7 +77,7 @@ const TargetFormModal: React.FC<TargetFormModalProps> = ({
                         { required: true, message: t('common:validation.required') },
                         {
                             pattern: /^[a-zA-Z0-9_-]+$/,
-                            message: 'Only alphanumeric characters, underscores, and hyphens allowed',
+                            message: t('form.validation.controllerIdPattern'),
                         },
                     ]}
                 >
@@ -99,7 +99,7 @@ const TargetFormModal: React.FC<TargetFormModalProps> = ({
                 <Form.Item
                     name="name"
                     label={t('form.name')}
-                    rules={[{ max: 128, message: 'Name cannot exceed 128 characters' }]}
+                    rules={[{ max: 128, message: t('form.validation.nameMaxLength') }]}
                 >
                     <Input placeholder={t('form.namePlaceholder')} maxLength={128} />
                 </Form.Item>
@@ -107,7 +107,7 @@ const TargetFormModal: React.FC<TargetFormModalProps> = ({
                 <Form.Item
                     name="description"
                     label={t('form.description')}
-                    rules={[{ max: 512, message: 'Description cannot exceed 512 characters' }]}
+                    rules={[{ max: 512, message: t('form.validation.descriptionMaxLength') }]}
                 >
                     <Input.TextArea
                         placeholder={t('form.descriptionPlaceholder')}

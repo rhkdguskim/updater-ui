@@ -1,11 +1,26 @@
 {
     "title": "작업 관리",
     "subtitle": "액션 및 롤아웃 개요",
+    "operationsTitle": "작업 관리 모니터링",
+    "operationsSubtitle": "롤아웃 배포 진행 상황 확인 및 액션 상태 모니터링",
+    "lastUpdated": "업데이트",
+    "monitoring": "모니터링 중",
+    "polling": {
+        "fast": "실시간 (5초)",
+        "slow": "대기 (30초)"
+    },
     "kpi": {
         "running": "실행 중",
         "pending": "대기 중",
         "completed": "완료됨",
-        "activeRollouts": "활성 롤아웃",
+        "activeRollouts": "진행 중인 롤아웃",
+        "waitingApproval": "승인 대기",
+        "criticalAlerts": "긴급 알림",
+        "successRate": "성공률",
+        "runningActions": "실행 중",
+        "requiresReview": "검토 필요",
+        "immediateAttention": "즉시 조치 필요",
+        "allClear": "이상 없음",
         "actions": "액션",
         "awaitingAction": "액션 대기 중",
         "last24h": "최근 24시간",
@@ -13,8 +28,11 @@
     },
     "chart": {
         "actionStatus": "액션 상태",
+        "rolloutStatus": "롤아웃 상태",
+        "liveRollouts": "라이브 롤아웃 모니터",
+        "actionSummary": "액션 요약 (24시간)",
         "total": "총",
-        "recentActions": "최근 액션",
+        "recentActions": "최근 액션 (24시간)",
         "activeRollouts": "활성 롤아웃",
         "jobProgress": {
             "title": "Job 진행 상황",
@@ -28,14 +46,25 @@
             "errors": "오류 {{count}}건"
         }
     },
+    "quickAccess": {
+        "rollouts": "롤아웃",
+        "rolloutsDesc": "롤아웃 배포 관리",
+        "actions": "액션",
+        "actionsDesc": "디바이스 액션 추적",
+        "total": "총",
+        "last24h": "최근 24시간",
+        "viewAll": "전체 보기"
+    },
     "table": {
         "id": "ID",
         "name": "이름",
         "target": "타겟",
+        "targets": "대상 수",
         "distribution": "배포 세트",
         "status": "상태",
         "time": "시간",
-        "progress": "진행률"
+        "progress": "진행률",
+        "actions": "액션"
     },
     "tree": {
         "actions": "액션",
@@ -178,7 +207,9 @@
         "cancel": "취소",
         "confirm": "승인",
         "deny": "거부",
-        "openDetail": "상세 보기"
+        "openDetail": "상세 보기",
+        "refresh": "새로고침",
+        "view": "보기"
     },
     "rollouts": {
         "start": "시작",
@@ -202,7 +233,9 @@
         "controllerPlaceholder": "타겟 컨트롤러 ID를 입력하세요"
     },
     "messages": {
-        "noActions": "최근 24시간 내 액션이 없습니다",
+        "noActions": "최근 액션이 없습니다",
+        "noRollouts": "롤아웃이 없습니다",
+        "noActiveRollouts": "진행 중인 롤아웃이 없습니다",
         "actionSelect": "액션을 선택하세요.",
         "rolloutSelect": "롤아웃을 선택하세요.",
         "forceSuccess": "액션을 강제 전환했습니다",

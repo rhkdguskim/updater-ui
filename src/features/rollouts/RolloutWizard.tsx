@@ -424,7 +424,7 @@ const RolloutWizard: React.FC = () => {
                                     ...(e.target.checked ? { tags: [], targetTypes: [], statuses: [], controllerQuery: '', searchKeyword: '' } : {})
                                 }))}
                             >
-                                <strong>{t('wizard.targetFilter.allTargets', '모든 대상에 배포 (필터 없음)')}</strong>
+                                <strong>{t('wizard.targetFilter.allTargets')}</strong>
                             </Checkbox>
                         </Form.Item>
                         {!builderState.allTargets && (
@@ -520,7 +520,7 @@ const RolloutWizard: React.FC = () => {
                                     />
                                 </Form.Item>
                             </>)}
-                        <Alert type="info" message={builderState.allTargets ? t('wizard.targetFilter.allTargetsHint', '모든 등록된 대상에 배포됩니다.') : t('wizard.targetFilter.builderHint')} />
+                        <Alert type="info" message={builderState.allTargets ? t('wizard.targetFilter.allTargetsHint') : t('wizard.targetFilter.builderHint')} />
                     </Form>
                 ) : (
                     <Form layout="vertical">

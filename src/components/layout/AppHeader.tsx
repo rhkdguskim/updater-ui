@@ -8,6 +8,11 @@ import {
     MdRocketLaunch,
     MdPlayArrow,
     MdAssignment,
+    MdList,
+    MdLabel,
+    MdCategory,
+    MdExtension,
+    MdOutlineDashboard,
 } from 'react-icons/md';
 import styled from 'styled-components';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -19,8 +24,8 @@ const { Header } = Layout;
 const { Text } = Typography;
 
 const StyledHeader = styled(Header) <{ $bg: string }>`
-    padding: 0 32px;
-    height: 64px;
+    padding: 0 24px;
+    height: 48px;
     background: ${(props) => props.$bg};
     display: flex;
     align-items: center;
@@ -52,24 +57,24 @@ const HeaderRight = styled.div`
 const LogoContainer = styled.div`
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   cursor: pointer;
   
   .logo-icon {
-    width: 32px;
-    height: 32px;
+    width: 26px;
+    height: 26px;
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    border-radius: 8px;
+    border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
-    font-size: 18px;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    font-size: 14px;
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
   }
   
   .logo-text {
-    font-size: 1.1rem;
+    font-size: 0.95rem;
     font-weight: 600;
     letter-spacing: -0.02em;
     color: ${({ theme }) => theme === 'dark' ? '#fff' : '#1e293b'};
@@ -185,16 +190,19 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
             children: [
                 {
                     key: '/targets/overview',
+                    icon: <MdOutlineDashboard />,
                     label: t('nav.overview', '개요'),
                     onClick: () => navigate('/targets'),
                 },
                 {
                     key: '/targets/list',
+                    icon: <MdList />,
                     label: t('nav.list'),
                     onClick: () => navigate('/targets/list'),
                 },
                 {
                     key: '/targets/tags-types',
+                    icon: <MdLabel />,
                     label: t('nav.tagsAndTypes'),
                     onClick: () => navigate('/targets/tags-types'),
                 },
@@ -208,6 +216,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
             children: [
                 {
                     key: '/distributions/overview',
+                    icon: <MdOutlineDashboard />,
                     label: t('nav.overview', '개요'),
                     onClick: () => navigate('/distributions'),
                 },
@@ -218,11 +227,13 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
                     children: [
                         {
                             key: '/distributions/sets',
+                            icon: <MdList />,
                             label: t('nav.list'),
                             onClick: () => navigate('/distributions/sets'),
                         },
                         {
                             key: '/distributions/ds-types-tags',
+                            icon: <MdCategory />,
                             label: t('nav.typesAndTags'),
                             onClick: () => navigate('/distributions/ds-types-tags'),
                         },
@@ -236,11 +247,13 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
                     children: [
                         {
                             key: '/distributions/modules',
+                            icon: <MdList />,
                             label: t('nav.list'),
                             onClick: () => navigate('/distributions/modules'),
                         },
                         {
                             key: '/distributions/sm-types',
+                            icon: <MdExtension />,
                             label: t('nav.types'),
                             onClick: () => navigate('/distributions/sm-types'),
                         },
@@ -256,7 +269,8 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
             children: [
                 {
                     key: '/jobs/dashboard',
-                    label: t('nav.jobsOverview', '작업 관리'),
+                    icon: <MdOutlineDashboard />,
+                    label: t('nav.jobsOverview', '개요'),
                     onClick: () => navigate('/jobs'),
                 },
                 {

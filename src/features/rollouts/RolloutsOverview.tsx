@@ -26,8 +26,9 @@ const fadeIn = keyframes`
 const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 24px;
-    padding: 24px;
+    gap: 12px;
+    height: 100%;
+    overflow: auto;
     animation: ${fadeIn} 0.4s ease-out;
 `;
 
@@ -35,12 +36,13 @@ const PageHeader = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 4px 0;
 `;
 
 const StatsCard = styled(Card) <{ $accentColor?: string }>`
     border: none;
-    border-radius: 16px;
-    box-shadow: var(--shadow-sm);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     transition: all 0.25s var(--ease-smooth);
     position: relative;
     overflow: hidden;
@@ -64,8 +66,8 @@ const StatsCard = styled(Card) <{ $accentColor?: string }>`
 
 const ChartCard = styled(Card)`
     border: none;
-    border-radius: 16px;
-    box-shadow: var(--shadow-sm);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     
     .ant-card-head-title {
         font-size: 14px;
@@ -88,14 +90,14 @@ const RolloutPreviewCard = styled(Card)`
 `;
 
 const IconWrapper = styled.div<{ $bg?: string }>`
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: ${props => props.$bg || 'rgba(99, 102, 241, 0.1)'};
-    font-size: 24px;
+    font-size: 20px;
 `;
 
 const COLORS = {
@@ -315,7 +317,7 @@ const RolloutsOverview: React.FC = () => {
                                     textAlign: 'center'
                                 }}>
                                     <div style={{ fontSize: 28, fontWeight: 700 }}>{totalCount}</div>
-                                    <div style={{ fontSize: 12, color: 'var(--status-neutral)' }}>Total</div>
+                                    <div style={{ fontSize: 12, color: 'var(--status-neutral)' }}>{t('overview.total')}</div>
                                 </div>
                             </div>
                         )}

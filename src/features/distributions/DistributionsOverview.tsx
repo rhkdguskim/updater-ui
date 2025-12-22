@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Row, Col, Typography, Statistic, Button, Flex, Skeleton, Table, Tag } from 'antd';
+import { Card, Row, Col, Typography, Statistic, Button, Flex, Skeleton, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled, { keyframes } from 'styled-components';
@@ -16,7 +16,7 @@ import { useGetDistributionSets } from '@/api/generated/distribution-sets/distri
 import { useGetSoftwareModules } from '@/api/generated/software-modules/software-modules';
 import { useGetDistributionSetTags } from '@/api/generated/distribution-set-tags/distribution-set-tags';
 import { useGetDistributionSetTypes } from '@/api/generated/distribution-set-types/distribution-set-types';
-import type { MgmtDistributionSet } from '@/api/generated/model';
+import { AirportSlideList } from '@/components/common';
 
 const { Title, Text } = Typography;
 
@@ -29,9 +29,9 @@ const fadeInUp = keyframes`
 const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     height: 100%;
-    overflow: hidden;
+    overflow: auto;
     animation: ${fadeInUp} 0.5s ease-out;
 `;
 
@@ -39,7 +39,7 @@ const PageHeader = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 4px 0;
 `;
 
 const HeaderContent = styled.div`
@@ -66,7 +66,7 @@ const GradientTitle = styled(Title)`
 
 const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number }>`
     border: none;
-    border-radius: 20px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
@@ -100,7 +100,7 @@ const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number }>`
 
 const ChartCard = styled(Card) <{ $delay?: number }>`
     border: none;
-    border-radius: 20px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
@@ -132,10 +132,10 @@ const ChartCard = styled(Card) <{ $delay?: number }>`
 `;
 
 const BigNumber = styled.div`
-    font-size: 48px;
+    font-size: 36px;
     font-weight: 700;
     line-height: 1;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
 `;
 
 const COLORS = {
@@ -148,7 +148,7 @@ const COLORS = {
 const PIE_COLORS = ['#6366f1', '#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#06b6d4'];
 
 const DistributionsOverview: React.FC = () => {
-    const { t } = useTranslation('distributions');
+    const { t } = useTranslation(['distributions', 'common']);
     const navigate = useNavigate();
 
     const { data: setsData, isLoading: setsLoading, refetch: refetchSets } = useGetDistributionSets({ limit: 500 });
@@ -168,7 +168,7 @@ const DistributionsOverview: React.FC = () => {
     const typeDistribution = React.useMemo(() => {
         const counts: Record<string, number> = {};
         setsData?.content?.forEach(ds => {
-            const typeName = ds.typeName || 'Unknown';
+            const typeName = ds.typeName || t('common:status.unknown');
             counts[typeName] = (counts[typeName] || 0) + 1;
         });
         return Object.entries(counts).map(([name, value], index) => ({
@@ -184,39 +184,6 @@ const DistributionsOverview: React.FC = () => {
             .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
             .slice(0, 8);
     }, [setsData]);
-
-    const columns = [
-        {
-            title: t('table.name'),
-            dataIndex: 'name',
-            key: 'name',
-            render: (text: string) => <Text strong>{text}</Text>,
-        },
-        {
-            title: t('table.version'),
-            dataIndex: 'version',
-            key: 'version',
-            width: 100,
-            render: (version: string) => <Tag color="blue">v{version}</Tag>,
-        },
-        {
-            title: t('table.type'),
-            dataIndex: 'typeName',
-            key: 'typeName',
-            width: 120,
-            render: (type: string) => type || <Text type="secondary">-</Text>,
-        },
-        {
-            title: t('table.complete'),
-            key: 'complete',
-            width: 100,
-            render: (_: unknown, record: MgmtDistributionSet) => (
-                <Tag color={record.complete ? 'green' : 'orange'}>
-                    {record.complete ? t('status.complete') : t('status.incomplete')}
-                </Tag>
-            ),
-        },
-    ];
 
     return (
         <PageContainer>
@@ -234,7 +201,7 @@ const DistributionsOverview: React.FC = () => {
                     onClick={refetch}
                     loading={isLoading}
                 >
-                    {t('actions.refresh')}
+                    {t('common:actions.refresh')}
                 </Button>
             </PageHeader>
 
@@ -254,7 +221,7 @@ const DistributionsOverview: React.FC = () => {
                                     </Text>
                                     <BigNumber style={{ color: COLORS.sets }}>{setsCount}</BigNumber>
                                 </div>
-                                <AppstoreOutlined style={{ fontSize: 40, color: COLORS.sets, opacity: 0.3 }} />
+                                <AppstoreOutlined style={{ fontSize: 28, color: COLORS.sets, opacity: 0.3 }} />
                             </Flex>
                         )}
                     </StatsCard>
@@ -273,7 +240,7 @@ const DistributionsOverview: React.FC = () => {
                                     </Text>
                                     <BigNumber style={{ color: COLORS.modules }}>{modulesCount}</BigNumber>
                                 </div>
-                                <CodeOutlined style={{ fontSize: 40, color: COLORS.modules, opacity: 0.3 }} />
+                                <CodeOutlined style={{ fontSize: 28, color: COLORS.modules, opacity: 0.3 }} />
                             </Flex>
                         )}
                     </StatsCard>
@@ -292,7 +259,7 @@ const DistributionsOverview: React.FC = () => {
                                     </Text>
                                     <BigNumber style={{ color: COLORS.tags }}>{tagsCount}</BigNumber>
                                 </div>
-                                <TagsOutlined style={{ fontSize: 40, color: COLORS.tags, opacity: 0.3 }} />
+                                <TagsOutlined style={{ fontSize: 28, color: COLORS.tags, opacity: 0.3 }} />
                             </Flex>
                         )}
                     </StatsCard>
@@ -311,7 +278,7 @@ const DistributionsOverview: React.FC = () => {
                                     </Text>
                                     <BigNumber style={{ color: COLORS.types }}>{typesCount}</BigNumber>
                                 </div>
-                                <BlockOutlined style={{ fontSize: 40, color: COLORS.types, opacity: 0.3 }} />
+                                <BlockOutlined style={{ fontSize: 28, color: COLORS.types, opacity: 0.3 }} />
                             </Flex>
                         )}
                     </StatsCard>
@@ -386,21 +353,45 @@ const DistributionsOverview: React.FC = () => {
                         title={t('overview.recentSets', 'Recent Distribution Sets')}
                         $delay={6}
                         style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-                        styles={{ body: { flex: 1, overflow: 'auto', padding: '12px' } }}
+                        styles={{ body: { flex: 1, overflow: 'hidden', padding: '12px' } }}
                     >
-                        <Table
-                            dataSource={recentSets}
-                            columns={columns}
-                            rowKey="id"
-                            size="small"
-                            pagination={false}
-                            loading={isLoading}
-                            locale={{ emptyText: t('messages.noData', { ns: 'common' }) }}
-                            onRow={(record) => ({
-                                onClick: () => navigate(`/distributions/sets/${record.id}`),
-                                style: { cursor: 'pointer' }
-                            })}
-                        />
+                        {isLoading ? (
+                            <Skeleton active paragraph={{ rows: 6 }} />
+                        ) : recentSets.length > 0 ? (
+                            <AirportSlideList
+                                items={recentSets}
+                                itemHeight={48}
+                                visibleCount={6}
+                                interval={3500}
+                                renderItem={(record) => (
+                                    <Flex
+                                        key={record.id}
+                                        align="center"
+                                        justify="space-between"
+                                        style={{
+                                            padding: '8px 12px',
+                                            borderBottom: '1px solid rgba(0,0,0,0.04)',
+                                            cursor: 'pointer',
+                                            height: '100%',
+                                        }}
+                                        onClick={() => navigate(`/distributions/sets/${record.id}`)}
+                                    >
+                                        <Flex align="center" gap={12} style={{ flex: 1 }}>
+                                            <Text strong style={{ minWidth: 120 }}>{record.name}</Text>
+                                            <Tag color="blue">v{record.version}</Tag>
+                                            <Text type="secondary" style={{ fontSize: 12 }}>{record.typeName || '-'}</Text>
+                                        </Flex>
+                                        <Tag color={record.complete ? 'green' : 'orange'}>
+                                            {record.complete ? t('status.complete') : t('status.incomplete')}
+                                        </Tag>
+                                    </Flex>
+                                )}
+                            />
+                        ) : (
+                            <Flex justify="center" align="center" style={{ height: '100%' }}>
+                                <Text type="secondary">{t('messages.noData', { ns: 'common' })}</Text>
+                            </Flex>
+                        )}
                     </ChartCard>
                 </Col>
             </Row>

@@ -57,11 +57,22 @@
         "complete": "완료",
         "incomplete": "미완료"
     },
+    "table": {
+        "name": "이름",
+        "version": "버전",
+        "type": "유형",
+        "complete": "완료 상태"
+    },
+    "status": {
+        "complete": "완료",
+        "incomplete": "미완료"
+    },
     "actions": {
         "viewDetails": "상세 보기",
         "delete": "삭제",
         "clone": "복제",
-        "invalidate": "무효화"
+        "invalidate": "무효화",
+        "deleteSelected": "선택 삭제"
     },
     "messages": {
         "deleteSetSuccess": "배포 세트가 성공적으로 삭제되었습니다.",
@@ -75,7 +86,15 @@
         "createSetSuccess": "배포 세트가 성공적으로 생성되었습니다.",
         "createModuleSuccess": "소프트웨어 모듈이 성공적으로 생성되었습니다.",
         "createSetError": "배포 세트 생성에 실패했습니다.",
-        "createModuleError": "소프트웨어 모듈 생성에 실패했습니다."
+        "createModuleError": "소프트웨어 모듈 생성에 실패했습니다.",
+        "bulkDeleteModuleSuccess": "선택한 소프트웨어 모듈이 삭제되었습니다.",
+        "bulkDeleteModuleConfirmTitle": "{{count}}개의 소프트웨어 모듈 삭제",
+        "bulkDeleteModuleConfirmDesc": "선택한 소프트웨어 모듈을 정말로 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.",
+        "invalidateSuccess": "배포 세트가 무효화되었습니다.",
+        "invalidateConfirmTitle": "배포 세트 무효화",
+        "invalidateConfirmDesc": "무효화되면 이 세트를 새 배포에 사용할 수 없습니다. 이 작업은 되돌릴 수 없습니다.",
+        "cloneSuccess": "배포 세트가 복제되었습니다.",
+        "tagsUpdated": "배포 세트 태그가 업데이트되었습니다."
     },
     "modal": {
         "createSetTitle": "배포 세트 생성",
@@ -159,6 +178,14 @@
             "hashes": "해시",
             "actions": "액션"
         }
+    },
+    "builder": {
+        "title": "고급 배포 세트 빌더",
+        "basicInfo": "기본 정보",
+        "moduleComposition": "모듈 구성",
+        "searchPlaceholder": "소프트웨어 모듈 검색...",
+        "selectionPreview": "선택 미리보기:",
+        "allModules": "전체"
     },
     "metadataTab": {
         "add": "메타데이터 추가",
@@ -254,6 +281,8 @@
         "pageTitle": "일괄 할당 - 배포 세트",
         "instruction": "배포 세트를 선택하고 태그를 할당하거나 제거하세요",
         "selectedSets": "선택됨: {{count}}개 배포 세트",
+        "selectedSetsCount": "{{count}}개의 배포 세트가 선택됨",
+        "mode": "할당 모드",
         "tagAssignment": "태그 할당",
         "assignMode": "모드",
         "assign": "태그 할당",
@@ -265,7 +294,18 @@
         "unassignTags": "태그 제거",
         "tagAssignSuccess": "{{count}}개 배포 세트에 태그가 할당되었습니다",
         "tagUnassignSuccess": "{{count}}개 배포 세트에서 태그가 제거되었습니다",
-        "manageTags": "태그 관리"
+        "manageTags": "태그 관리",
+        "step1": "1단계: 배포 세트 선택",
+        "step2": "2단계: 태그 및 작업 선택",
+        "availableTags": "사용 가능한 태그:",
+        "noTagsFound": "태그가 없습니다",
+        "bulkTagAssignment": "일괄 태그 할당",
+        "selectedCount": "{{count}}개의 배포 세트가 선택되었습니다.",
+        "warningSelectBoth": "하나 이상의 배포 세트와 하나의 태그를 선택해주세요",
+        "assignSuccess": "선택한 세트에 태그가 성공적으로 할당되었습니다",
+        "unassignSuccess": "선택한 세트에서 태그가 성공적으로 제거되었습니다",
+        "assignError": "태그 할당에 실패했습니다",
+        "unassignError": "태그 제거에 실패했습니다"
     },
     "dsTypesAndTags": {
         "title": "배포 세트 유형 & 태그"
@@ -314,6 +354,7 @@
     },
     "values": {
         "yes": "예",
-        "no": "아니오"
+        "no": "아니오",
+        "new": "신규"
     }
 }

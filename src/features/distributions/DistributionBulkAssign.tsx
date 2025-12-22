@@ -28,7 +28,7 @@ const DistributionBulkAssign: React.FC = () => {
 
     const handleBulkAssign = async () => {
         if (selectedSetIds.length === 0 || !selectedTagId) {
-            message.warning('Please select at least one distribution set and one tag');
+            message.warning(t('bulkAssignment.warningSelectBoth'));
             return;
         }
 
@@ -37,16 +37,16 @@ const DistributionBulkAssign: React.FC = () => {
                 distributionsetTagId: selectedTagId,
                 data: selectedSetIds
             });
-            message.success('Tags assigned successfully to selected sets');
+            message.success(t('bulkAssignment.assignSuccess'));
             setSelectedSetIds([]);
         } catch (error) {
-            message.error('Failed to assign tags');
+            message.error(t('bulkAssignment.assignError'));
         }
     };
 
     const handleBulkUnassign = async () => {
         if (selectedSetIds.length === 0 || !selectedTagId) {
-            message.warning('Please select at least one distribution set and one tag');
+            message.warning(t('bulkAssignment.warningSelectBoth'));
             return;
         }
 
@@ -55,26 +55,26 @@ const DistributionBulkAssign: React.FC = () => {
                 distributionsetTagId: selectedTagId,
                 data: selectedSetIds
             });
-            message.success('Tags unassigned successfully from selected sets');
+            message.success(t('bulkAssignment.unassignSuccess'));
             setSelectedSetIds([]);
         } catch (error) {
-            message.error('Failed to unassign tags');
+            message.error(t('bulkAssignment.unassignError'));
         }
     };
 
     const columns = [
         {
-            title: 'Name',
+            title: t('list.columns.name'),
             dataIndex: 'name',
             key: 'name',
         },
         {
-            title: 'Version',
+            title: t('list.columns.version'),
             dataIndex: 'version',
             key: 'version',
         },
         {
-            title: 'Type',
+            title: t('list.columns.type'),
             dataIndex: 'typeName',
             key: 'typeName',
         }
@@ -85,8 +85,8 @@ const DistributionBulkAssign: React.FC = () => {
             <Breadcrumb
                 items={[
                     { title: t('pageTitle'), href: '/distributions' },
-                    { title: 'Distribution Sets', href: '/distributions/sets' },
-                    { title: 'Bulk Assignment' },
+                    { title: t('list.title'), href: '/distributions/sets' },
+                    { title: t('bulkAssignment.title') },
                 ]}
             />
 
@@ -98,12 +98,12 @@ const DistributionBulkAssign: React.FC = () => {
                         onClick={() => navigate('/distributions/sets')}
                         style={{ marginRight: 8 }}
                     />
-                    Bulk Tag Assignment
+                    {t('bulkAssignment.bulkTagAssignment')}
                 </Title>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 24 }}>
-                <Card title="Step 1: Select Distribution Sets">
+                <Card title={t('bulkAssignment.step1')}>
                     <Table
                         rowSelection={{
                             type: 'checkbox',
@@ -119,9 +119,9 @@ const DistributionBulkAssign: React.FC = () => {
                     />
                 </Card>
 
-                <Card title="Step 2: Select Tag & Action">
+                <Card title={t('bulkAssignment.step2')}>
                     <Space direction="vertical" style={{ width: '100%' }} size="middle">
-                        <Text strong>Available Tags:</Text>
+                        <Text strong>{t('bulkAssignment.availableTags')}</Text>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                             {tags.map(tag => (
                                 <Tag.CheckableTag
@@ -138,7 +138,7 @@ const DistributionBulkAssign: React.FC = () => {
                                     {tag.name}
                                 </Tag.CheckableTag>
                             ))}
-                            {tags.length === 0 && <Text type="secondary">No tags found</Text>}
+                            {tags.length === 0 && <Text type="secondary">{t('bulkAssignment.noTagsFound')}</Text>}
                         </div>
 
                         <div style={{ marginTop: 24 }}>
@@ -150,7 +150,7 @@ const DistributionBulkAssign: React.FC = () => {
                                 loading={assignMutation.isPending}
                                 disabled={selectedSetIds.length === 0 || !selectedTagId}
                             >
-                                Assign Tag
+                                {t('bulkAssignment.assign')}
                             </Button>
                             <Button
                                 danger
@@ -159,12 +159,12 @@ const DistributionBulkAssign: React.FC = () => {
                                 loading={unassignMutation.isPending}
                                 disabled={selectedSetIds.length === 0 || !selectedTagId}
                             >
-                                Unassign Tag
+                                {t('bulkAssignment.unassign')}
                             </Button>
                         </div>
 
                         <Text type="secondary" style={{ fontSize: '12px' }}>
-                            Selected {selectedSetIds.length} distribution sets.
+                            {t('bulkAssignment.selectedCount', { count: selectedSetIds.length })}
                         </Text>
                     </Space>
                 </Card>

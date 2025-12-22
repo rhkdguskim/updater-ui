@@ -452,7 +452,7 @@ const CreateDistributionSetWizard: React.FC<CreateDistributionSetWizardProps> = 
                                 ]}
                             >
                                 <Space>
-                                    <Tag color="green">NEW</Tag>
+                                    <Tag color="green">{t('values.new')}</Tag>
                                     <span>{item.name}</span>
                                     <Tag color="blue">{item.version}</Tag>
                                     <Tag color="cyan">{item.typeName || item.type}</Tag>
@@ -573,7 +573,7 @@ const CreateDistributionSetWizard: React.FC<CreateDistributionSetWizardProps> = 
                             renderItem={(item) => (
                                 <List.Item>
                                     <Space>
-                                        {item.isNew && <Tag color="green">NEW</Tag>}
+                                        {item.isNew && <Tag color="green">{t('values.new')}</Tag>}
                                         <span>{item.name}</span>
                                         <Tag color="blue">{item.version}</Tag>
                                         <Tag color="cyan">{item.typeName}</Tag>

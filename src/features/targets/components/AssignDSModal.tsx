@@ -166,7 +166,7 @@ const AssignDSModal: React.FC<AssignDSModalProps> = ({
                     type="info"
                     message={
                         <>
-                            Assigning to target: <Text strong>{targetId}</Text>
+                            {t('assign.targetLabel')} <Text strong>{targetId}</Text>
                         </>
                     }
                     style={{ marginBottom: 16 }}

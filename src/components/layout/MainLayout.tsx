@@ -16,9 +16,9 @@ const ContentLayout = styled(Layout)`
 `;
 
 const StyledContent = styled(Content) <{ $bg: string; $radius: number }>`
-  margin: 24px;
-  padding: 24px;
-  height: calc(100vh - 64px - 48px);
+  margin: 8px;
+  padding: 12px;
+  height: calc(100vh - 48px - 16px);
   overflow: auto;
   background: ${(props) => props.$bg};
   border-radius: ${(props) => props.$radius}px;

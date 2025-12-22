@@ -324,7 +324,7 @@ const Configuration: React.FC = () => {
                                     item.type
                                 )
                             }
-                            placeholder="value1, value2, ..."
+                            placeholder={t('placeholders.array')}
                         />
                     );
                 default:

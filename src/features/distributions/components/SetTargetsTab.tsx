@@ -12,7 +12,7 @@ interface SetTargetsTabProps {
 }
 
 const SetTargetsTab: React.FC<SetTargetsTabProps> = ({ distributionSetId }) => {
-    useTranslation(['distributions', 'common']);
+    const { t } = useTranslation(['distributions', 'targets', 'common']);
     const navigate = useNavigate();
     const [view, setView] = useState<'assigned' | 'installed'>('assigned');
     const [pagination, setPagination] = useState({ current: 1, pageSize: 10 });
@@ -34,7 +34,7 @@ const SetTargetsTab: React.FC<SetTargetsTabProps> = ({ distributionSetId }) => {
 
     const columns = [
         {
-            title: 'Controller ID',
+            title: t('targets:table.controllerId'),
             dataIndex: 'controllerId',
             key: 'controllerId',
             render: (text: string) => (
@@ -42,18 +42,18 @@ const SetTargetsTab: React.FC<SetTargetsTabProps> = ({ distributionSetId }) => {
             )
         },
         {
-            title: 'Name',
+            title: t('targets:table.name'),
             dataIndex: 'name',
             key: 'name',
         },
         {
-            title: 'Description',
+            title: t('targets:form.description'),
             dataIndex: 'description',
             key: 'description',
             ellipsis: true,
         },
         {
-            title: 'Last Contact',
+            title: t('targets:table.lastControllerRequest'),
             dataIndex: 'lastContact',
             key: 'lastContact',
             render: (val: number) => val ? format(val, 'yyyy-MM-dd HH:mm:ss') : '-'
@@ -65,8 +65,8 @@ const SetTargetsTab: React.FC<SetTargetsTabProps> = ({ distributionSetId }) => {
             <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Segmented
                     options={[
-                        { label: 'Assigned Targets', value: 'assigned' },
-                        { label: 'Installed Targets', value: 'installed' },
+                        { label: t('detail.Assigned Targets'), value: 'assigned' },
+                        { label: t('detail.Installed Targets'), value: 'installed' },
                     ]}
                     value={view}
                     onChange={(val) => {
@@ -75,7 +75,7 @@ const SetTargetsTab: React.FC<SetTargetsTabProps> = ({ distributionSetId }) => {
                     }}
                 />
                 <Text type="secondary">
-                    Total: {data?.total || 0}
+                    {t('detail.Total')}: {data?.total || 0}
                 </Text>
             </div>
 

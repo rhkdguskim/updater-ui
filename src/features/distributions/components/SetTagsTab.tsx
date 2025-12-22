@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Tag, Button, message, Space, Modal, Table, Spin } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
+import { useTranslation } from 'react-i18next';
 import {
     useGetDistributionSetTags,
     useAssignDistributionSet,
@@ -17,6 +18,7 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
     distributionSetId,
     isAdmin,
 }) => {
+    const { t } = useTranslation(['distributions', 'common']);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [selectedTagId, setSelectedTagId] = useState<number | null>(null);
 
@@ -68,7 +70,7 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
     const assignMutation = useAssignDistributionSet({
         mutation: {
             onSuccess: () => {
-                message.success('Tag assigned successfully');
+                message.success(t('tagsTab.successAssign'));
                 setIsModalVisible(false);
                 setSelectedTagId(null);
                 // Add to local state immediately
@@ -76,7 +78,7 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
                     setAssignedTagIds(prev => [...prev, selectedTagId]);
                 }
             },
-            onError: () => message.error('Failed to assign tag'),
+            onError: () => message.error(t('tagsTab.errorAssign')),
         },
     });
 
@@ -84,17 +86,17 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
     const unassignMutation = useUnassignDistributionSet({
         mutation: {
             onSuccess: (_, variables) => {
-                message.success('Tag removed successfully');
+                message.success(t('tagsTab.successUnassign'));
                 // Remove from local state
                 setAssignedTagIds(prev => prev.filter(id => id !== variables.distributionsetTagId));
             },
-            onError: () => message.error('Failed to remove tag'),
+            onError: () => message.error(t('tagsTab.errorUnassign')),
         },
     });
 
     const handleAssign = () => {
         if (!selectedTagId) {
-            message.warning('Please select a tag');
+            message.warning(t('tagsTab.warningSelect'));
             return;
         }
         assignMutation.mutate({
@@ -124,7 +126,7 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
 
     const columns = [
         {
-            title: 'Tag Name',
+            title: t('tagsTab.columns.name'),
             dataIndex: 'name',
             key: 'name',
             render: (text: string, record: MgmtTag) => (
@@ -132,14 +134,14 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
             ),
         },
         {
-            title: 'Description',
+            title: t('tagsTab.columns.description'),
             dataIndex: 'description',
             key: 'description',
         },
     ];
 
     if (isTagsLoading || loadingAssignments) {
-        return <Spin tip="Loading tags..." />;
+        return <Spin tip={t('common:messages.loading')} />;
     }
 
     return (
@@ -148,7 +150,7 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
             <div style={{ marginBottom: 16 }}>
                 <Space wrap>
                     {assignedTags.length === 0 ? (
-                        <span style={{ color: '#999' }}>No tags assigned</span>
+                        <span style={{ color: '#999' }}>{t('tagsTab.noTags')}</span>
                     ) : (
                         assignedTags.map(tag => (
                             <Tag
@@ -174,13 +176,13 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
                     icon={<PlusOutlined />}
                     onClick={() => setIsModalVisible(true)}
                 >
-                    Add Tag
+                    {t('tagsTab.add')}
                 </Button>
             )}
 
             {/* Tag Selection Modal */}
             <Modal
-                title="Select Tag to Assign"
+                title={t('tagsTab.selectTitle')}
                 open={isModalVisible}
                 onOk={handleAssign}
                 onCancel={() => {
@@ -205,7 +207,7 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
                 />
                 {availableTags.length === 0 && !isTagsLoading && (
                     <div style={{ textAlign: 'center', color: '#999', padding: 16 }}>
-                        No available tags to assign
+                        {t('tagsTab.noAvailable')}
                     </div>
                 )}
             </Modal>

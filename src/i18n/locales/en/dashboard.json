@@ -17,7 +17,9 @@
         "criticalErrors": "Critical Errors",
         "window24h": "Last 24h window",
         "realtimeSample": "Realtime sample ({{count}} devices)",
-        "alertBadge": "Alert"
+        "alertBadge": "Alert",
+        "requiresAttention": "Requires attention",
+        "allClear": "All clear"
     },
     "charts": {
         "deviceStatus": "Device Status",

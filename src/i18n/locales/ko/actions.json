@@ -6,8 +6,10 @@
         "id": "ID",
         "status": "상태",
         "type": "유형",
+        "target": "타겟",
         "distributionSet": "배포 세트",
         "forceType": "강제 유형",
+        "createdAt": "생성일",
         "actions": "액션"
     },
     "forceTypes": {
@@ -70,6 +72,19 @@
         "view": "보기",
         "addAction": "액션 추가",
         "addActionComingSoon": "액션 생성 기능은 곧 제공됩니다."
+    },
+    "polling": {
+        "live": "실시간 (5초)",
+        "idle": "대기 (30초)"
+    },
+    "lastUpdated": "업데이트",
+    "bulk": {
+        "selected": "{{count}}개 선택됨",
+        "cancel": "일괄 취소",
+        "force": "일괄 강제",
+        "cancelConfirm": "선택한 액션을 취소할까요?",
+        "cancelComingSoon": "일괄 취소 기능은 곧 제공됩니다.",
+        "clearSelection": "선택 해제"
     },
     "detail": {
         "pageTitle": "액션 상세",

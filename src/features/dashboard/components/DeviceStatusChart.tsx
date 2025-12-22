@@ -146,29 +146,29 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null;
 };
 
-export const DeviceStatusChart: React.FC<DeviceStatusChartProps> = ({
+const DeviceStatusChart: React.FC<DeviceStatusChartProps> = ({
     total,
     onlineCount,
     offlineCount,
     loading
 }) => {
-    const { t } = useTranslation('dashboard');
+    const { t } = useTranslation(['dashboard', 'common']);
     const navigate = useNavigate();
 
     const data = useMemo(() => [
         {
-            name: 'Online',
+            name: t('chart.online'),
             value: onlineCount,
             color: COLORS.Online,
             percentage: total > 0 ? (onlineCount / total) * 100 : 0
         },
         {
-            name: 'Offline',
+            name: t('chart.offline'),
             value: offlineCount,
             color: COLORS.Offline,
             percentage: total > 0 ? (offlineCount / total) * 100 : 0
         }
-    ], [onlineCount, offlineCount, total]);
+    ], [onlineCount, offlineCount, total, t]);
 
     const handleClick = () => {
         // Note: pollStatus.overdue is not a valid search parameter in hawkBit API
@@ -215,7 +215,7 @@ export const DeviceStatusChart: React.FC<DeviceStatusChartProps> = ({
                                 {data.map((entry, index) => (
                                     <Cell
                                         key={`cell-${index}`}
-                                        fill={entry.name === 'Online' ? 'url(#onlineGradient)' : 'url(#offlineGradient)'}
+                                        fill={entry.name === t('chart.online') ? 'url(#onlineGradient)' : 'url(#offlineGradient)'}
                                     />
                                 ))}
                             </Pie>
@@ -225,7 +225,7 @@ export const DeviceStatusChart: React.FC<DeviceStatusChartProps> = ({
 
                     <CenterLabel>
                         <TotalValue>{total}</TotalValue>
-                        <TotalLabel>Total Devices</TotalLabel>
+                        <TotalLabel>{t('chart.deviceStatus')}</TotalLabel>
                     </CenterLabel>
                 </ChartContainer>
             )}
@@ -236,14 +236,14 @@ export const DeviceStatusChart: React.FC<DeviceStatusChartProps> = ({
                         <LegendDot $color={COLORS.Online} />
                         <Text>
                             <span style={{ fontWeight: 600 }}>{onlineCount}</span>
-                            <span style={{ color: 'var(--status-neutral)', marginLeft: 4 }}>Online</span>
+                            <span style={{ color: 'var(--status-neutral)', marginLeft: 4 }}>{t('chart.online')}</span>
                         </Text>
                     </LegendItem>
                     <LegendItem $clickable onClick={() => handleClick()}>
                         <LegendDot $color={COLORS.Offline} />
                         <Text>
                             <span style={{ fontWeight: 600 }}>{offlineCount}</span>
-                            <span style={{ color: 'var(--status-neutral)', marginLeft: 4 }}>Offline</span>
+                            <span style={{ color: 'var(--status-neutral)', marginLeft: 4 }}>{t('chart.offline')}</span>
                         </Text>
                     </LegendItem>
                 </LegendContainer>
@@ -251,4 +251,6 @@ export const DeviceStatusChart: React.FC<DeviceStatusChartProps> = ({
         </ChartCard>
     );
 };
+
+export { DeviceStatusChart };
 

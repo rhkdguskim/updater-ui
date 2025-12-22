@@ -9,6 +9,8 @@
         "offlineTargets": "오프라인 상태",
         "successRate": "최근 배포 성공률",
         "availability": "가용성",
+        "connectivity": "연결 상태",
+        "onlineDevices": "온라인 기기",
         "pendingActions": "대기 중인 액션",
         "errors": "오류",
         "last24h": "최근 24시간",
@@ -17,7 +19,9 @@
         "criticalErrors": "치명적 오류",
         "window24h": "최근 24시간 기준",
         "realtimeSample": "실시간 샘플 ({{count}}대)",
-        "alertBadge": "경고"
+        "alertBadge": "경고",
+        "requiresAttention": "확인 필요",
+        "allClear": "정상"
     },
     "charts": {
         "deviceStatus": "장치 상태",

@@ -28,7 +28,12 @@
         "downloadSettings": "Download Settings",
         "downloadSettingsDesc": "Artifact download permissions",
         "assignmentSettings": "Assignment Settings",
-        "assignmentSettingsDesc": "Target assignment configurations"
+        "assignmentSettingsDesc": "Target assignment configurations",
+        "otherSettings": "Other Settings",
+        "otherSettingsDesc": "Miscellaneous configuration keys"
+    },
+    "placeholders": {
+        "array": "value1, value2, ..."
     },
     "descriptions": {
         "pollingTime": "Default polling interval for targets (HH:mm:ss)",

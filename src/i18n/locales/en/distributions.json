@@ -61,7 +61,8 @@
         "viewDetails": "View Details",
         "delete": "Delete",
         "clone": "Clone",
-        "invalidate": "Invalidate"
+        "invalidate": "Invalidate",
+        "deleteSelected": "Delete Selected"
     },
     "messages": {
         "deleteSetSuccess": "Distribution Set deleted successfully",
@@ -75,7 +76,15 @@
         "createSetSuccess": "Distribution Set created successfully",
         "createModuleSuccess": "Software Module created successfully",
         "createSetError": "Failed to create Distribution Set",
-        "createModuleError": "Failed to create Software Module"
+        "createModuleError": "Failed to create Software Module",
+        "bulkDeleteModuleSuccess": "Selected Software Modules deleted successfully",
+        "bulkDeleteModuleConfirmTitle": "Delete {{count}} Software Modules",
+        "bulkDeleteModuleConfirmDesc": "Are you sure you want to delete the selected Software Modules? This action cannot be undone.",
+        "invalidateSuccess": "Distribution set invalidated successfully",
+        "invalidateConfirmTitle": "Invalidate Distribution Set",
+        "invalidateConfirmDesc": "Once invalidated, this set cannot be used for new deployments. This action is permanent.",
+        "cloneSuccess": "Distribution set cloned successfully",
+        "tagsUpdated": "Distribution set tags updated successfully"
     },
     "modal": {
         "createSetTitle": "Create Distribution Set",
@@ -160,6 +169,14 @@
             "actions": "Actions"
         }
     },
+    "builder": {
+        "title": "Advanced Distribution Set Builder",
+        "basicInfo": "Basic Information",
+        "moduleComposition": "Module Composition",
+        "searchPlaceholder": "Search software modules...",
+        "selectionPreview": "Selection Preview:",
+        "allModules": "All"
+    },
     "metadataTab": {
         "add": "Add Metadata",
         "edit": "Edit Metadata",
@@ -217,7 +234,15 @@
         "deleteSuccess": "Type deleted successfully",
         "deleteError": "Failed to delete type",
         "deleteConfirmTitle": "Delete Type",
-        "deleteConfirmDesc": "Are you sure you want to delete this type?"
+        "deleteConfirmDesc": "Are you sure you want to delete this type?",
+        "moduleTypesHint": "Select software module types compatible with this distribution set type.",
+        "mandatoryModuleTypes": "Mandatory Module Types",
+        "mandatoryModuleTypesTooltip": "These module types must be included for the distribution set to be complete.",
+        "optionalModuleTypes": "Optional Module Types",
+        "optionalModuleTypesTooltip": "These module types can optionally be included.",
+        "selectModuleTypes": "Select module types...",
+        "moduleTypeRequired": "At least one module type must be selected.",
+        "moduleTypesReadonly": "Module types cannot be changed after creation."
     },
     "tagManagement": {
         "dsTagTitle": "Distribution Set Tags",
@@ -246,6 +271,8 @@
         "pageTitle": "Bulk Assignment - Distribution Sets",
         "instruction": "Select distribution sets and assign or remove tags",
         "selectedSets": "Selected: {{count}} distribution set(s)",
+        "selectedSetsCount": "{{count}} distribution set(s) selected",
+        "mode": "Assignment Mode",
         "tagAssignment": "Tag Assignment",
         "assignMode": "Mode",
         "assign": "Assign Tags",
@@ -257,7 +284,18 @@
         "unassignTags": "Remove Tags",
         "tagAssignSuccess": "Tags assigned to {{count}} distribution set(s)",
         "tagUnassignSuccess": "Tags removed from {{count}} distribution set(s)",
-        "manageTags": "Manage Tags"
+        "manageTags": "Manage Tags",
+        "step1": "Step 1: Select Distribution Sets",
+        "step2": "Step 2: Select Tag & Action",
+        "availableTags": "Available Tags:",
+        "noTagsFound": "No tags found",
+        "bulkTagAssignment": "Bulk Tag Assignment",
+        "selectedCount": "Selected {{count}} distribution set(s).",
+        "warningSelectBoth": "Please select at least one distribution set and one tag",
+        "assignSuccess": "Tags assigned successfully to selected sets",
+        "unassignSuccess": "Tags unassigned successfully from selected sets",
+        "assignError": "Failed to assign tags",
+        "unassignError": "Failed to unassign tags"
     },
     "dsTypesAndTags": {
         "title": "Distribution Set Types & Tags"
@@ -306,6 +344,7 @@
     },
     "values": {
         "yes": "Yes",
-        "no": "No"
+        "no": "No",
+        "new": "NEW"
     }
 }

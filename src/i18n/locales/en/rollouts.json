@@ -16,7 +16,8 @@
         "noRollouts": "No rollouts yet",
         "noActiveRollouts": "No active rollouts",
         "createFirst": "Create First Rollout",
-        "allTargets": "All targets"
+        "allTargets": "All targets",
+        "total": "Total"
     },
     "refresh": "Refresh",
     "createRollout": "Create Rollout",

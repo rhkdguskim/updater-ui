@@ -28,7 +28,12 @@
         "downloadSettings": "다운로드 설정",
         "downloadSettingsDesc": "아티팩트 다운로드 권한",
         "assignmentSettings": "할당 설정",
-        "assignmentSettingsDesc": "대상 할당 구성"
+        "assignmentSettingsDesc": "대상 할당 구성",
+        "otherSettings": "기타 설정",
+        "otherSettingsDesc": "기타 구성 항목"
+    },
+    "placeholders": {
+        "array": "값1, 값2, ..."
     },
     "descriptions": {
         "pollingTime": "대상의 기본 폴링 간격 (HH:mm:ss)",

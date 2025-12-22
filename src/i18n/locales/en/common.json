@@ -15,7 +15,8 @@
         "smTypes": "Module Type Management",
         "actions": "Actions",
         "rollouts": "Rollouts",
-        "jobs": "Jobs",
+        "jobs": "Task Management",
+        "jobsOverview": "Overview",
         "system": "System",
         "configuration": "Configuration",
         "deployment": "Deployment",
@@ -23,7 +24,8 @@
         "types": "Types",
         "tags": "Tags",
         "tagsAndTypes": "Tags & Types",
-        "typesAndTags": "Types & Tags"
+        "typesAndTags": "Types & Tags",
+        "overview": "Overview"
     },
     "actions": {
         "save": "Save",
@@ -52,6 +54,7 @@
         "error": "Error",
         "canceled": "Canceled",
         "inSync": "In Sync",
+        "in_sync": "In Sync",
         "unknown": "Unknown",
         "scheduled": "Scheduled",
         "paused": "Paused",

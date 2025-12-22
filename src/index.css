@@ -856,3 +856,227 @@ textarea {
         background-position: -200% 0;
     }
 }
+
+/* ============================================
+   COMPACT UI STYLES
+   ============================================ */
+
+/* Compact Table Styles */
+.ant-table-tbody>tr>td {
+    padding: 8px 12px !important;
+}
+
+.ant-table-thead>tr>th {
+    padding: 10px 12px !important;
+}
+
+.ant-table-small .ant-table-tbody>tr>td {
+    padding: 6px 10px !important;
+}
+
+.ant-table-small .ant-table-thead>tr>th {
+    padding: 8px 10px !important;
+}
+
+/* Compact Card Styles */
+.ant-card-small>.ant-card-body {
+    padding: 12px !important;
+}
+
+.ant-card>.ant-card-body {
+    padding: 16px !important;
+}
+
+.ant-card-head {
+    min-height: 40px !important;
+    padding: 0 16px !important;
+}
+
+.ant-card-head-title {
+    padding: 10px 0 !important;
+}
+
+/* Compact Form Elements */
+.ant-form-item {
+    margin-bottom: 12px;
+}
+
+.ant-select-selector,
+.ant-input,
+.ant-input-affix-wrapper {
+    height: 32px !important;
+}
+
+/* Compact Gap Utilities */
+.ant-row {
+    row-gap: 12px !important;
+}
+
+.ant-space-compact {
+    gap: 4px;
+}
+
+/* Compact Statistic */
+.ant-statistic-content-value {
+    font-size: 28px !important;
+}
+
+.ant-statistic-title {
+    font-size: 12px !important;
+    margin-bottom: 4px !important;
+}
+
+/* Compact Tag */
+.ant-tag {
+    padding: 2px 8px !important;
+    font-size: 11px !important;
+    line-height: 1.4 !important;
+}
+
+/* Compact Button */
+.ant-btn-sm {
+    height: 28px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+}
+
+/* Compact Pagination */
+.ant-pagination {
+    font-size: 13px;
+}
+
+.ant-pagination-item {
+    min-width: 28px !important;
+    height: 28px !important;
+    line-height: 26px !important;
+}
+
+/* Compact Modal */
+.ant-modal-header {
+    padding: 12px 16px !important;
+}
+
+.ant-modal-body {
+    padding: 16px !important;
+}
+
+.ant-modal-footer {
+    padding: 10px 16px !important;
+}
+
+/* Compact Tabs - Fixed indicator position */
+.ant-tabs-tab {
+    padding: 6px 12px !important;
+}
+
+.ant-tabs-nav {
+    margin-bottom: 8px !important;
+}
+
+.ant-tabs-ink-bar {
+    bottom: 0 !important;
+}
+
+.ant-tabs-top>.ant-tabs-nav::before {
+    bottom: 0;
+}
+
+/* Compact Description List */
+.ant-descriptions-item-label,
+.ant-descriptions-item-content {
+    padding: 6px 10px !important;
+}
+
+/* ============================================
+   100VH RESPONSIVE LAYOUT
+   ============================================ */
+
+/* Ensure tables with scroll work properly */
+.ant-table-wrapper {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.ant-table {
+    overflow: auto;
+}
+
+/* Fix table container to fill available space */
+.ant-table-container {
+    overflow: auto;
+    flex: 1;
+}
+
+/* Ensure card body can flex */
+.ant-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.ant-card-body {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* List views should scroll not clip */
+.ant-list {
+    overflow: auto;
+    flex: 1;
+}
+
+/* Full height page container utility */
+.full-height-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+.full-height-container>.flex-content {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+}
+
+/* Airport-style slide animation */
+@keyframes slideUp {
+
+    0%,
+    20% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    25%,
+    100% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+}
+
+@keyframes slideIn {
+
+    0%,
+    20% {
+        transform: translateY(100%);
+        opacity: 0;
+    }
+
+    25%,
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.airport-slide-container {
+    overflow: hidden;
+    position: relative;
+}
+
+.airport-slide-item {
+    animation: slideUp 5s ease-in-out infinite;
+}

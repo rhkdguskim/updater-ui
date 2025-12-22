@@ -124,7 +124,7 @@ const DistributionSetTypeDialog: React.FC<DistributionSetTypeDialogProps> = ({
                 const optionalIds = values.optionalModuleTypeIds || [];
 
                 if (mandatoryIds.length === 0 && optionalIds.length === 0) {
-                    message.error(t('typeManagement.moduleTypeRequired', '최소 하나의 모듈 타입을 선택해야 합니다.'));
+                    message.error(t('typeManagement.moduleTypeRequired'));
                     return;
                 }
 
@@ -192,18 +192,18 @@ const DistributionSetTypeDialog: React.FC<DistributionSetTypeDialogProps> = ({
                     <Divider />
                     <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
                         {isEditing
-                            ? t('typeManagement.moduleTypesReadonly', '모듈 타입은 생성 후 변경할 수 없습니다.')
-                            : t('typeManagement.moduleTypesHint', '이 배포 세트 타입과 호환되는 소프트웨어 모듈 타입을 선택하세요.')}
+                            ? t('typeManagement.moduleTypesReadonly')
+                            : t('typeManagement.moduleTypesHint')}
                     </Text>
 
                     <Form.Item
                         name="mandatoryModuleTypeIds"
-                        label={t('typeManagement.mandatoryModuleTypes', '필수 모듈 타입')}
-                        tooltip={t('typeManagement.mandatoryModuleTypesTooltip', '배포 세트가 완전하려면 이 타입의 모듈이 반드시 포함되어야 합니다.')}
+                        label={t('typeManagement.mandatoryModuleTypes')}
+                        tooltip={t('typeManagement.mandatoryModuleTypesTooltip')}
                     >
                         <Select
                             mode="multiple"
-                            placeholder={t('typeManagement.selectModuleTypes', '모듈 타입 선택...')}
+                            placeholder={t('typeManagement.selectModuleTypes')}
                             options={smTypeOptions}
                             loading={smTypesLoading || mandatoryLoading}
                             allowClear
@@ -215,12 +215,12 @@ const DistributionSetTypeDialog: React.FC<DistributionSetTypeDialogProps> = ({
 
                     <Form.Item
                         name="optionalModuleTypeIds"
-                        label={t('typeManagement.optionalModuleTypes', '선택 모듈 타입')}
-                        tooltip={t('typeManagement.optionalModuleTypesTooltip', '이 타입의 모듈은 선택적으로 포함할 수 있습니다.')}
+                        label={t('typeManagement.optionalModuleTypes')}
+                        tooltip={t('typeManagement.optionalModuleTypesTooltip')}
                     >
                         <Select
                             mode="multiple"
-                            placeholder={t('typeManagement.selectModuleTypes', '모듈 타입 선택...')}
+                            placeholder={t('typeManagement.selectModuleTypes')}
                             options={smTypeOptions}
                             loading={smTypesLoading || optionalLoading}
                             allowClear
