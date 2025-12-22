@@ -13,6 +13,8 @@
         "filterByTag": "Filter by Tag",
         "savedFilters": "Saved Filters"
     },
+    "quickFilters": "Quick Filters",
+    "manageFilters": "Manage",
     "detail": {
         "title": "Target Details",
         "tabs": {
@@ -254,6 +256,17 @@
         "selectType": "Select a type",
         "assignTypeButton": "Assign Type to Selected",
         "typeAssignSuccess": "Type assigned to {{count}} targets."
+    },
+    "bulkDelete": {
+        "title": "Bulk Delete Targets",
+        "button": "Delete",
+        "confirmMessage": "Are you sure you want to delete {{count}} target(s)?",
+        "confirmDesc": "This action cannot be undone.",
+        "processing": "Deleting targets...",
+        "success": "Successfully deleted {{count}} target(s).",
+        "partialSuccess": "Deleted {{success}} target(s). {{failed}} failed.",
+        "failed": "Failed to delete targets.",
+        "errorTitle": "Some deletions failed"
     },
     "savedFilters": {
         "title": "Saved Filters",

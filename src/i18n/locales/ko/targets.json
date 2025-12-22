@@ -13,6 +13,8 @@
         "filterByTag": "태그로 필터링",
         "savedFilters": "저장된 필터"
     },
+    "quickFilters": "빠른 필터",
+    "manageFilters": "관리",
     "detail": {
         "title": "타겟 상세",
         "tabs": {
@@ -266,6 +268,17 @@
         "selectType": "유형 선택",
         "assignTypeButton": "선택한 타겟에 유형 할당",
         "typeAssignSuccess": "{{count}}개 타겟에 유형이 할당되었습니다."
+    },
+    "bulkDelete": {
+        "title": "타겟 일괄 삭제",
+        "button": "삭제",
+        "confirmMessage": "{{count}}개 타겟을 삭제하시겠습니까?",
+        "confirmDesc": "이 작업은 되돌릴 수 없습니다.",
+        "processing": "타겟 삭제 중...",
+        "success": "{{count}}개 타겟이 삭제되었습니다.",
+        "partialSuccess": "{{success}}개 삭제 완료, {{failed}}개 실패.",
+        "failed": "타겟 삭제에 실패했습니다.",
+        "errorTitle": "일부 삭제에 실패했습니다"
     },
     "savedFilters": {
         "title": "저장된 필터",

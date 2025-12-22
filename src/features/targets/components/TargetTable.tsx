@@ -132,7 +132,7 @@ const TargetTable: React.FC<TargetTableProps> = ({
             sorter: true,
             ellipsis: true,
             render: (_: string, record) => (
-                <Space direction="vertical" size={0}>
+                <Space orientation="vertical" size={0}>
                     <Text strong>{record.name || <Text type="secondary">-</Text>}</Text>
                     {record.ipAddress && (
                         <Text type="secondary" style={{ fontSize: 12 }}>

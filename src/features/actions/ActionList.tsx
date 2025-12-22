@@ -310,11 +310,11 @@ const ActionList: React.FC = () => {
 
             <Card
                 style={{ flex: 1, height: '100%' }}
-                bodyStyle={{ display: 'flex', flexDirection: 'column', gap: 16, height: '100%' }}
+                styles={{ body: { display: 'flex', flexDirection: 'column', gap: 16, height: '100%' } }}
             >
                 <SummaryGrid>
                     {summaryCards.map((card) => (
-                        <SummaryCard key={card.key} bordered={false} bodyStyle={{ padding: '12px 16px' }}>
+                        <SummaryCard key={card.key} variant="borderless" styles={{ body: { padding: '12px 16px' } }}>
                             <Text type="secondary">{card.label}</Text>
                             <Title level={3} style={{ margin: 0 }}>
                                 {card.value}

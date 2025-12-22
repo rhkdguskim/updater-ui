@@ -11,6 +11,7 @@ import {
     AssignDSModal,
     BulkAssignTagsModal,
     BulkAssignTypeModal,
+    BulkDeleteTargetModal,
     SavedFiltersModal,
 } from './components';
 import type { AssignPayload } from './components';
@@ -65,6 +66,7 @@ const TargetList: React.FC = () => {
     const [selectedTargetIds, setSelectedTargetIds] = useState<string[]>([]);
     const [bulkTagsModalOpen, setBulkTagsModalOpen] = useState(false);
     const [bulkTypeModalOpen, setBulkTypeModalOpen] = useState(false);
+    const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
     const [savedFiltersOpen, setSavedFiltersOpen] = useState(false);
     const [activeSavedFilter, setActiveSavedFilter] = useState<{ id?: number; name?: string; query: string } | null>(null);
     const [searchResetSignal, setSearchResetSignal] = useState(0);
@@ -406,6 +408,9 @@ const TargetList: React.FC = () => {
                         <Button onClick={() => setBulkTypeModalOpen(true)}>
                             {t('bulkAssign.assignType')}
                         </Button>
+                        <Button danger onClick={() => setBulkDeleteModalOpen(true)}>
+                            {t('bulkDelete.button', { defaultValue: 'Delete' })}
+                        </Button>
                     </Space>
                 )}
 
@@ -488,6 +493,17 @@ const TargetList: React.FC = () => {
                 onSuccess={() => {
                     setBulkTypeModalOpen(false);
                     setSelectedTargetIds([]); // Clear selection after success
+                    queryClient.invalidateQueries({ queryKey: getGetTargetsQueryKey() });
+                }}
+            />
+
+            <BulkDeleteTargetModal
+                open={bulkDeleteModalOpen}
+                targetIds={selectedTargetIds}
+                onCancel={() => setBulkDeleteModalOpen(false)}
+                onSuccess={() => {
+                    setBulkDeleteModalOpen(false);
+                    setSelectedTargetIds([]);
                     queryClient.invalidateQueries({ queryKey: getGetTargetsQueryKey() });
                 }}
             />

@@ -329,7 +329,7 @@ const DistributionsOverview: React.FC = () => {
                                 <Statistic
                                     value={typesCount}
                                     suffix={t('overview.typesLabel', 'types')}
-                                    valueStyle={{ fontSize: 14, fontWeight: 600 }}
+                                    styles={{ content: { fontSize: 14, fontWeight: 600 } }}
                                 />
                             </Flex>
                         }
@@ -386,7 +386,7 @@ const DistributionsOverview: React.FC = () => {
                         title={t('overview.recentSets', 'Recent Distribution Sets')}
                         $delay={6}
                         style={{ flex: 1, display: 'flex', flexDirection: 'column' }}
-                        bodyStyle={{ flex: 1, overflow: 'auto', padding: '12px' }}
+                        styles={{ body: { flex: 1, overflow: 'auto', padding: '12px' } }}
                     >
                         <Table
                             dataSource={recentSets}
