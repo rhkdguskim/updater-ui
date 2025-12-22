@@ -197,16 +197,19 @@ const TargetsOverview: React.FC = () => {
 
     const columns = [
         {
-            title: t('table.controllerId'),
-            dataIndex: 'controllerId',
-            key: 'controllerId',
-            render: (text: string) => <Text strong>{text}</Text>,
-        },
-        {
             title: t('table.name'),
             dataIndex: 'name',
             key: 'name',
-            render: (text: string) => text || <Text type="secondary">-</Text>,
+            render: (_: string, record: MgmtTarget) => (
+                <div>
+                    <Text strong>{record.name || record.controllerId}</Text>
+                    {record.ipAddress && (
+                        <div>
+                            <Text type="secondary" style={{ fontSize: 12 }}>{record.ipAddress}</Text>
+                        </div>
+                    )}
+                </div>
+            ),
         },
         {
             title: t('table.status'),

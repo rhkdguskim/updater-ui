@@ -253,6 +253,28 @@ const Dashboard: React.FC = () => {
         { name: 'Offline', value: offlineCount, color: COLORS.offline },
     ].filter(d => d.value > 0);
 
+    // Create a map of controllerId to target info for quick lookup
+    const targetMap = React.useMemo(() => {
+        const map = new Map<string, { name?: string; ipAddress?: string }>();
+        targets.forEach(t => {
+            if (t.controllerId) {
+                map.set(t.controllerId, { name: t.name, ipAddress: t.ipAddress });
+            }
+        });
+        return map;
+    }, [targets]);
+
+    const getTargetIdFromAction = (record: MgmtAction) => {
+        // Try to get from direct link first, then parse from self link
+        // Format: .../targets/{controllerId}/actions/{actionId}
+        let targetId = record._links?.target?.href?.split('/').pop();
+        if (!targetId && record._links?.self?.href) {
+            const match = record._links.self.href.match(/targets\/([^/]+)\/actions/);
+            if (match) targetId = match[1];
+        }
+        return targetId;
+    };
+
     // Recent actions table
     const recentActionsTable = [...recentActions]
         .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
@@ -276,18 +298,23 @@ const Dashboard: React.FC = () => {
             title: t('recentActions.target', 'Target'),
             key: 'target',
             render: (_: unknown, record: MgmtAction) => {
-                // Try to get from direct link first, then parse from self link
-                // Format: .../targets/{controllerId}/actions/{actionId}
-                let targetId = record._links?.target?.href?.split('/').pop();
-                if (!targetId && record._links?.self?.href) {
-                    const match = record._links.self.href.match(/targets\/([^/]+)\/actions/);
-                    if (match) targetId = match[1];
-                }
-
+                const targetId = getTargetIdFromAction(record);
                 if (!targetId) return '-';
+
+                const targetInfo = targetMap.get(targetId);
+                const displayName = targetInfo?.name || targetId;
+                const ipAddress = targetInfo?.ipAddress;
+
                 return (
                     <a onClick={() => navigate(`/targets/${targetId}`)} style={{ cursor: 'pointer' }}>
-                        {targetId}
+                        <div>
+                            <Text strong>{displayName}</Text>
+                            {ipAddress && (
+                                <div>
+                                    <Text type="secondary" style={{ fontSize: 11 }}>{ipAddress}</Text>
+                                </div>
+                            )}
+                        </div>
                     </a>
                 );
             },
@@ -298,7 +325,12 @@ const Dashboard: React.FC = () => {
             render: (_: unknown, record: MgmtAction) => {
                 const link = getDistributionLink(record);
                 if (!link) {
-                    return '-';
+                    // Try to get DS name from rollout or action info if available
+                    const rolloutName = (record as unknown as { rolloutName?: string }).rolloutName;
+                    if (rolloutName) {
+                        return <Text type="secondary">{rolloutName}</Text>;
+                    }
+                    return <Text type="secondary">-</Text>;
                 }
                 return (
                     <a onClick={() => navigate(link.href)} style={{ cursor: 'pointer' }}>

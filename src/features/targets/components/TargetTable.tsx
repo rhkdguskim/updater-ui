@@ -114,29 +114,17 @@ const TargetTable: React.FC<TargetTableProps> = ({
 
     const columns: TableProps<MgmtTarget>['columns'] = [
         {
-            title: t('table.controllerId'),
-            dataIndex: 'controllerId',
-            key: 'controllerId',
-            sorter: true,
-            width: 180,
-            render: (text: string) => (
-                <Text strong copyable={{ text }}>
-                    {text}
-                </Text>
-            ),
-        },
-        {
             title: t('table.name'),
             dataIndex: 'name',
             key: 'name',
             sorter: true,
-            ellipsis: true,
+            width: 220,
             render: (_: string, record) => (
-                <Space orientation="vertical" size={0}>
-                    <Text strong>{record.name || <Text type="secondary">-</Text>}</Text>
+                <Space direction="vertical" size={0}>
+                    <Text strong>{record.name || record.controllerId}</Text>
                     {record.ipAddress && (
                         <Text type="secondary" style={{ fontSize: 12 }}>
-                            {t('table.ipAddress')}: {record.ipAddress}
+                            {record.ipAddress}
                         </Text>
                     )}
                 </Space>

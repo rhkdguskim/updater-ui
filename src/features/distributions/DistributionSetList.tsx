@@ -107,7 +107,7 @@ const DistributionSetList: React.FC = () => {
             key: 'name',
             sorter: true,
             render: (text, record) => (
-                <a onClick={() => navigate(`/ distributions / sets / ${record.id} `)}>{text}</a>
+                <a onClick={() => navigate(`/distributions/sets/${record.id}`)}>{text}</a>
             ),
         },
         {
@@ -162,7 +162,7 @@ const DistributionSetList: React.FC = () => {
                         <Button
                             type="text"
                             icon={<EyeOutlined />}
-                            onClick={() => navigate(`/ distributions / sets / ${record.id} `)}
+                            onClick={() => navigate(`/distributions/sets/${record.id}`)}
                         />
                     </Tooltip>
                     {isAdmin && (
