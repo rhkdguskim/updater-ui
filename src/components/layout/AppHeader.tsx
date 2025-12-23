@@ -74,10 +74,14 @@ const LogoContainer = styled.div`
   }
   
   .logo-text {
-    font-size: 0.95rem;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: ${({ theme }) => theme === 'dark' ? '#fff' : '#1e293b'};
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: #1e293b;
+    
+    .dark-mode & {
+      color: #f8fafc;
+    }
   }
 `;
 

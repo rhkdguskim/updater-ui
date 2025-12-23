@@ -47,8 +47,8 @@ const DeviceCardGrid: React.FC<DeviceCardGridProps> = ({
     delay = 10,
     cols = 4,
     rows = 2,
-    gap = 10,
-    rowHeight = 110,
+    gap = 8,
+    rowHeight = 90,
     targetTypeColorMap,
 }) => {
     const { t } = useTranslation('dashboard');

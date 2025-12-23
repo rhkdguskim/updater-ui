@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Typography, Button, Flex, Skeleton, Progress, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +37,7 @@ import {
     ActivityItem,
     COLORS,
 } from '@/components/shared/OverviewStyles';
+import RolloutCreateModal from './RolloutCreateModal';
 
 dayjs.extend(relativeTime);
 
@@ -72,6 +73,7 @@ const RolloutsOverview: React.FC = () => {
 
     const { data: allRollouts, isLoading, refetch, dataUpdatedAt } = useGetRollouts({ limit: 100 });
     const lastUpdated = dataUpdatedAt ? dayjs(dataUpdatedAt).fromNow() : '-';
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const rollouts = allRollouts?.content || [];
     const totalCount = rollouts.length;
@@ -151,7 +153,7 @@ const RolloutsOverview: React.FC = () => {
                         <Button
                             type="primary"
                             icon={<PlusOutlined />}
-                            onClick={() => navigate('/rollouts/create')}
+                            onClick={() => setIsCreateModalOpen(true)}
                             size="small"
                         >
                             {t('overview.createRollout', 'Create')}
@@ -408,7 +410,7 @@ const RolloutsOverview: React.FC = () => {
                                     type="primary"
                                     size="small"
                                     icon={<PlusOutlined />}
-                                    onClick={() => navigate('/rollouts/create')}
+                                    onClick={() => setIsCreateModalOpen(true)}
                                 >
                                     {t('overview.createFirst', 'Create First Rollout')}
                                 </Button>
@@ -475,6 +477,14 @@ const RolloutsOverview: React.FC = () => {
                     )}
                 </OverviewListCard>
             </BottomRow>
+            <RolloutCreateModal
+                open={isCreateModalOpen}
+                onClose={() => setIsCreateModalOpen(false)}
+                onSuccess={(id) => {
+                    setIsCreateModalOpen(false);
+                    navigate(`/rollouts/${id}`);
+                }}
+            />
         </OverviewPageContainer>
     );
 };

@@ -81,7 +81,7 @@ export const GradientTitle = styled(Typography.Title) <{ $theme?: keyof typeof O
     }
     
     .dark-mode & {
-        background: linear-gradient(135deg, #f1f5f9 0%, #94a3b8 100%);
+        background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
         -webkit-background-clip: text;
         background-clip: text;
     }
@@ -90,8 +90,8 @@ export const GradientTitle = styled(Typography.Title) <{ $theme?: keyof typeof O
 export const TopRow = styled.div`
     display: flex;
     gap: 12px;
-    flex: 0 0 280px;
-    min-height: 280px;
+    flex: 0 0 240px;
+    min-height: 240px;
 `;
 
 export const BottomRow = styled.div`
@@ -149,11 +149,12 @@ export const OverviewStatsCard = styled(Card) <{ $accentColor?: string; $delay?:
     }
 
     .dark-mode & {
-        background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
+        background: linear-gradient(145deg, rgba(24, 24, 27, 0.95) 0%, rgba(9, 9, 11, 0.9) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.04);
     }
     
     .ant-card-body {
-        padding: 16px;
+        padding: 12px;
         height: 100%;
         display: flex;
         flex-direction: column;
@@ -231,14 +232,15 @@ export const OverviewChartCard = styled(Card) <{ $delay?: number; $theme?: keyof
     }
 
     .dark-mode & {
-        background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
+        background: linear-gradient(145deg, rgba(24, 24, 27, 0.95) 0%, rgba(9, 9, 11, 0.9) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.04);
         
         .ant-card-head {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
         
         .ant-card-head-title {
-            color: #e2e8f0;
+            color: #f8fafc;
         }
     }
 `;
@@ -307,6 +309,13 @@ export const ChartLegendItem = styled.div`
         transform: translateX(2px);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
     }
+
+    .dark-mode & {
+        background: linear-gradient(135deg, rgba(24, 24, 27, 0.8) 0%, rgba(9, 9, 11, 0.6) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.03);
+        
+        span { color: #94a3b8 !important; }
+    }
 `;
 
 export const ActivityItem = styled.div`
@@ -326,6 +335,11 @@ export const ActivityItem = styled.div`
         background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(248, 250, 252, 0.7) 100%);
         transform: translateX(2px);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .dark-mode & {
+        background: linear-gradient(135deg, rgba(24, 24, 27, 0.8) 0%, rgba(9, 9, 11, 0.6) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.03);
     }
 `;
 

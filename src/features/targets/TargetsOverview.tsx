@@ -149,7 +149,7 @@ const TargetsOverview: React.FC = () => {
                 <ChartLegendItem key={entry.name}>
                     <Flex align="center" gap={6}>
                         <div style={{ width: 10, height: 10, borderRadius: 3, background: entry.color, boxShadow: `0 1px 3px ${entry.color}40` }} />
-                        <Text style={{ fontSize: 11, color: '#475569' }}>{entry.name}</Text>
+                        <Text style={{ fontSize: 11 }}>{entry.name}</Text>
                     </Flex>
                     <Text strong style={{ fontSize: 12, color: entry.color }}>{entry.value}</Text>
                 </ChartLegendItem>

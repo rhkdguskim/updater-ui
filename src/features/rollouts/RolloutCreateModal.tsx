@@ -22,13 +22,13 @@ const RolloutCreateModal: React.FC<RolloutCreateModalProps> = ({
             open={open}
             onCancel={onClose}
             footer={null}
-            width="90%"
-            style={{ maxWidth: 1200, top: 20 }}
+            width={1100}
+            style={{ top: 40 }}
             styles={{
                 body: {
-                    maxHeight: 'calc(100vh - 140px)',
-                    overflow: 'auto',
+                    height: 'calc(100vh - 160px)',
                     padding: 0,
+                    overflow: 'hidden',
                 }
             }}
             destroyOnClose

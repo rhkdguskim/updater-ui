@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
     Card,
@@ -22,17 +22,17 @@ import {
     Col,
     Flex,
 } from 'antd';
-import { ArrowLeftOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined, ReloadOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import { useCreate, useStart, getRollout } from '@/api/generated/rollouts/rollouts';
-import { useGetDistributionSets } from '@/api/generated/distribution-sets/distribution-sets';
+import { useCreate, useStart, getRollouts } from '@/api/generated/rollouts/rollouts';
+import { useGetDistributionSets, useGetAssignedSoftwareModules } from '@/api/generated/distribution-sets/distribution-sets';
+import { useGetArtifacts } from '@/api/generated/software-modules/software-modules';
 import { useGetTargets } from '@/api/generated/targets/targets';
 import { useGetTargetTags } from '@/api/generated/target-tags/target-tags';
 import { useGetTargetTypes } from '@/api/generated/target-types/target-types';
-import type { MgmtDistributionSet } from '@/api/generated/model';
 import { useQueryClient } from '@tanstack/react-query';
-import type { RadioChangeEvent } from 'antd/es/radio';
 import styled from 'styled-components';
+import { buildCondition, combineWithAnd, combineWithOr, escapeValue } from '@/utils/fiql';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -58,9 +58,6 @@ const TitleGroup = styled.div`
     gap: 12px;
 `;
 
-const StepsCard = styled(Card)`
-    border-radius: 14px;
-`;
 
 const ActionsBar = styled.div`
     display: flex;
@@ -103,44 +100,38 @@ const buildFiqlFromBuilder = (state: TargetFilterBuilderState) => {
 
     // Tags: tag=="name"
     if (state.tags.length > 0) {
-        const escapeQuote = (s: string) => s.replace(/"/g, '\\"');
-        const formattedTags = state.tags.map(t => `tag=="${escapeQuote(t)}"`);
-
-        if (state.tags.length === 1) {
-            clauses.push(formattedTags[0]);
+        const tagConditions = state.tags.map(t => buildCondition({ field: 'tag.name', operator: '==', value: t }));
+        if (state.tagMode === 'any') {
+            clauses.push(`(${combineWithOr(tagConditions)})`);
         } else {
-            const operator = state.tagMode === 'any' ? ',' : ';';
-            clauses.push(`(${formattedTags.join(operator)})`);
+            clauses.push(combineWithAnd(tagConditions));
         }
     }
 
     // Target Types: targettype.name=="name"
     if (state.targetTypes.length > 0) {
-        const escapeQuote = (s: string) => s.replace(/"/g, '\\"');
-        const formattedTypes = state.targetTypes.map(t => `targettype.name=="${escapeQuote(t)}"`);
-
-        if (state.targetTypes.length === 1) {
-            clauses.push(formattedTypes[0]);
+        const typeConditions = state.targetTypes.map(t => buildCondition({ field: 'targettype.name', operator: '==', value: t }));
+        if (state.targetTypeMode === 'any') {
+            clauses.push(`(${combineWithOr(typeConditions)})`);
         } else {
-            const operator = state.targetTypeMode === 'any' ? ',' : ';';
-            clauses.push(`(${formattedTypes.join(operator)})`);
+            clauses.push(combineWithAnd(typeConditions));
         }
     }
 
     // Update Status: updateStatus=="in_sync"
     if (state.updateStatuses.length > 0) {
-        if (state.updateStatuses.length === 1) {
-            clauses.push(`updateStatus=="${state.updateStatuses[0]}"`);
+        const statusConditions = state.updateStatuses.map(s => buildCondition({ field: 'updateStatus', operator: '==', value: s }));
+        if (statusConditions.length === 1) {
+            clauses.push(statusConditions[0]);
         } else {
-            const joined = state.updateStatuses.map(s => `updateStatus=="${s}"`).join(',');
-            clauses.push(`(${joined})`);
+            clauses.push(`(${combineWithOr(statusConditions)})`);
         }
     }
 
     // Polling Status (Online/Offline): pollStatus.overdue==true/false
     if (state.pollingStatuses.length === 1) {
         const isOnline = state.pollingStatuses[0] === 'online';
-        clauses.push(`pollStatus.overdue==${!isOnline}`);
+        clauses.push(buildCondition({ field: 'pollStatus.overdue', operator: '==', value: !isOnline }));
     }
 
     if (state.controllerQuery.trim()) {
@@ -150,7 +141,7 @@ const buildFiqlFromBuilder = (state: TargetFilterBuilderState) => {
         clauses.push(`name==*${state.searchKeyword.trim()}*`);
     }
 
-    return clauses.join(';');
+    return combineWithAnd(clauses);
 };
 
 interface RolloutWizardProps {
@@ -159,23 +150,64 @@ interface RolloutWizardProps {
     onSuccess?: (rolloutId: number) => void;
 }
 
-const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSuccess }) => {
-    const { t } = useTranslation('rollouts');
+const ArtifactPreview: React.FC<{ distributionSetId: number }> = ({ distributionSetId }) => {
+    const { t } = useTranslation(['distributions', 'common']);
+    const { data: modulesData, isLoading } = useGetAssignedSoftwareModules(distributionSetId);
+
+    if (isLoading) return <Spin size="small" />;
+    const modules = modulesData?.content || [];
+    if (modules.length === 0) return <Text type="secondary">{t('common:messages.noData')}</Text>;
+
+    return (
+        <div style={{ padding: '8px 24px' }}>
+            <Typography.Title level={5}>{t('list.softwareModules')}</Typography.Title>
+            <Space direction="vertical" style={{ width: '100%' }}>
+                {modules.map((mod: any) => (
+                    <div key={mod.id}>
+                        <Text strong>{mod.name} ({mod.version})</Text>
+                        <ModuleArtifacts softwareModuleId={mod.id} />
+                    </div>
+                ))}
+            </Space>
+        </div>
+    );
+};
+
+const ModuleArtifacts: React.FC<{ softwareModuleId: number }> = ({ softwareModuleId }) => {
+    const { data: artifactsData, isLoading } = useGetArtifacts(softwareModuleId);
+
+    if (isLoading) return <Spin size="small" style={{ marginLeft: 8 }} />;
+    const artifacts = artifactsData || [];
+    if (artifacts.length === 0) return null;
+
+    return (
+        <ul style={{ margin: '4px 0 8px 16px', fontSize: '12px', color: '#666' }}>
+            {artifacts.map((art: any) => (
+                <li key={art.sha1}>{art.filename} ({Math.round((art.size || 0) / 1024)} KB)</li>
+            ))}
+        </ul>
+    );
+};
+
+export const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSuccess }) => {
+    const { t } = useTranslation(['rollouts', 'common']);
     const navigate = useNavigate();
     const queryClient = useQueryClient();
+
     const [currentStep, setCurrentStep] = useState(0);
     const [formData, setFormData] = useState<WizardFormData>({
         name: '',
-        description: '',
-        distributionSetId: undefined,
-        distributionSetName: '',
-        targetFilterQuery: '',
-        amountGroups: 5,
+        amountGroups: 1,
         successThreshold: 80,
         errorThreshold: 20,
         startImmediately: false,
     });
 
+    const [isCheckingName, setIsCheckingName] = useState(false);
+    const [nameError, setNameError] = useState<string | null>(null);
+
+    const [dsSearchValue, setDsSearchValue] = useState('');
+    const [dsSearchField, setDsSearchField] = useState('name');
     const [filterMode, setFilterMode] = useState<'builder' | 'advanced'>('builder');
     const [builderState, setBuilderState] = useState<TargetFilterBuilderState>({
         allTargets: false,
@@ -189,7 +221,7 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
         searchKeyword: '',
     });
 
-    React.useEffect(() => {
+    useEffect(() => {
         if (filterMode === 'builder') {
             const timer = setTimeout(() => {
                 const fiql = buildFiqlFromBuilder(builderState);
@@ -203,10 +235,21 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
     const [basicInfoForm] = Form.useForm();
     const [groupSettingsForm] = Form.useForm();
 
+    const amountGroupsValue = Form.useWatch('amountGroups', groupSettingsForm);
     // Fetch distribution sets
+    const dsQuery = useMemo(() => {
+        const clauses: string[] = [];
+        if (dsSearchValue) {
+            clauses.push(`${dsSearchField}==*${dsSearchValue}*`);
+        }
+        // Hawkbit doesn't easily support multi-tag filtering in a single GET /distributionsets query
+        // typically you query by tag. We'll simplify for now to name/version/type.
+        return clauses.join(';');
+    }, [dsSearchValue, dsSearchField]);
+
     const { data: dsData, isLoading: dsLoading } = useGetDistributionSets({
-        limit: 100,
-        q: 'type==os;type==software',
+        limit: 50,
+        q: dsQuery || undefined,
     });
 
     // Fetch target metadata for builder
@@ -214,14 +257,14 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
     const { data: targetTypesData, isLoading: targetTypesLoading } = useGetTargetTypes({ limit: 200 });
 
     // Fetch targets for preview
-    const { data: targetPreviewData, refetch: refetchTargets, isLoading: previewLoading } = useGetTargets(
+    const { data: targetsData, isLoading: isLoadingTargets, refetch: refetchTargets } = useGetTargets(
         {
             q: formData.targetFilterQuery === 'controllerId==*' ? undefined : formData.targetFilterQuery,
-            limit: 5,
+            limit: 5, // Limit for preview table
         },
         {
             query: {
-                enabled: false,
+                enabled: false, // Only fetch on demand
             },
         }
     );
@@ -237,50 +280,22 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
                     const rolloutId = data.id;
 
                     if (formData.startImmediately) {
-                        let attempts = 0;
-                        const maxAttempts = 15;
-
-                        const pollAndStart = async () => {
+                        // Trigger start attempt in background, but don't block navigation
+                        const tryStart = async () => {
                             try {
-                                const rollout = await getRollout(rolloutId);
-                                const status = rollout.status?.toLowerCase();
-
-                                if (status === 'ready') {
-                                    startMutation.mutate({ rolloutId });
-                                } else if (status === 'creating' && attempts < maxAttempts) {
-                                    attempts++;
-                                    setTimeout(pollAndStart, 1000);
-                                } else if (status === 'running') {
-                                    message.success(t('detail.messages.startSuccess'));
-                                    if (isModal && onSuccess) {
-                                        onSuccess(rolloutId);
-                                    } else {
-                                        navigate(`/rollouts/${rolloutId}`);
-                                    }
-                                } else {
-                                    message.warning(t('wizard.messages.cannotStartImmediately', 'Rollout created but cannot start immediately. Please start manually.'));
-                                    if (isModal && onSuccess) {
-                                        onSuccess(rolloutId);
-                                    } else {
-                                        navigate(`/rollouts/${rolloutId}`);
-                                    }
-                                }
-                            } catch {
-                                if (isModal && onSuccess) {
-                                    onSuccess(rolloutId);
-                                } else {
-                                    navigate(`/rollouts/${rolloutId}`);
-                                }
+                                startMutation.mutate({ rolloutId });
+                            } catch (e) {
+                                console.error('Auto-start polling failed', e);
                             }
                         };
+                        tryStart();
+                    }
 
-                        setTimeout(pollAndStart, 500);
+                    // Navigate immediately regardless of startImmediately
+                    if (isModal && onSuccess) {
+                        onSuccess(rolloutId);
                     } else {
-                        if (isModal && onSuccess) {
-                            onSuccess(rolloutId);
-                        } else {
-                            navigate(`/rollouts/${rolloutId}`);
-                        }
+                        navigate(`/rollouts/${rolloutId}`);
                     }
                 }
             },
@@ -319,23 +334,35 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
         if (currentStep === 0) {
             try {
                 const values = await basicInfoForm.validateFields();
+                setIsCheckingName(true);
+                setNameError(null);
+
+                // Use current form value directly for validation
+                const existingRollouts = await getRollouts({ q: `name==${escapeValue(values.name)}` });
+                if (existingRollouts && existingRollouts.total && existingRollouts.total > 0) {
+                    setNameError(t('wizard.basicInfo.nameDuplicate', { defaultValue: 'Rollout name already exists' }));
+                    setIsCheckingName(false);
+                    return;
+                }
+
+                setIsCheckingName(false);
                 setFormData((prev) => ({ ...prev, ...values }));
                 setCurrentStep(currentStep + 1);
-            } catch {
+            } catch (err) {
+                console.error('Validation error', err);
+                setIsCheckingName(false);
             }
         } else if (currentStep === 1) {
             if (!formData.distributionSetId) {
-                message.warning(t('wizard.distributionSet.selectRequired'));
+                message.warning(t('wizard.distributionSet.selectionRequired'));
                 return;
             }
             setCurrentStep(currentStep + 1);
         } else if (currentStep === 2) {
-            if (!builderState.allTargets && !formData.targetFilterQuery?.trim()) {
-                message.warning(t('wizard.targetFilter.required'));
-                return;
-            }
-            if (builderState.allTargets && !formData.targetFilterQuery?.trim()) {
-                setFormData((prev) => ({ ...prev, targetFilterQuery: 'controllerId==*' }));
+            // Ensure targetFilterQuery is up to date if using builder
+            if (filterMode === 'builder') {
+                const fiql = buildFiqlFromBuilder(builderState);
+                setFormData(prev => ({ ...prev, targetFilterQuery: fiql }));
             }
             setCurrentStep(currentStep + 1);
         } else if (currentStep === 3) {
@@ -363,31 +390,27 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
             ? 'controllerId==*'
             : formData.targetFilterQuery?.trim();
 
-        createMutation.mutate({
-            data: {
-                name: formData.name,
-                description: formData.description || undefined,
-                distributionSetId: formData.distributionSetId,
-                targetFilterQuery: finalQuery,
-                amountGroups: formData.amountGroups,
-                successCondition: {
-                    condition: 'THRESHOLD',
-                    expression: String(formData.successThreshold),
-                },
-                errorCondition: {
-                    condition: 'THRESHOLD',
-                    expression: String(formData.errorThreshold),
-                },
+        const payload: any = {
+            name: formData.name,
+            description: formData.description || '',
+            distributionSetId: formData.distributionSetId,
+            amountGroups: formData.amountGroups,
+            successCondition: {
+                condition: 'THRESHOLD',
+                expression: formData.successThreshold.toString(),
             },
-        });
-    };
+            errorCondition: {
+                condition: 'THRESHOLD',
+                expression: formData.errorThreshold.toString(),
+            },
+        };
 
-    const handleSelectDS = (ds: MgmtDistributionSet) => {
-        setFormData((prev) => ({
-            ...prev,
-            distributionSetId: ds.id,
-            distributionSetName: `${ds.name} (v${ds.version})`,
-        }));
+        // Only include targetFilterQuery if it's not empty/null
+        if (finalQuery && finalQuery.trim() !== '') {
+            payload.targetFilterQuery = finalQuery;
+        }
+
+        createMutation.mutate({ data: payload });
     };
 
     const renderBasicInfoStep = () => (
@@ -401,60 +424,89 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
                     name="name"
                     label={t('wizard.basicInfo.name')}
                     rules={[{ required: true, message: t('wizard.basicInfo.nameRequired') }]}
+                    validateStatus={nameError ? 'error' : undefined}
+                    help={nameError}
                 >
-                    <Input placeholder={t('wizard.basicInfo.namePlaceholder')} />
+                    <Input
+                        placeholder={t('wizard.basicInfo.namePlaceholder')}
+                        onChange={() => setNameError(null)}
+                    />
                 </Form.Item>
                 <Form.Item name="description" label={t('wizard.basicInfo.description')}>
                     <TextArea rows={4} placeholder={t('wizard.basicInfo.descriptionPlaceholder')} />
                 </Form.Item>
             </Form>
+            {isCheckingName && <Spin size="small" tip="Checking name..." />}
         </Card>
     );
 
+
     const renderDistributionSetStep = () => (
         <Card title={t('wizard.distributionSet.title')} style={isModal ? { boxShadow: 'none', border: 'none', background: 'transparent' } : undefined}>
-            {formData.distributionSetId && (
-                <Alert
-                    type="success"
-                    message={`${t('wizard.distributionSet.selected')}: ${formData.distributionSetName}`}
-                    style={{ marginBottom: 16 }}
-                />
-            )}
-            {dsLoading ? (
-                <Spin />
-            ) : (
-                <Table
-                    dataSource={dsData?.content || []}
-                    rowKey="id"
-                    size="small"
-                    pagination={{ pageSize: 5 }}
-                    rowSelection={{
-                        type: 'radio',
-                        selectedRowKeys: formData.distributionSetId ? [formData.distributionSetId] : [],
-                        onChange: (_, selectedRows) => {
-                            if (selectedRows[0]) {
-                                handleSelectDS(selectedRows[0]);
-                            }
-                        },
-                    }}
-                    columns={[
-                        { title: t('wizard.distributionSet.columns.name'), dataIndex: 'name' },
-                        { title: t('wizard.distributionSet.columns.version'), dataIndex: 'version', width: 100 },
-                        {
-                            title: t('wizard.distributionSet.columns.type'),
-                            dataIndex: 'type',
-                            width: 120,
-                            render: (type: string) => <Tag>{type}</Tag>,
-                        },
-                    ]}
-                />
-            )}
+            <div style={{ marginBottom: 16 }}>
+                <Space.Compact style={{ width: '100%' }}>
+                    <Select
+                        value={dsSearchField}
+                        onChange={setDsSearchField}
+                        options={[
+                            { label: t('wizard.distributionSet.searchName', { defaultValue: 'Name' }), value: 'name' },
+                            { label: t('wizard.distributionSet.searchVersion', { defaultValue: 'Version' }), value: 'version' },
+                            { label: t('wizard.distributionSet.searchDescription', { defaultValue: 'Description' }), value: 'description' },
+                        ]}
+                        style={{ width: 120 }}
+                    />
+                    <Input.Search
+                        placeholder={t('wizard.distributionSet.searchPlaceholder')}
+                        allowClear
+                        onSearch={(val) => setDsSearchValue(val)}
+                        style={{ width: '100%' }}
+                        enterButton
+                    />
+                </Space.Compact>
+            </div>
+            <Table
+                loading={dsLoading}
+                dataSource={dsData?.content || []}
+                rowKey="id"
+                size="small"
+                pagination={{ pageSize: 5 }}
+                expandable={{
+                    expandedRowRender: (record) => <ArtifactPreview distributionSetId={record.id} />,
+                    rowExpandable: (record) => !!record.id,
+                }}
+                rowSelection={{
+                    type: 'radio',
+                    selectedRowKeys: formData.distributionSetId ? [formData.distributionSetId] : [],
+                    onChange: (_, selectedRows) => {
+                        const row = selectedRows[0];
+                        setFormData((prev) => ({
+                            ...prev,
+                            distributionSetId: row.id,
+                            distributionSetName: `${row.name} (${row.version})`,
+                        }));
+                    },
+                }}
+                columns={[
+                    { title: t('wizard.distributionSet.columns.name'), dataIndex: 'name' },
+                    { title: t('wizard.distributionSet.columns.version'), dataIndex: 'version', width: 100 },
+                    {
+                        title: t('wizard.distributionSet.columns.type'),
+                        dataIndex: 'type',
+                        width: 120,
+                        render: (type: string) => <Tag>{type}</Tag>,
+                    },
+                ]}
+            />
         </Card>
     );
 
     const renderTargetFilterStep = () => {
-        const previewTargets = targetPreviewData?.content || [];
-        const isEffectiveFilter = formData.targetFilterQuery && formData.targetFilterQuery !== 'controllerId==*';
+
+        const previewColumns = [
+            { title: t('wizard.targetFilter.previewColumns.controllerId'), dataIndex: 'controllerId' },
+            { title: t('wizard.targetFilter.previewColumns.name'), dataIndex: 'name' },
+            { title: t('wizard.targetFilter.previewColumns.type'), dataIndex: 'targetTypeName' },
+        ];
 
         return (
             <Card title={t('wizard.targetFilter.title')} style={isModal ? { boxShadow: 'none', border: 'none', background: 'transparent' } : undefined}>
@@ -475,6 +527,12 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
 
                 {filterMode === 'builder' ? (
                     <div style={{ marginBottom: 24 }}>
+                        <Alert
+                            message={t('wizard.targetFilter.builderHint')}
+                            type="info"
+                            showIcon
+                            style={{ marginBottom: 16 }}
+                        />
                         <Form layout="vertical">
                             <Form.Item>
                                 <Checkbox
@@ -607,55 +665,97 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
                 <div style={{ borderTop: '1px solid var(--ant-color-border-secondary, #f0f0f0)', paddingTop: 16 }}>
                     <Flex justify="space-between" align="center" style={{ marginBottom: 12 }}>
                         <Text strong>{t('wizard.targetFilter.preview')}</Text>
-                        <Button size="small" icon={<ReloadOutlined />} onClick={() => refetchTargets()} loading={previewLoading}>
+                        <Button size="small" icon={<ReloadOutlined />} onClick={() => refetchTargets()} loading={isLoadingTargets}>
                             {t('common:refresh')}
                         </Button>
                     </Flex>
-                    {previewTargets.length > 0 && (
+                    <div style={{ marginBottom: 24 }}>
+                        <Text strong>{t('wizard.targetFilter.targetCount', { count: targetsData?.total || 0 })}</Text>
                         <Table
+                            dataSource={targetsData?.content || []}
+                            columns={previewColumns}
+                            rowKey="id"
                             size="small"
-                            rowKey="controllerId"
                             pagination={false}
-                            dataSource={previewTargets}
-                            columns={[
-                                { title: t('wizard.targetFilter.previewColumns.controllerId'), dataIndex: 'controllerId' },
-                                { title: t('wizard.targetFilter.previewColumns.name'), dataIndex: 'name' },
-                                { title: t('wizard.targetFilter.previewColumns.type'), dataIndex: 'targetTypeName' },
-                            ]}
+                            loading={isLoadingTargets}
+                            style={{ marginTop: 8 }}
+                            footer={() => (
+                                <div style={{ textAlign: 'right', fontSize: '12px', color: 'rgba(0,0,0,0.45)' }}>
+                                    {t('pagination.total', { count: targetsData?.total || 0 })}
+                                </div>
+                            )}
                         />
-                    )}
+                    </div>
                 </div>
             </Card>
         );
     };
 
-    const renderGroupSettingsStep = () => (
-        <Card title={t('wizard.groupSettings.title')} style={isModal ? { boxShadow: 'none', border: 'none', background: 'transparent' } : undefined}>
-            <Form
-                form={groupSettingsForm}
-                layout="vertical"
-                initialValues={{
-                    amountGroups: formData.amountGroups,
-                    successThreshold: formData.successThreshold,
-                    errorThreshold: formData.errorThreshold,
-                    startImmediately: formData.startImmediately,
-                }}
-            >
-                <Form.Item name="amountGroups" label={t('wizard.groupSettings.amountGroups')} rules={[{ required: true }]}>
-                    <InputNumber min={1} max={100} style={{ width: '100%' }} />
-                </Form.Item>
-                <Form.Item name="successThreshold" label={t('wizard.groupSettings.successThreshold')} rules={[{ required: true }]}>
-                    <InputNumber min={0} max={100} style={{ width: '100%' }} />
-                </Form.Item>
-                <Form.Item name="errorThreshold" label={t('wizard.groupSettings.errorThreshold')} rules={[{ required: true }]}>
-                    <InputNumber min={0} max={100} style={{ width: '100%' }} />
-                </Form.Item>
-                <Form.Item name="startImmediately" valuePropName="checked">
-                    <Checkbox>{t('wizard.groupSettings.startImmediately')}</Checkbox>
-                </Form.Item>
-            </Form>
-        </Card>
-    );
+    const renderGroupSettingsStep = (amountGroupsFromWatch: number) => {
+        const amountGroups = amountGroupsFromWatch || formData.amountGroups;
+        const totalTargets = targetsData?.total || 0;
+
+        const groupSize = Math.floor(totalTargets / amountGroups);
+        const remainder = totalTargets % amountGroups;
+
+        return (
+            <Card title={t('wizard.groupSettings.title')} style={isModal ? { boxShadow: 'none', border: 'none', background: 'transparent' } : undefined}>
+                <Form
+                    form={groupSettingsForm}
+                    layout="vertical"
+                    initialValues={{
+                        amountGroups: formData.amountGroups,
+                        successThreshold: formData.successThreshold,
+                        errorThreshold: formData.errorThreshold,
+                        startImmediately: formData.startImmediately,
+                    }}
+                >
+                    <Row gutter={24}>
+                        <Col span={12}>
+                            <Form.Item name="amountGroups" label={t('wizard.groupSettings.amountGroups')} rules={[{ required: true }]}>
+                                <InputNumber min={1} max={100} style={{ width: '100%' }} />
+                            </Form.Item>
+                        </Col>
+                        <Col span={12}>
+                            <div style={{ marginTop: 30 }}>
+                                <Text type="secondary">
+                                    {t('wizard.groupSettings.preview', {
+                                        defaultValue: 'Group Distribution Preview: {{count}} groups, approx. {{size}} targets/group',
+                                        count: amountGroups,
+                                        size: groupSize,
+                                    })}
+                                </Text>
+                            </div>
+                        </Col>
+                    </Row>
+
+                    <Alert
+                        message={t('wizard.groupSettings.distributionHint', {
+                            defaultValue: 'Targets will be divided into {{count}} groups. {{exact}} groups of {{size}}, and {{extraCount}} groups of {{extraSize}}.',
+                            count: amountGroups,
+                            exact: amountGroups - remainder,
+                            size: groupSize,
+                            extraCount: remainder,
+                            extraSize: groupSize + (remainder > 0 ? 1 : 0),
+                        })}
+                        type="info"
+                        showIcon
+                        style={{ marginBottom: 16 }}
+                    />
+
+                    <Form.Item name="successThreshold" label={t('wizard.groupSettings.successThreshold')} rules={[{ required: true }]}>
+                        <InputNumber min={0} max={100} formatter={value => `${value}%`} parser={value => value?.replace('%', '') as any} style={{ width: '100%' }} />
+                    </Form.Item>
+                    <Form.Item name="errorThreshold" label={t('wizard.groupSettings.errorThreshold')} rules={[{ required: true }]}>
+                        <InputNumber min={0} max={100} formatter={value => `${value}%`} parser={value => value?.replace('%', '') as any} style={{ width: '100%' }} />
+                    </Form.Item>
+                    <Form.Item name="startImmediately" valuePropName="checked">
+                        <Checkbox>{t('wizard.groupSettings.startImmediately')}</Checkbox>
+                    </Form.Item>
+                </Form>
+            </Card>
+        );
+    };
 
     const renderReviewStep = () => (
         <Card title={t('wizard.review.title')} style={isModal ? { boxShadow: 'none', border: 'none', background: 'transparent' } : undefined}>
@@ -663,10 +763,25 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
                 <Descriptions.Item label={t('wizard.review.name')}>{formData.name}</Descriptions.Item>
                 <Descriptions.Item label={t('wizard.review.description')}>{formData.description || '-'}</Descriptions.Item>
                 <Descriptions.Item label={t('wizard.review.distributionSet')}>{formData.distributionSetName}</Descriptions.Item>
-                <Descriptions.Item label={t('wizard.review.targetFilter')}>{formData.targetFilterQuery || t('wizard.review.allTargets')}</Descriptions.Item>
+                <Descriptions.Item label={t('wizard.review.targetFilter')}>
+                    {formData.targetFilterQuery ? (
+                        <code style={{ background: 'rgba(0,0,0,0.05)', padding: '2px 4px', borderRadius: '4px' }}>
+                            {formData.targetFilterQuery}
+                        </code>
+                    ) : (
+                        <Tag color="green">{t('wizard.review.allTargets')}</Tag>
+                    )}
+                </Descriptions.Item>
                 <Descriptions.Item label={t('wizard.review.groups')}>{formData.amountGroups}</Descriptions.Item>
                 <Descriptions.Item label={t('wizard.review.successThreshold')}>{formData.successThreshold}%</Descriptions.Item>
                 <Descriptions.Item label={t('wizard.review.errorThreshold')}>{formData.errorThreshold}%</Descriptions.Item>
+                <Descriptions.Item label={t('wizard.groupSettings.startImmediately')}>
+                    {formData.startImmediately ? (
+                        <Tag color="blue">{t('common:yes', { defaultValue: 'Yes' })}</Tag>
+                    ) : (
+                        <Tag>{t('common:no', { defaultValue: 'No' })}</Tag>
+                    )}
+                </Descriptions.Item>
             </Descriptions>
         </Card>
     );
@@ -676,46 +791,56 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
             case 0: return renderBasicInfoStep();
             case 1: return renderDistributionSetStep();
             case 2: return renderTargetFilterStep();
-            case 3: return renderGroupSettingsStep();
+            case 3: return renderGroupSettingsStep(amountGroupsValue);
             case 4: return renderReviewStep();
             default: return null;
         }
     };
 
     const mainContent = (
-        <Row gutter={[16, 16]}>
-            <Col xs={24} md={7} lg={6}>
-                <StepsCard style={isModal ? { boxShadow: 'none', border: 'none', background: 'transparent' } : undefined}>
-                    <Steps current={currentStep} items={steps} direction="vertical" size="small" />
-                </StepsCard>
-            </Col>
-            <Col xs={24} md={17} lg={18}>
-                <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Flex vertical gap={24} style={{ height: '100%' }}>
+            <Card className="steps-card" styles={{ body: { padding: '16px 24px' } }}>
+                <Steps
+                    current={currentStep}
+                    items={steps}
+                    direction={isModal ? "horizontal" : "vertical"}
+                    size="small"
+                    style={!isModal ? { minHeight: 300 } : undefined}
+                    responsive={false}
+                />
+            </Card>
+
+            <Flex vertical gap={20} style={{ flex: 1, minHeight: 0 }}>
+                <div style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
                     {renderStepContent()}
-                    <ActionsBar>
-                        <Space>
-                            {currentStep > 0 && <Button onClick={handlePrev}>{t('wizard.buttons.previous')}</Button>}
-                            {currentStep < steps.length - 1 ? (
-                                <Button type="primary" onClick={handleNext}>{t('wizard.buttons.next')}</Button>
-                            ) : (
-                                <Button type="primary" onClick={handleCreate} loading={createMutation.isPending || startMutation.isPending}>
-                                    {t('wizard.buttons.create')}
-                                </Button>
-                            )}
-                            {isModal ? (
-                                <Button onClick={onClose}>{t('common:cancel')}</Button>
-                            ) : (
-                                <Button onClick={() => navigate('/rollouts')}>{t('common:cancel')}</Button>
-                            )}
-                        </Space>
-                    </ActionsBar>
-                </Space>
-            </Col>
-        </Row>
+                </div>
+                <ActionsBar>
+                    <Space>
+                        {currentStep > 0 && <Button onClick={handlePrev}>{t('wizard.buttons.previous')}</Button>}
+                        {currentStep < steps.length - 1 ? (
+                            <Button type="primary" onClick={handleNext}>{t('wizard.buttons.next')}</Button>
+                        ) : (
+                            <Button type="primary" onClick={handleCreate} loading={createMutation.isPending || startMutation.isPending}>
+                                {t('wizard.buttons.create')}
+                            </Button>
+                        )}
+                        {isModal ? (
+                            <Button onClick={onClose}>{t('common:cancel')}</Button>
+                        ) : (
+                            <Button onClick={() => navigate('/rollouts')}>{t('common:cancel')}</Button>
+                        )}
+                    </Space>
+                </ActionsBar>
+            </Flex>
+        </Flex>
     );
 
     if (isModal) {
-        return <div style={{ padding: '24px' }}>{mainContent}</div>;
+        return (
+            <div style={{ padding: '20px 24px', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                {mainContent}
+            </div>
+        );
     }
 
     return (
@@ -725,10 +850,41 @@ const RolloutWizard: React.FC<RolloutWizardProps> = ({ isModal, onClose, onSucce
                     <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/rollouts')}>
                         {t('detail.back')}
                     </Button>
-                    <Title level={2} style={{ margin: 0 }}>{t('wizard.title')}</Title>
+                    <Title level={4} style={{ margin: 0 }}>{t('wizard.title')}</Title>
                 </TitleGroup>
             </HeaderRow>
-            {mainContent}
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+                {isModal ? mainContent : (
+                    <Row gutter={[24, 24]} style={{ height: '100%' }}>
+                        <Col xs={24} md={6}>
+                            <Card style={{ borderRadius: 12 }}>
+                                <Steps
+                                    current={currentStep}
+                                    items={steps}
+                                    direction="vertical"
+                                    size="small"
+                                />
+                            </Card>
+                        </Col>
+                        <Col xs={24} md={18} style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                            {renderStepContent()}
+                            <ActionsBar>
+                                <Space>
+                                    {currentStep > 0 && <Button onClick={handlePrev}>{t('wizard.buttons.previous')}</Button>}
+                                    {currentStep < steps.length - 1 ? (
+                                        <Button type="primary" onClick={handleNext}>{t('wizard.buttons.next')}</Button>
+                                    ) : (
+                                        <Button type="primary" onClick={handleCreate} loading={createMutation.isPending || startMutation.isPending}>
+                                            {t('wizard.buttons.create')}
+                                        </Button>
+                                    )}
+                                    <Button onClick={() => navigate('/rollouts')}>{t('common:cancel')}</Button>
+                                </Space>
+                            </ActionsBar>
+                        </Col>
+                    </Row>
+                )}
+            </div>
         </PageContainer>
     );
 };

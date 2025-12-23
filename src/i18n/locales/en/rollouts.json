@@ -127,15 +127,20 @@
             "name": "Rollout Name",
             "namePlaceholder": "Enter rollout name",
             "nameRequired": "Please enter a rollout name",
+            "nameDuplicate": "Rollout name already exists",
             "description": "Description",
             "descriptionPlaceholder": "Enter description (optional)"
         },
         "distributionSet": {
             "title": "Select Distribution Set",
             "selectDS": "Select a Distribution Set",
+            "searchPlaceholder": "Search by selected field",
+            "searchName": "Name",
+            "searchVersion": "Version",
+            "searchDescription": "Description",
+            "selectionRequired": "Please select a distribution set",
             "selected": "Selected",
             "noSelection": "No distribution set selected",
-            "selectRequired": "Please select a distribution set",
             "columns": {
                 "id": "ID",
                 "name": "Name",
@@ -188,6 +193,8 @@
         "groupSettings": {
             "title": "Group Settings",
             "amountGroups": "Number of Groups",
+            "preview": "Group Distribution Preview: {{count}} groups, approx. {{size}} targets/group",
+            "distributionHint": "Targets will be divided into {{count}} groups. {{exact}} groups of {{size}}, and {{extraCount}} groups of {{extraSize}}.",
             "successThreshold": "Success Threshold (%)",
             "errorThreshold": "Error Threshold (%)",
             "startImmediately": "Start immediately after creation"
@@ -213,7 +220,8 @@
         "messages": {
             "createSuccess": "Rollout created successfully",
             "createError": "Failed to create rollout",
-            "cannotStartImmediately": "Rollout created but cannot start immediately. Please start manually."
+            "cannotStartImmediately": "Rollout created but cannot start immediately. Please start manually.",
+            "targetMatchingError": "Matching target not found for the filter. Please check your filter."
         }
     }
 }

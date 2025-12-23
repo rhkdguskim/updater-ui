@@ -17,7 +17,7 @@ export interface FiqlCondition {
  * Escapes special characters in FIQL values.
  * RSQL reserves: " ' ( ) ; , < > = ! ~ space
  */
-const escapeValue = (value: string): string => {
+export const escapeValue = (value: string): string => {
     // If simple alphanumeric, return as is
     if (/^[a-zA-Z0-9.\-_]+$/.test(value)) {
         return value;

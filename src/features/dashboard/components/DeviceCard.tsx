@@ -46,7 +46,7 @@ const DeviceCardWrapper = styled.div<{ $isOnline?: boolean; $updateStatus?: stri
     animation: ${fadeIn} 0.3s ease-out;
     overflow: hidden;
     position: relative;
-    padding: 14px 16px;
+    padding: 10px 12px;
 
     /* Status bar on left */
     &::before {
@@ -54,7 +54,7 @@ const DeviceCardWrapper = styled.div<{ $isOnline?: boolean; $updateStatus?: stri
         position: absolute;
         top: 0;
         left: 0;
-        width: 4px;
+        width: 3px;
         height: 100%;
         background: ${props => {
         // Prioritize target type color if available
@@ -71,20 +71,30 @@ const DeviceCardWrapper = styled.div<{ $isOnline?: boolean; $updateStatus?: stri
     }
 
     &:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         border-color: ${props => {
         const status = props.$updateStatus?.toLowerCase();
-        if (status === 'pending') return 'rgba(59, 130, 246, 0.3)';
-        if (status === 'error') return 'rgba(239, 68, 68, 0.3)';
-        if (status === 'in_sync') return 'rgba(16, 185, 129, 0.3)';
-        return 'rgba(0, 0, 0, 0.08)';
+        if (status === 'pending') return 'rgba(59, 130, 246, 0.4)';
+        if (status === 'error') return 'rgba(239, 68, 68, 0.4)';
+        if (status === 'in_sync') return 'rgba(16, 185, 129, 0.4)';
+        return 'rgba(0, 0, 0, 0.12)';
     }};
     }
 
     .dark-mode & {
-        background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
-        border-color: rgba(255, 255, 255, 0.08);
+        background: ${props => {
+        const status = props.$updateStatus?.toLowerCase();
+        if (status === 'pending') return 'linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, rgba(9, 9, 11, 0.98) 30%)';
+        if (status === 'error') return 'linear-gradient(145deg, rgba(239, 68, 68, 0.1) 0%, rgba(9, 9, 11, 0.98) 30%)';
+        if (status === 'in_sync') return 'linear-gradient(145deg, rgba(16, 185, 129, 0.1) 0%, rgba(9, 9, 11, 0.98) 30%)';
+        return 'linear-gradient(145deg, rgba(24, 24, 27, 0.95) 0%, rgba(9, 9, 11, 0.9) 100%)';
+    }};
+        border: 1px solid rgba(255, 255, 255, 0.04);
+        
+        &:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+        }
     }
 `;
 

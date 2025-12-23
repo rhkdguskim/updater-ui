@@ -3,155 +3,139 @@ import type { ThemeConfig } from 'antd';
 
 export const darkTheme: ThemeConfig = {
     token: {
-        // Modern vibrant primary color palette
-        colorPrimary: '#818cf8', // Lighter indigo for dark mode
-        colorSuccess: '#34d399', // Emerald
-        colorWarning: '#fbbf24', // Amber
-        colorError: '#f87171', // Red
-        colorInfo: '#60a5fa', // Blue
+        // More vibrant primary color for dark mode (Indigo-400)
+        colorPrimary: '#818cf8',
+        colorSuccess: '#34d399', // Emerald-400
+        colorWarning: '#fbbf24', // Amber-400
+        colorError: '#f87171', // Red-400
+        colorInfo: '#60a5fa', // Blue-400
 
-        // Dark backgrounds with depth
-        colorBgContainer: '#1e1e2e',
-        colorBgLayout: '#11111b',
-        colorBgBase: '#11111b',
-        colorBgElevated: '#262637',
-        colorBgSpotlight: '#313244',
+        // Deeper backgrounds (Zinc-950 and Zinc-900)
+        colorBgContainer: '#09090b',
+        colorBgLayout: '#020617', // Deeper Slate-950
+        colorBgBase: '#020617',
+        colorBgElevated: '#18181b', // Zinc-900
+        colorBgSpotlight: '#27272a', // Zinc-800
 
-        // Typography for dark mode
-        colorText: '#cdd6f4',
-        colorTextSecondary: '#a6adc8',
-        colorTextTertiary: '#7f849c',
-        colorTextQuaternary: '#585b70',
+        // Typography
+        colorText: '#f8fafc', // Slate-50
+        colorTextSecondary: '#94a3b8', // Slate-400
+        colorTextTertiary: '#64748b', // Slate-500
+        colorTextQuaternary: '#475569', // Slate-600
 
-        // Borders
-        colorBorder: '#313244',
-        colorBorderSecondary: '#45475a',
+        // Borders - subtler
+        colorBorder: '#1e293b',
+        colorBorderSecondary: '#0f172a',
 
-        // Design tokens
-        borderRadius: 12,
-        borderRadiusLG: 16,
-        borderRadiusSM: 8,
+        // Design tokens - more compact
+        borderRadius: 8,
+        borderRadiusLG: 12,
+        borderRadiusSM: 6,
         borderRadiusXS: 4,
 
         // Typography
         fontFamily: "'Pretendard Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif",
-        fontSize: 14,
-        fontSizeHeading1: 38,
-        fontSizeHeading2: 30,
-        fontSizeHeading3: 24,
+        fontSize: 13, // Slightly smaller for compact feel
+        fontSizeHeading1: 32,
+        fontSizeHeading2: 24,
+        fontSizeHeading3: 20,
 
-        // Spacing
-        marginXS: 8,
-        marginSM: 12,
-        margin: 16,
-        marginMD: 20,
-        marginLG: 24,
-        marginXL: 32,
+        // Spacing - more compact
+        marginXS: 4,
+        marginSM: 8,
+        margin: 12,
+        marginMD: 16,
+        marginLG: 20,
+        marginXL: 28,
 
         // Motion
         motionDurationFast: '0.1s',
         motionDurationMid: '0.2s',
         motionDurationSlow: '0.3s',
 
-        // Shadows for dark mode
-        boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.3), 0 1px 2px -1px rgb(0 0 0 / 0.3)',
-        boxShadowSecondary: '0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3)',
+        // Shadows
+        boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3)',
+        boxShadowSecondary: '0 10px 15px -3px rgb(0 0 0 / 0.4), 0 4px 6px -4px rgb(0 0 0 / 0.4)',
     },
     algorithm: theme.darkAlgorithm,
     components: {
         Layout: {
-            siderBg: '#1e1e2e',
-            headerBg: '#1e1e2e',
-            bodyBg: '#11111b',
-            headerPadding: '0 24px',
+            siderBg: '#09090b',
+            headerBg: '#09090b',
+            bodyBg: '#020617',
+            headerPadding: '0 20px',
         },
         Menu: {
             darkItemBg: 'transparent',
             darkSubMenuItemBg: 'transparent',
-            darkItemSelectedBg: 'rgba(129, 140, 248, 0.2)',
-            darkItemHoverBg: 'rgba(129, 140, 248, 0.1)',
-            itemBorderRadius: 8,
-            itemMarginInline: 8,
-            itemPaddingInline: 16,
-            iconSize: 18,
-            collapsedIconSize: 20,
+            darkItemSelectedBg: 'rgba(129, 140, 248, 0.15)',
+            darkItemHoverBg: 'rgba(129, 140, 248, 0.08)',
+            itemBorderRadius: 6,
+            itemMarginInline: 6,
+            itemPaddingInline: 12,
+            iconSize: 16,
+            collapsedIconSize: 18,
         },
         Card: {
-            colorBgContainer: '#1e1e2e',
-            borderRadiusLG: 16,
-            boxShadowTertiary: '0 1px 3px 0 rgb(0 0 0 / 0.3)',
-            paddingLG: 24,
+            colorBgContainer: '#09090b',
+            borderRadiusLG: 12,
+            boxShadowTertiary: '0 4px 6px -1px rgb(0 0 0 / 0.2)',
+            paddingLG: 16, // More compact padding
         },
         Table: {
-            headerBg: '#181825',
-            headerColor: '#a6adc8',
-            rowHoverBg: '#262637',
-            borderColor: '#313244',
-            headerBorderRadius: 12,
+            headerBg: '#18181b',
+            headerColor: '#cbd5e1',
+            rowHoverBg: '#1e293b',
+            borderColor: '#1e293b',
+            headerBorderRadius: 8,
+            padding: 10, // Compact table
         },
         Button: {
-            borderRadius: 8,
-            borderRadiusLG: 12,
-            borderRadiusSM: 6,
-            paddingInline: 16,
-            paddingInlineLG: 24,
-            fontWeight: 500,
-            primaryShadow: '0 4px 14px 0 rgba(129, 140, 248, 0.25)',
+            borderRadius: 6,
+            borderRadiusLG: 8,
+            borderRadiusSM: 4,
+            paddingInline: 12,
+            paddingInlineLG: 20,
+            fontWeight: 600,
+            primaryShadow: '0 4px 12px 0 rgba(129, 140, 248, 0.2)',
         },
         Input: {
-            borderRadius: 8,
-            paddingInline: 12,
-            activeShadow: '0 0 0 3px rgba(129, 140, 248, 0.15)',
-            colorBgContainer: '#181825',
+            borderRadius: 6,
+            paddingInline: 10,
+            activeShadow: '0 0 0 2px rgba(129, 140, 248, 0.2)',
+            colorBgContainer: '#020617',
         },
         Select: {
-            borderRadius: 8,
-            optionSelectedBg: 'rgba(129, 140, 248, 0.2)',
+            borderRadius: 6,
+            optionSelectedBg: 'rgba(129, 140, 248, 0.15)',
         },
         Tag: {
-            borderRadiusSM: 6,
+            borderRadiusSM: 4,
         },
         Badge: {
-            dotSize: 8,
-        },
-        Breadcrumb: {
-            separatorMargin: 12,
-        },
-        Descriptions: {
-            itemPaddingBottom: 16,
-        },
-        Statistic: {
-            contentFontSize: 28,
+            dotSize: 6,
         },
         Tabs: {
-            cardBg: '#181825',
+            cardBg: '#020617',
             itemActiveColor: '#818cf8',
             itemHoverColor: '#818cf8',
             inkBarColor: '#818cf8',
+            horizontalItemPadding: '8px 4px',
         },
         Modal: {
-            contentBg: '#1e1e2e',
-            headerBg: '#1e1e2e',
-            borderRadiusLG: 16,
+            contentBg: '#09090b',
+            headerBg: '#09090b',
+            borderRadiusLG: 12,
         },
         Drawer: {
-            colorBgElevated: '#1e1e2e',
-            borderRadiusLG: 16,
-        },
-        Message: {
+            colorBgElevated: '#09090b',
             borderRadiusLG: 12,
         },
-        Notification: {
-            borderRadiusLG: 12,
-        },
-        Steps: {
-            iconSize: 32,
-        },
-        Spin: {
-            colorPrimary: '#818cf8',
+        Statistic: {
+            contentFontSize: 24,
         },
         Tooltip: {
-            colorBgSpotlight: '#313244',
+            colorBgSpotlight: '#18181b',
         },
     },
 };
