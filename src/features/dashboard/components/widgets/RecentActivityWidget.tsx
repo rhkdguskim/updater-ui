@@ -9,14 +9,11 @@ import { ListCard, IconBadge } from '../DashboardStyles';
 import type { MgmtTarget, MgmtAction } from '@/api/generated/model';
 import { useGetAction1 } from '@/api/generated/actions/actions';
 import {
-    LoadingOutlined,
     CheckCircleFilled,
     CloseCircleFilled,
     SyncOutlined,
     RocketOutlined,
     ThunderboltOutlined,
-    WifiOutlined,
-    ApiOutlined
 } from '@ant-design/icons';
 
 dayjs.extend(relativeTime);
@@ -78,69 +75,7 @@ const ActivityRow = styled.div`
     }
 `;
 
-const DeviceInfo = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex: 1;
-    min-width: 0;
-`;
 
-const DeviceIcon = styled.div<{ $status: 'online' | 'offline' | 'busy' }>`
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    flex-shrink: 0;
-    
-    background: ${props => {
-        switch (props.$status) {
-            case 'online': return 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
-            case 'busy': return 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)';
-            case 'offline': return 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
-            default: return 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
-        }
-    }};
-    color: white;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-`;
-
-const DeviceDetails = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    min-width: 0;
-    flex: 1;
-`;
-
-const DeviceName = styled(Text)`
-    font-size: 13px;
-    font-weight: 600;
-    color: #1f2937;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-`;
-
-const DeviceMeta = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 8px;
-`;
-
-const IpAddress = styled(Text)`
-    font-size: 11px;
-    font-family: 'JetBrains Mono', 'Fira Code', monospace;
-    color: #6b7280;
-`;
-
-const TimeAgo = styled(Text)`
-    font-size: 10px;
-    color: #9ca3af;
-`;
 
 // Timeline Components
 const TimelineContainer = styled.div`
@@ -226,39 +161,7 @@ const StepConnector = styled.div<{ $active?: boolean; $isAnimated?: boolean }>`
     `}
 `;
 
-const StatusBadge = styled(Tag) <{ $variant: 'success' | 'processing' | 'error' | 'default' }>`
-    margin: 0;
-    border: none;
-    font-size: 10px;
-    font-weight: 500;
-    padding: 2px 8px;
-    border-radius: 10px;
-    
-    ${props => {
-        switch (props.$variant) {
-            case 'success':
-                return css`
-                    background: rgba(16, 185, 129, 0.1);
-                    color: #059669;
-                `;
-            case 'processing':
-                return css`
-                    background: rgba(59, 130, 246, 0.1);
-                    color: #2563eb;
-                `;
-            case 'error':
-                return css`
-                    background: rgba(239, 68, 68, 0.1);
-                    color: #dc2626;
-                `;
-            default:
-                return css`
-                    background: rgba(107, 114, 128, 0.1);
-                    color: #6b7280;
-                `;
-        }
-    }}
-`;
+
 
 // Component Logic
 const ActionTimeline = ({ action: initialAction }: { action: MgmtAction }) => {
@@ -391,28 +294,10 @@ const ActionTimeline = ({ action: initialAction }: { action: MgmtAction }) => {
     );
 };
 
-const getDeviceStatus = (target: MgmtTarget, action: MgmtAction): 'online' | 'offline' | 'busy' => {
-    const actionStatus = action.status?.toLowerCase() || '';
-    if (['running', 'retrieving', 'downloading'].includes(actionStatus)) return 'busy';
 
-    const lastRequest = target.pollStatus?.lastRequestAt;
-    if (!lastRequest) return 'offline';
-
-    const isRecent = Date.now() - lastRequest < 5 * 60 * 1000; // 5 minutes
-    return isRecent ? 'online' : 'offline';
-};
-
-const getStatusBadgeVariant = (status: string): 'success' | 'processing' | 'error' | 'default' => {
-    const s = status.toLowerCase();
-    if (['finished'].includes(s)) return 'success';
-    if (['running', 'retrieving', 'downloading', 'scheduled', 'pending'].includes(s)) return 'processing';
-    if (['error', 'failed', 'canceled'].includes(s)) return 'error';
-    return 'default';
-};
 
 // Row Component that handles data fetching
 const RecentActivityRow = ({ record, onClick }: { record: RecentActivityItem; onClick: () => void }) => {
-    const { t } = useTranslation('dashboard');
 
     // Fetch latest details if action is active
     const isActive = ['running', 'pending', 'scheduled', 'retrieving', 'retrieved', 'downloading'].includes(record.action.status?.toLowerCase() || '');
@@ -495,8 +380,11 @@ const RecentActivityRow = ({ record, onClick }: { record: RecentActivityItem; on
     );
 };
 
+import { useNavigate } from 'react-router-dom';
+
 export const RecentActivityWidget: React.FC<RecentActivityWidgetProps> = ({ isLoading, data }) => {
     const { t } = useTranslation(['dashboard', 'common']);
+    const navigate = useNavigate();
 
     return (
         <ListCard

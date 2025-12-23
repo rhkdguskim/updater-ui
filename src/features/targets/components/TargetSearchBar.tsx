@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-import { buildWildcardSearch, appendFilter, buildCondition } from '@/utils/fiql';
+import { buildWildcardSearch } from '@/utils/fiql';
 
 const { Search } = Input;
 

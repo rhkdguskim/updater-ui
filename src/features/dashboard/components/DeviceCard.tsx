@@ -7,8 +7,6 @@ import {
     SyncOutlined,
     CloseCircleFilled,
     ClockCircleFilled,
-    CloudServerOutlined,
-    ThunderboltOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -23,11 +21,6 @@ const { Text } = Typography;
 const fadeIn = keyframes`
     from { opacity: 0; transform: scale(0.95); }
     to { opacity: 1; transform: scale(1); }
-`;
-
-const pulse = keyframes`
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
 `;
 
 // Compact premium device card
@@ -198,7 +191,7 @@ const getActionIcon = (status?: string) => {
     return <ClockCircleFilled />;
 };
 
-const DeviceCard: React.FC<DeviceCardProps> = ({ target, recentAction, delay = 0 }) => {
+const DeviceCard: React.FC<DeviceCardProps> = ({ target, recentAction }) => {
     const { t } = useTranslation(['targets', 'common']);
     const navigate = useNavigate();
 
