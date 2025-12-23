@@ -34,6 +34,8 @@
         "total": "총",
         "recentActions": "최근 액션 (24시간)",
         "activeRollouts": "활성 롤아웃",
+        "targets": "대상",
+        "actions": "액션",
         "jobProgress": {
             "title": "Job 진행 상황",
             "actionsTitle": "액션 진행률",

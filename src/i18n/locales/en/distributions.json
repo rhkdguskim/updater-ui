@@ -9,8 +9,20 @@
         "types": "Types",
         "distributionByType": "Distribution by Type",
         "recentSets": "Recent Distribution Sets",
+        "recentModules": "Recent Software Modules",
         "total": "total",
-        "typesLabel": "types"
+        "typesLabel": "types",
+        "dsTags": "DS Tags",
+        "dsTypes": "DS Types",
+        "viewSets": "View Distribution Sets",
+        "viewModules": "View Modules",
+        "assetDistribution": "Asset Distribution",
+        "quickActions": "Quick Actions",
+        "allSets": "All Sets",
+        "allModules": "All Modules",
+        "manageTags": "Manage Tags",
+        "bulkAssign": "Bulk Assign",
+        "completeness": "Completeness"
     },
     "table": {
         "name": "Name",

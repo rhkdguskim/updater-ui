@@ -47,8 +47,9 @@ const fadeInUp = keyframes`
 const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    height: 100%;
+    gap: 12px;
+    height: calc(100vh - 120px);
+    min-height: 600px;
     overflow: hidden;
     animation: ${fadeInUp} 0.5s ease-out;
 `;
@@ -57,7 +58,8 @@ const PageHeader = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 4px 0;
+    flex-shrink: 0;
 `;
 
 const HeaderContent = styled.div`
@@ -84,7 +86,7 @@ const GradientTitle = styled(Title)`
 
 const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number }>`
     border: none;
-    border-radius: 20px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
@@ -118,7 +120,7 @@ const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number }>`
 
 const ChartCard = styled(Card) <{ $delay?: number }>`
     border: none;
-    border-radius: 20px;
+    border-radius: 12px;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
@@ -150,10 +152,10 @@ const ChartCard = styled(Card) <{ $delay?: number }>`
 `;
 
 const BigNumber = styled.div`
-    font-size: 48px;
+    font-size: 32px;
     font-weight: 700;
-    line-height: 1;
-    margin-bottom: 8px;
+    line-height: 1.2;
+    margin-bottom: 4px;
 `;
 
 const COLORS = {
@@ -386,10 +388,10 @@ const JobManagement: React.FC = () => {
         <PageContainer>
             <PageHeader>
                 <HeaderContent>
-                    <GradientTitle level={2}>
+                    <GradientTitle level={3}>
                         {t('title', 'Job Management')}
                     </GradientTitle>
-                    <Text type="secondary" style={{ fontSize: 15 }}>
+                    <Text type="secondary" style={{ fontSize: 13 }}>
                         {t('subtitle', 'Actions and rollouts overview')}
                     </Text>
                 </HeaderContent>

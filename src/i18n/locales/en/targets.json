@@ -245,7 +245,11 @@
         "createSuccess": "Target type created successfully.",
         "updateSuccess": "Target type updated successfully.",
         "deleteSuccess": "Target type deleted successfully.",
-        "deleteConfirm": "Are you sure you want to delete this target type?"
+        "deleteConfirm": "Are you sure you want to delete this target type?",
+        "compatibleDsTypes": "Compatible Distribution Set Types",
+        "compatibleDsTypesHint": "Only these DS types can be deployed to targets of this type",
+        "selectDsTypes": "Select compatible DS types...",
+        "noCompatibleWarning": "If no DS types are selected, targets of this type will be incompatible with all deployments."
     },
     "tagManagement": {
         "title": "Target Tag Management",

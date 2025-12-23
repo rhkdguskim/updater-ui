@@ -9,6 +9,7 @@
         "types": "유형",
         "distributionByType": "유형별 배포",
         "recentSets": "최근 배포 세트",
+        "recentModules": "최근 소프트웨어 모듈",
         "total": "총",
         "typesLabel": "유형",
         "dsTags": "DS 태그",
@@ -20,7 +21,8 @@
         "allSets": "전체 세트",
         "allModules": "전체 모듈",
         "manageTags": "태그 관리",
-        "bulkAssign": "일괄 할당"
+        "bulkAssign": "일괄 할당",
+        "completeness": "완전성"
     },
     "list": {
         "title": "배포 세트",

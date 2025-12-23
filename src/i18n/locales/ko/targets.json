@@ -255,7 +255,11 @@
         "createSuccess": "타겟 유형이 생성되었습니다.",
         "updateSuccess": "타겟 유형이 업데이트되었습니다.",
         "deleteSuccess": "타겟 유형이 삭제되었습니다.",
-        "deleteConfirm": "정말로 이 타겟 유형을 삭제하시겠습니까?"
+        "deleteConfirm": "정말로 이 타겟 유형을 삭제하시겠습니까?",
+        "compatibleDsTypes": "호환 배포 세트 유형",
+        "compatibleDsTypesHint": "이 타겟 유형에는 선택한 DS 유형만 배포 가능합니다",
+        "selectDsTypes": "호환 DS 유형 선택...",
+        "noCompatibleWarning": "DS 유형을 선택하지 않으면 이 타겟 유형에 모든 배포가 불가능합니다."
     },
     "tagManagement": {
         "title": "타겟 태그 관리",

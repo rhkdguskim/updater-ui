@@ -2,10 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 
-const Container = styled.div`
+const Container = styled.div<{ $fullHeight?: boolean }>`
     overflow: hidden;
     position: relative;
     width: 100%;
+    ${props => props.$fullHeight && `
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    `}
 `;
 
 const SlideWrapper = styled.div<{ $offset: number; $itemHeight: number; $isAnimating: boolean }>`
@@ -28,6 +33,7 @@ interface AirportSlideListProps<T> {
     visibleCount?: number;
     interval?: number; // ms
     className?: string;
+    fullHeight?: boolean; // If true, fills the parent container
 }
 
 function AirportSlideList<T>({
@@ -37,18 +43,39 @@ function AirportSlideList<T>({
     visibleCount = 5,
     interval = 3000,
     className,
+    fullHeight = false,
 }: AirportSlideListProps<T>) {
     const [offset, setOffset] = useState(0);
     const [isAnimating, setIsAnimating] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [dynamicVisibleCount, setDynamicVisibleCount] = useState(visibleCount);
+
+    // Calculate visible count based on container height when fullHeight is enabled
+    useEffect(() => {
+        if (!fullHeight || !containerRef.current) return;
+
+        const updateVisibleCount = () => {
+            const containerHeight = containerRef.current?.clientHeight || 0;
+            const newVisibleCount = Math.max(1, Math.floor(containerHeight / itemHeight));
+            setDynamicVisibleCount(newVisibleCount);
+        };
+
+        updateVisibleCount();
+        const resizeObserver = new ResizeObserver(updateVisibleCount);
+        resizeObserver.observe(containerRef.current);
+
+        return () => resizeObserver.disconnect();
+    }, [fullHeight, itemHeight]);
+
+    const effectiveVisibleCount = fullHeight ? dynamicVisibleCount : visibleCount;
 
     // Double the items for seamless looping
-    const displayItems = items.length > visibleCount
-        ? [...items, ...items.slice(0, visibleCount)]
+    const displayItems = items.length > effectiveVisibleCount
+        ? [...items, ...items.slice(0, effectiveVisibleCount)]
         : items;
 
     useEffect(() => {
-        if (items.length <= visibleCount) return;
+        if (items.length <= effectiveVisibleCount) return;
 
         const timer = setInterval(() => {
             setIsAnimating(true);
@@ -56,7 +83,7 @@ function AirportSlideList<T>({
         }, interval);
 
         return () => clearInterval(timer);
-    }, [items.length, visibleCount, interval]);
+    }, [items.length, effectiveVisibleCount, interval]);
 
     // Reset to beginning when we've scrolled through all items
     useEffect(() => {
@@ -70,11 +97,16 @@ function AirportSlideList<T>({
         }
     }, [offset, items.length]);
 
+    const containerStyle = fullHeight
+        ? { flex: 1, minHeight: 0, height: '100%' }
+        : { height: itemHeight * visibleCount };
+
     return (
         <Container
             ref={containerRef}
             className={className}
-            style={{ height: itemHeight * visibleCount }}
+            $fullHeight={fullHeight}
+            style={containerStyle}
         >
             <SlideWrapper
                 $offset={offset}

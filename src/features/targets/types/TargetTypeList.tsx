@@ -8,7 +8,7 @@ import {
     Tag,
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from 'react-i18next'
 import { useQueryClient } from '@tanstack/react-query';
 import type { ColumnsType } from 'antd/es/table';
 import {
@@ -16,7 +16,11 @@ import {
     useDeleteTargetType,
     useCreateTargetTypes,
     useUpdateTargetType,
+    useAddCompatibleDistributionSets,
+    useRemoveCompatibleDistributionSet,
+    getCompatibleDistributionSets,
     getGetTargetTypesQueryKey,
+    getGetCompatibleDistributionSetsQueryKey,
 } from '@/api/generated/target-types/target-types';
 import type { MgmtTargetType, MgmtTargetTypeRequestBodyPost, MgmtTargetTypeRequestBodyPut } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -54,11 +58,6 @@ const TargetTypeList: React.FC = () => {
 
     const createMutation = useCreateTargetTypes({
         mutation: {
-            onSuccess: () => {
-                message.success(t('typeManagement.createSuccess'));
-                setDialogOpen(false);
-                queryClient.invalidateQueries({ queryKey: getGetTargetTypesQueryKey() });
-            },
             onError: (error) => {
                 message.error((error as Error).message || t('common:error'));
             },
@@ -67,25 +66,91 @@ const TargetTypeList: React.FC = () => {
 
     const updateMutation = useUpdateTargetType({
         mutation: {
-            onSuccess: () => {
-                message.success(t('typeManagement.updateSuccess'));
-                setDialogOpen(false);
-                setEditingType(null);
-                queryClient.invalidateQueries({ queryKey: getGetTargetTypesQueryKey() });
-            },
             onError: (error) => {
                 message.error((error as Error).message || t('common:error'));
             },
         },
     });
 
-    const handleCreate = (values: MgmtTargetTypeRequestBodyPost) => {
-        createMutation.mutate({ data: [values] });
+    const addCompatibleMutation = useAddCompatibleDistributionSets({
+        mutation: {
+            onError: (error) => {
+                message.error((error as Error).message || t('common:error'));
+            },
+        },
+    });
+
+    const removeCompatibleMutation = useRemoveCompatibleDistributionSet({
+        mutation: {
+            onError: (error) => {
+                message.error((error as Error).message || t('common:error'));
+            },
+        },
+    });
+
+    const handleCreate = async (values: MgmtTargetTypeRequestBodyPost, compatibleDsTypeIds?: number[]) => {
+        try {
+            // Create the target type with compatible DS types
+            const createData: MgmtTargetTypeRequestBodyPost = {
+                ...values,
+                compatibledistributionsettypes: compatibleDsTypeIds?.map(id => ({ id })),
+            };
+
+            await createMutation.mutateAsync({ data: [createData] });
+
+            message.success(t('typeManagement.createSuccess'));
+            setDialogOpen(false);
+            queryClient.invalidateQueries({ queryKey: getGetTargetTypesQueryKey() });
+        } catch {
+            // Error handled in mutation
+        }
     };
 
-    const handleUpdate = (values: MgmtTargetTypeRequestBodyPut) => {
-        if (editingType?.id) {
-            updateMutation.mutate({ targetTypeId: editingType.id, data: values });
+    const handleUpdate = async (values: MgmtTargetTypeRequestBodyPut, compatibleDsTypeIds?: number[]) => {
+        if (!editingType?.id) return;
+
+        try {
+            // First update the target type basic info
+            await updateMutation.mutateAsync({ targetTypeId: editingType.id, data: values });
+
+            // Then handle compatible DS types
+            // Get current compatible DS types
+            const currentCompatible = await queryClient.fetchQuery({
+                queryKey: getGetCompatibleDistributionSetsQueryKey(editingType.id),
+                queryFn: () => getCompatibleDistributionSets(editingType.id),
+                staleTime: 0,
+            }).catch(() => []) as { id: number }[];
+
+            const currentIds = currentCompatible?.map(dt => dt.id) || [];
+            const newIds = compatibleDsTypeIds || [];
+
+            // Find IDs to add and remove
+            const toAdd = newIds.filter(id => !currentIds.includes(id));
+            const toRemove = currentIds.filter(id => !newIds.includes(id));
+
+            // Add new compatible DS types
+            if (toAdd.length > 0) {
+                await addCompatibleMutation.mutateAsync({
+                    targetTypeId: editingType.id,
+                    data: toAdd.map(id => ({ id })),
+                });
+            }
+
+            // Remove old compatible DS types
+            for (const dsTypeId of toRemove) {
+                await removeCompatibleMutation.mutateAsync({
+                    targetTypeId: editingType.id,
+                    distributionSetTypeId: dsTypeId,
+                });
+            }
+
+            message.success(t('typeManagement.updateSuccess'));
+            setDialogOpen(false);
+            setEditingType(null);
+            queryClient.invalidateQueries({ queryKey: getGetTargetTypesQueryKey() });
+            queryClient.invalidateQueries({ queryKey: getGetCompatibleDistributionSetsQueryKey(editingType.id) });
+        } catch {
+            // Error handled in mutation
         }
     };
 
@@ -157,6 +222,9 @@ const TargetTypeList: React.FC = () => {
         },
     ];
 
+    const isSubmitting = createMutation.isPending || updateMutation.isPending ||
+        addCompatibleMutation.isPending || removeCompatibleMutation.isPending;
+
     return (
         <>
             <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
@@ -193,7 +261,7 @@ const TargetTypeList: React.FC = () => {
                 open={dialogOpen}
                 mode={editingType ? 'edit' : 'create'}
                 initialData={editingType}
-                loading={createMutation.isPending || updateMutation.isPending}
+                loading={isSubmitting}
                 onSubmit={editingType ? handleUpdate : handleCreate}
                 onCancel={() => {
                     setDialogOpen(false);

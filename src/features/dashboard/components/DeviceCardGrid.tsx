@@ -22,15 +22,30 @@ const GridContainer = styled(Card) <{ $delay?: number }>`
     animation-delay: ${props => (props.$delay || 0) * 0.1}s;
     animation-fill-mode: both;
     overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 
     .ant-card-head {
         border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        flex-shrink: 0;
+        padding: 8px 12px;
+        min-height: auto;
     }
 
     .ant-card-head-title {
-        font-size: 15px;
+        font-size: 13px;
         font-weight: 600;
         color: #334155;
+        padding: 4px 0;
+    }
+    
+    .ant-card-body {
+        flex: 1;
+        padding: 8px 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
     }
 
     .dark-mode & {
@@ -51,8 +66,9 @@ const SlideWrapper = styled.div<{ $offsetLine: number; $rowHeight: number; $gap:
     transition: ${props => props.$isAnimating ? 'transform 0.6s cubic-bezier(0.4, 0, 0.2, 1)' : 'none'};
 `;
 
-const Viewport = styled.div<{ $height: number }>`
-    height: ${props => props.$height}px;
+const Viewport = styled.div<{ $height?: number }>`
+    flex: 1;
+    min-height: 0;
     overflow: hidden;
 `;
 

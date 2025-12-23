@@ -131,5 +131,26 @@
             "confirmSuccess": "Action confirmed",
             "confirmError": "Failed to confirm action"
         }
+    },
+    "overview": {
+        "title": "Action Management",
+        "subtitle": "Deployment actions and status overview",
+        "totalActions": "Total Actions",
+        "successRate": "Success Rate",
+        "statusDistribution": "Status Distribution",
+        "activeSummary": "Active Summary",
+        "activeActions": "Active Actions",
+        "recentActions": "Recent Actions (24h)",
+        "noActiveActions": "No active actions",
+        "noRecentActions": "No recent actions"
+    },
+    "status": {
+        "running": "Running",
+        "pending": "Pending",
+        "scheduled": "Scheduled",
+        "finished": "Finished",
+        "error": "Error",
+        "canceled": "Canceled",
+        "unknown": "Unknown"
     }
 }

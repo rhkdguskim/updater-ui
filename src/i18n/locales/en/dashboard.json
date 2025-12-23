@@ -3,12 +3,19 @@
     "subtitle": "Real-time system monitoring",
     "refresh": "Refresh",
     "pageTitle": "Dashboard Overview",
+    "lastUpdated": "Updated",
+    "polling": {
+        "live": "Live",
+        "idle": "Idle"
+    },
     "kpi": {
         "totalTargets": "Total Targets",
         "onlineTargets": "Online Targets",
         "offlineTargets": "Offline Targets",
         "successRate": "Success Rate (Recent)",
         "availability": "Availability",
+        "connectivity": "Connectivity",
+        "onlineDevices": "online devices",
         "pendingActions": "Pending Actions",
         "errors": "Errors",
         "last24h": "Last 24 hours",
@@ -45,7 +52,13 @@
         "deviceStatus": "Device Status",
         "total": "total",
         "online": "Online",
-        "offline": "Offline"
+        "offline": "Offline",
+        "connectivityStatus": "Connectivity Status",
+        "deploymentRate": "Deployment Rate",
+        "deploymentRateDesc": "Target completion rate",
+        "targets": "targets",
+        "rolloutStatus": "Rollout Status",
+        "actionStatus": "Action Status (24h)"
     },
     "recentActions": {
         "title": "Recent Actions (24h)",
@@ -54,6 +67,12 @@
         "status": "Status",
         "time": "Time",
         "empty": "No recent actions"
+    },
+    "recentDevices": {
+        "title": "Recent Device Activity"
+    },
+    "deviceGrid": {
+        "title": "Device Status Grid"
     },
     "rollout": {
         "activeMonitor": "Active Rollout Monitor",
@@ -155,5 +174,11 @@
     "version": {
         "fragmentationTitle": "Fragmentation Index",
         "fragmentationLabel": "{{score}}% · {{count}} versions"
+    },
+    "actionType": {
+        "update": "Update",
+        "cancel": "Cancel",
+        "download": "Download",
+        "deploy": "Deploy"
     }
 }

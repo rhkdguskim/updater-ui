@@ -131,5 +131,26 @@
             "confirmSuccess": "액션이 확인되었습니다",
             "confirmError": "액션 확인에 실패했습니다"
         }
+    },
+    "overview": {
+        "title": "작업 관리",
+        "subtitle": "배포 작업 및 상태 개요",
+        "totalActions": "전체 작업",
+        "successRate": "성공률",
+        "statusDistribution": "상태 분포",
+        "activeSummary": "활성 요약",
+        "activeActions": "실행 중인 작업",
+        "recentActions": "최근 작업 (24시간)",
+        "noActiveActions": "실행 중인 작업 없음",
+        "noRecentActions": "최근 작업 없음"
+    },
+    "status": {
+        "running": "실행 중",
+        "pending": "대기 중",
+        "scheduled": "예약됨",
+        "finished": "완료됨",
+        "error": "오류",
+        "canceled": "취소됨",
+        "unknown": "알 수 없음"
     }
 }

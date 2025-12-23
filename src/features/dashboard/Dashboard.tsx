@@ -1,10 +1,9 @@
 import React, { useMemo } from 'react';
-import { Card, Row, Col, Typography, Button, Flex, Skeleton, Tag, Progress } from 'antd';
+import { Card, Typography, Button, Flex, Skeleton, Tag, Progress } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import styled, { keyframes, css } from 'styled-components';
 import {
-    CloudServerOutlined,
     CheckCircleOutlined,
     ClockCircleOutlined,
     WarningOutlined,
@@ -46,9 +45,9 @@ const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 12px;
-    height: 100%;
-    min-height: 100%;
-    overflow: auto;
+    height: calc(100vh - 120px);
+    min-height: 600px;
+    overflow: hidden;
     animation: ${fadeInUp} 0.5s ease-out;
 `;
 
@@ -57,6 +56,7 @@ const PageHeader = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 4px 0;
+    flex-shrink: 0;
 `;
 
 const HeaderContent = styled.div`
@@ -81,6 +81,38 @@ const GradientTitle = styled(Title)`
     }
 `;
 
+const TopRow = styled.div`
+    display: flex;
+    gap: 12px;
+    flex: 0 0 auto;
+    height: 220px;
+    min-height: 220px;
+`;
+
+const BottomRow = styled.div`
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+`;
+
+const KPIGridContainer = styled.div`
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 8px;
+    flex: 0 0 280px;
+    height: 100%;
+`;
+
+const ChartsContainer = styled.div`
+    display: flex;
+    gap: 12px;
+    flex: 1;
+    min-width: 0;
+`;
+
 const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number; $pulse?: boolean }>`
     border: none;
     border-radius: 12px;
@@ -94,6 +126,7 @@ const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number; $pulse
     animation-delay: ${props => (props.$delay || 0) * 0.1}s;
     animation-fill-mode: both;
     cursor: pointer;
+    height: 100%;
 
     &::before {
         content: '';
@@ -107,12 +140,20 @@ const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number; $pulse
     }
 
     &:hover {
-        transform: translateY(-4px);
+        transform: translateY(-2px);
         box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
     }
 
     .dark-mode & {
         background: rgba(30, 41, 59, 0.9);
+    }
+    
+    .ant-card-body {
+        padding: 12px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 `;
 
@@ -126,15 +167,79 @@ const ChartCard = styled(Card) <{ $delay?: number }>`
     animation-delay: ${props => (props.$delay || 0) * 0.1}s;
     animation-fill-mode: both;
     height: 100%;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
     
     .ant-card-head {
         border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        flex-shrink: 0;
+        padding: 8px 12px;
+        min-height: auto;
     }
     
     .ant-card-head-title {
-        font-size: 15px;
+        font-size: 13px;
         font-weight: 600;
         color: #334155;
+        padding: 4px 0;
+    }
+    
+    .ant-card-body {
+        flex: 1;
+        padding: 8px 12px;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dark-mode & {
+        background: rgba(30, 41, 59, 0.9);
+        
+        .ant-card-head {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .ant-card-head-title {
+            color: #e2e8f0;
+        }
+    }
+`;
+
+const ListCard = styled(Card) <{ $delay?: number }>`
+    border: none;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    animation: ${fadeInUp} 0.5s ease-out;
+    animation-delay: ${props => (props.$delay || 0) * 0.1}s;
+    animation-fill-mode: both;
+    height: 100%;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    
+    .ant-card-head {
+        border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+        flex-shrink: 0;
+        padding: 8px 12px;
+        min-height: auto;
+    }
+    
+    .ant-card-head-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #334155;
+        padding: 4px 0;
+    }
+    
+    .ant-card-body {
+        flex: 1;
+        padding: 8px 12px;
+        overflow: hidden;
     }
 
     .dark-mode & {
@@ -151,10 +256,10 @@ const ChartCard = styled(Card) <{ $delay?: number }>`
 `;
 
 const BigNumber = styled.div`
-    font-size: 36px;
+    font-size: 24px;
     font-weight: 700;
-    line-height: 1;
-    margin-bottom: 4px;
+    line-height: 1.2;
+    margin-bottom: 2px;
 `;
 
 const LiveIndicator = styled.div`
@@ -175,9 +280,9 @@ const LiveIndicator = styled.div`
 `;
 
 const ChartLegendItem = styled(Flex)`
-    padding: 6px 10px;
+    padding: 4px 8px;
     background: rgba(0, 0, 0, 0.02);
-    border-radius: 8px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
     
@@ -304,9 +409,21 @@ const Dashboard: React.FC = () => {
     const finishedRolloutTargets = rollouts.reduce(
         (sum, r) => sum + (r.totalTargetsPerStatus?.finished || 0), 0
     );
-    const deploymentRate = totalRolloutTargets > 0
+
+    // Fallback to Actions if no Rollouts
+    const hasRollouts = totalRolloutTargets > 0;
+    const totalActions = recentActions.length;
+    const finishedActions = finishedCount; // Only successful ones
+
+    const deploymentRate = hasRollouts
         ? Math.round((finishedRolloutTargets / totalRolloutTargets) * 100)
-        : null;
+        : totalActions > 0
+            ? Math.round((finishedActions / totalActions) * 100)
+            : null;
+
+    const deploymentRateLabel = hasRollouts
+        ? `${finishedRolloutTargets} / ${totalRolloutTargets} ${t('chart.targets', 'targets')}`
+        : `${finishedActions} / ${totalActions} ${t('chart.actions', 'actions')}`;
 
     // Pie chart data - Connectivity
     const connectivityPieData = useMemo(() => [
@@ -344,6 +461,21 @@ const Dashboard: React.FC = () => {
             .slice(0, 10);
     }, [recentActions]);
 
+    // Target lookup map for actions
+    const targetMap = useMemo(() => {
+        const map = new Map<string, { name: string; ip: string; controllerId: string }>();
+        targets.forEach(t => {
+            if (t.controllerId) {
+                map.set(t.controllerId, {
+                    name: t.name || t.controllerId,
+                    ip: t.ipAddress || '-',
+                    controllerId: t.controllerId,
+                });
+            }
+        });
+        return map;
+    }, [targets]);
+
     const getStatusLabel = (status?: string) => {
         if (!status) return t('common:status.unknown', { defaultValue: 'UNKNOWN' });
         const key = status.toLowerCase();
@@ -369,11 +501,11 @@ const Dashboard: React.FC = () => {
         <PageContainer>
             <PageHeader>
                 <HeaderContent>
-                    <GradientTitle level={2}>
+                    <GradientTitle level={3}>
                         {t('title', 'Operations Dashboard')}
                     </GradientTitle>
                     <Flex align="center" gap={12}>
-                        <Text type="secondary" style={{ fontSize: 15 }}>
+                        <Text type="secondary" style={{ fontSize: 13 }}>
                             {t('subtitle', 'Real-time system monitoring')}
                         </Text>
                         <LiveIndicator>
@@ -389,65 +521,56 @@ const Dashboard: React.FC = () => {
                         icon={<ReloadOutlined />}
                         onClick={refetch}
                         loading={isLoading}
+                        size="small"
                     >
                         {t('refresh', 'Refresh')}
                     </Button>
                 </Flex>
             </PageHeader>
 
-            {/* KPI Cards */}
-            <Row gutter={[16, 16]}>
-                <Col xs={24} sm={12} lg={6}>
+            {/* Top Row: KPI Cards (2x2) + 4 Charts */}
+            <TopRow>
+                {/* KPI Cards - 2x2 Grid */}
+                <KPIGridContainer>
                     <StatsCard
                         $accentColor="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
                         $delay={1}
                         onClick={() => navigate('/targets')}
                     >
                         {isLoading ? <Skeleton active paragraph={{ rows: 1 }} /> : (
-                            <Flex justify="space-between" align="center">
-                                <div>
-                                    <Text type="secondary" style={{ fontSize: 13, fontWeight: 600 }}>
-                                        {t('kpi.connectivity', 'Connectivity')}
-                                    </Text>
-                                    <BigNumber style={{ color: COLORS.online }}>{onlineCount}/{totalDevices}</BigNumber>
-                                    <Text type="secondary" style={{ fontSize: 12 }}>
-                                        {t('kpi.onlineDevices', 'online devices')}
-                                    </Text>
-                                </div>
-                                <CloudServerOutlined style={{ fontSize: 32, color: COLORS.online, opacity: 0.3 }} />
+                            <Flex vertical gap={2}>
+                                <Text type="secondary" style={{ fontSize: 11, fontWeight: 600 }}>
+                                    {t('kpi.connectivity', 'Connectivity')}
+                                </Text>
+                                <BigNumber style={{ color: COLORS.online }}>{onlineCount}/{totalDevices}</BigNumber>
+                                <Text type="secondary" style={{ fontSize: 10 }}>
+                                    {t('kpi.onlineDevices', 'online devices')}
+                                </Text>
                             </Flex>
                         )}
                     </StatsCard>
-                </Col>
-                <Col xs={24} sm={12} lg={6}>
                     <StatsCard
                         $accentColor="linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)"
                         $delay={2}
                         onClick={() => navigate('/actions')}
                     >
                         {isLoading ? <Skeleton active paragraph={{ rows: 1 }} /> : (
-                            <Flex justify="space-between" align="center">
-                                <div>
-                                    <Text type="secondary" style={{ fontSize: 13, fontWeight: 600 }}>
-                                        {t('kpi.successRate', 'Success Rate')}
-                                    </Text>
-                                    <BigNumber style={{ color: COLORS.success }}>
-                                        {successRate !== null ? `${successRate}%` : '-'}
-                                    </BigNumber>
-                                    <Progress
-                                        percent={successRate ?? 0}
-                                        size="small"
-                                        strokeColor={COLORS.success}
-                                        showInfo={false}
-                                        style={{ width: 100 }}
-                                    />
-                                </div>
-                                <CheckCircleOutlined style={{ fontSize: 32, color: COLORS.success, opacity: 0.3 }} />
+                            <Flex vertical gap={2}>
+                                <Text type="secondary" style={{ fontSize: 11, fontWeight: 600 }}>
+                                    {t('kpi.successRate', 'Success Rate')}
+                                </Text>
+                                <BigNumber style={{ color: COLORS.success }}>
+                                    {successRate !== null ? `${successRate}%` : '-'}
+                                </BigNumber>
+                                <Progress
+                                    percent={successRate ?? 0}
+                                    size="small"
+                                    strokeColor={COLORS.success}
+                                    showInfo={false}
+                                />
                             </Flex>
                         )}
                     </StatsCard>
-                </Col>
-                <Col xs={24} sm={12} lg={6}>
                     <StatsCard
                         $accentColor="linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)"
                         $delay={3}
@@ -455,22 +578,17 @@ const Dashboard: React.FC = () => {
                         onClick={() => navigate('/actions')}
                     >
                         {isLoading ? <Skeleton active paragraph={{ rows: 1 }} /> : (
-                            <Flex justify="space-between" align="center">
-                                <div>
-                                    <Text type="secondary" style={{ fontSize: 13, fontWeight: 600 }}>
-                                        {t('kpi.pendingActions', 'Pending Actions')}
-                                    </Text>
-                                    <BigNumber style={{ color: COLORS.pending }}>{pendingCount}</BigNumber>
-                                    <Text type="secondary" style={{ fontSize: 12 }}>
-                                        {t('kpi.last24h', 'Last 24 hours')}
-                                    </Text>
-                                </div>
-                                <ClockCircleOutlined style={{ fontSize: 32, color: COLORS.pending, opacity: 0.3 }} />
+                            <Flex vertical gap={2}>
+                                <Text type="secondary" style={{ fontSize: 11, fontWeight: 600 }}>
+                                    {t('kpi.pendingActions', 'Pending Actions')}
+                                </Text>
+                                <BigNumber style={{ color: COLORS.pending }}>{pendingCount}</BigNumber>
+                                <Text type="secondary" style={{ fontSize: 10 }}>
+                                    {t('kpi.last24h', 'Last 24 hours')}
+                                </Text>
                             </Flex>
                         )}
                     </StatsCard>
-                </Col>
-                <Col xs={24} sm={12} lg={6}>
                     <StatsCard
                         $accentColor="linear-gradient(135deg, #ef4444 0%, #f87171 100%)"
                         $delay={4}
@@ -478,50 +596,45 @@ const Dashboard: React.FC = () => {
                         onClick={() => navigate('/actions')}
                     >
                         {isLoading ? <Skeleton active paragraph={{ rows: 1 }} /> : (
-                            <Flex justify="space-between" align="center">
-                                <div>
-                                    <Text type="secondary" style={{ fontSize: 13, fontWeight: 600 }}>
-                                        {t('kpi.errors', 'Errors')}
-                                    </Text>
-                                    <BigNumber style={{ color: errorCount > 0 ? COLORS.error : '#64748b' }}>
-                                        {errorCount}
-                                    </BigNumber>
-                                    {errorCount > 0 ? (
-                                        <Tag color="red" icon={<WarningOutlined />}>{t('kpi.requiresAttention')}</Tag>
-                                    ) : (
-                                        <Tag color="green" icon={<CheckCircleOutlined />}>{t('kpi.allClear')}</Tag>
-                                    )}
-                                </div>
-                                <WarningOutlined style={{ fontSize: 32, color: COLORS.error, opacity: 0.3 }} />
+                            <Flex vertical gap={2}>
+                                <Text type="secondary" style={{ fontSize: 11, fontWeight: 600 }}>
+                                    {t('kpi.errors', 'Errors')}
+                                </Text>
+                                <BigNumber style={{ color: errorCount > 0 ? COLORS.error : '#64748b' }}>
+                                    {errorCount}
+                                </BigNumber>
+                                {errorCount > 0 ? (
+                                    <Tag color="red" icon={<WarningOutlined />} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>{t('kpi.requiresAttention')}</Tag>
+                                ) : (
+                                    <Tag color="green" icon={<CheckCircleOutlined />} style={{ fontSize: 10, padding: '0 4px', margin: 0 }}>{t('kpi.allClear')}</Tag>
+                                )}
                             </Flex>
                         )}
                     </StatsCard>
-                </Col>
-            </Row>
+                </KPIGridContainer>
 
-            {/* Charts Row */}
-            <Row gutter={[16, 16]}>
-                {/* Connectivity Status Chart */}
-                <Col xs={24} md={12} lg={6}>
+                {/* Charts Container - 4 Charts */}
+                <ChartsContainer>
+                    {/* Connectivity Status Chart */}
                     <ChartCard
                         title={
-                            <Flex align="center" gap={8}>
-                                <WifiOutlined style={{ color: COLORS.online }} />
-                                <span>{t('chart.connectivityStatus', 'Connectivity Status')}</span>
+                            <Flex align="center" gap={6}>
+                                <WifiOutlined style={{ color: COLORS.online, fontSize: 14 }} />
+                                <span>{t('chart.connectivityStatus', 'Connectivity')}</span>
                             </Flex>
                         }
                         $delay={5}
                     >
                         {isLoading ? (
-                            <Skeleton.Avatar active size={120} shape="circle" style={{ margin: '16px auto', display: 'block' }} />
+                            <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
                         ) : connectivityPieData.length > 0 ? (
-                            <div>
-                                <ResponsiveContainer width="100%" height={160}>
+                            <Flex vertical style={{ flex: 1 }}>
+                                <ResponsiveContainer width="100%" height={100}>
                                     <PieChart>
                                         <Pie
                                             data={connectivityPieData}
-                                            innerRadius={45}
-                                            outerRadius={60}
+                                            innerRadius={28}
+                                            outerRadius={40}
                                             paddingAngle={3}
                                             dataKey="value"
                                             strokeWidth={0}
@@ -534,70 +647,67 @@ const Dashboard: React.FC = () => {
                                     </PieChart>
                                 </ResponsiveContainer>
                                 {renderCustomLegend(connectivityPieData)}
-                            </div>
+                            </Flex>
                         ) : (
-                            <Flex justify="center" align="center" style={{ height: 160 }}>
+                            <Flex justify="center" align="center" style={{ flex: 1 }}>
                                 <Text type="secondary">{t('common:messages.noData')}</Text>
                             </Flex>
                         )}
                     </ChartCard>
-                </Col>
 
-                {/* Deployment Rate Chart */}
-                <Col xs={24} md={12} lg={6}>
+                    {/* Deployment Rate Chart */}
                     <ChartCard
                         title={
-                            <Flex align="center" gap={8}>
-                                <ThunderboltOutlined style={{ color: COLORS.finished }} />
-                                <span>{t('chart.deploymentRate', 'Deployment Rate')}</span>
+                            <Flex align="center" gap={6}>
+                                <ThunderboltOutlined style={{ color: COLORS.finished, fontSize: 14 }} />
+                                <span>{t('chart.deploymentRate', 'Deployment')}</span>
                             </Flex>
                         }
                         $delay={6}
                     >
                         {isLoading ? (
-                            <Skeleton active paragraph={{ rows: 3 }} />
+                            <Skeleton active paragraph={{ rows: 2 }} />
                         ) : (
-                            <Flex vertical align="center" justify="center" style={{ height: 160 + 68 }}>
-                                <div style={{ fontSize: 48, fontWeight: 700, color: COLORS.finished }}>
+                            <Flex vertical align="center" justify="center" style={{ flex: 1 }}>
+                                <div style={{ fontSize: 32, fontWeight: 700, color: COLORS.finished }}>
                                     {deploymentRate !== null ? `${deploymentRate}%` : '-'}
                                 </div>
-                                <Text type="secondary" style={{ fontSize: 13, marginTop: 8 }}>
-                                    {t('chart.deploymentRateDesc', 'Target completion rate')}
+                                <Text type="secondary" style={{ fontSize: 10, marginTop: 4 }}>
+                                    {t('chart.deploymentRateDesc', 'Target completion')}
                                 </Text>
                                 <Progress
                                     percent={deploymentRate ?? 0}
                                     strokeColor={COLORS.finished}
-                                    style={{ width: '80%', marginTop: 12 }}
+                                    style={{ width: '90%', marginTop: 8 }}
+                                    size="small"
                                 />
-                                <Text type="secondary" style={{ fontSize: 11, marginTop: 8 }}>
-                                    {finishedRolloutTargets} / {totalRolloutTargets} {t('chart.targets', 'targets')}
+                                <Text type="secondary" style={{ fontSize: 10, marginTop: 4 }}>
+                                    {deploymentRateLabel}
                                 </Text>
                             </Flex>
                         )}
                     </ChartCard>
-                </Col>
 
-                {/* Rollout Status Chart */}
-                <Col xs={24} md={12} lg={6}>
+                    {/* Rollout Status Chart */}
                     <ChartCard
                         title={
-                            <Flex align="center" gap={8}>
-                                <PlayCircleOutlined style={{ color: COLORS.running }} />
-                                <span>{t('chart.rolloutStatus', 'Rollout Status')}</span>
+                            <Flex align="center" gap={6}>
+                                <PlayCircleOutlined style={{ color: COLORS.running, fontSize: 14 }} />
+                                <span>{t('chart.rolloutStatus', 'Rollout')}</span>
                             </Flex>
                         }
                         $delay={7}
                     >
                         {isLoading ? (
-                            <Skeleton.Avatar active size={120} shape="circle" style={{ margin: '16px auto', display: 'block' }} />
+                            <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
                         ) : rolloutStatusData.length > 0 ? (
-                            <div>
-                                <ResponsiveContainer width="100%" height={160}>
+                            <Flex vertical style={{ flex: 1 }}>
+                                <ResponsiveContainer width="100%" height={100}>
                                     <PieChart>
                                         <Pie
                                             data={rolloutStatusData}
-                                            innerRadius={45}
-                                            outerRadius={60}
+                                            innerRadius={28}
+                                            outerRadius={40}
                                             paddingAngle={3}
                                             dataKey="value"
                                             strokeWidth={0}
@@ -610,36 +720,34 @@ const Dashboard: React.FC = () => {
                                     </PieChart>
                                 </ResponsiveContainer>
                                 {renderCustomLegend(rolloutStatusData)}
-                            </div>
+                            </Flex>
                         ) : (
-                            <Flex justify="center" align="center" style={{ height: 160 }}>
+                            <Flex justify="center" align="center" style={{ flex: 1 }}>
                                 <Text type="secondary">{t('common:messages.noData')}</Text>
                             </Flex>
                         )}
                     </ChartCard>
-                </Col>
 
-                {/* Action Status Chart */}
-                <Col xs={24} md={12} lg={6}>
+                    {/* Action Status Chart */}
                     <ChartCard
                         title={
-                            <Flex align="center" gap={8}>
-                                <SyncOutlined style={{ color: COLORS.running }} />
-                                <span>{t('chart.actionStatus', 'Action Status (24h)')}</span>
+                            <Flex align="center" gap={6}>
+                                <SyncOutlined style={{ color: COLORS.running, fontSize: 14 }} />
+                                <span>{t('chart.actionStatus', 'Actions (24h)')}</span>
                             </Flex>
                         }
                         $delay={8}
                     >
                         {isLoading ? (
-                            <Skeleton.Avatar active size={120} shape="circle" style={{ margin: '16px auto', display: 'block' }} />
+                            <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
                         ) : actionStatusData.length > 0 ? (
-                            <div>
-                                <ResponsiveContainer width="100%" height={160}>
+                            <Flex vertical style={{ flex: 1 }}>
+                                <ResponsiveContainer width="100%" height={100}>
                                     <PieChart>
                                         <Pie
                                             data={actionStatusData}
-                                            innerRadius={45}
-                                            outerRadius={60}
+                                            innerRadius={28}
+                                            outerRadius={40}
                                             paddingAngle={3}
                                             dataKey="value"
                                             strokeWidth={0}
@@ -652,108 +760,98 @@ const Dashboard: React.FC = () => {
                                     </PieChart>
                                 </ResponsiveContainer>
                                 {renderCustomLegend(actionStatusData)}
-                            </div>
+                            </Flex>
                         ) : (
-                            <Flex justify="center" align="center" style={{ height: 160 }}>
+                            <Flex justify="center" align="center" style={{ flex: 1 }}>
                                 <Text type="secondary">{t('common:messages.noData')}</Text>
                             </Flex>
                         )}
                     </ChartCard>
-                </Col>
-            </Row>
+                </ChartsContainer>
+            </TopRow>
 
-            {/* List Views Row */}
-            <Row gutter={[16, 16]}>
+            {/* Bottom Row: Recent Devices + Recent Actions + Device Grid */}
+            <BottomRow>
                 {/* Recent Device Status */}
-                <Col xs={24} lg={12}>
-                    <ChartCard
-                        title={t('recentDevices.title', 'Recent Device Activity')}
-                        $delay={9}
-                        styles={{ body: { padding: '12px', minHeight: 280 } }}
-                    >
-                        {isLoading ? (
-                            <Skeleton active paragraph={{ rows: 5 }} />
-                        ) : recentDevices.length > 0 ? (
+                <ListCard
+                    title={t('recentDevices.title', 'Recent Device Activity')}
+                    $delay={9}
+                >
+                    {isLoading ? (
+                        <Skeleton active paragraph={{ rows: 4 }} />
+                    ) : recentDevices.length > 0 ? (
+                        <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                             <AirportSlideList
                                 items={recentDevices}
-                                itemHeight={64}
-                                visibleCount={5}
+                                itemHeight={52}
+                                visibleCount={4}
                                 interval={3000}
+                                fullHeight={true}
                                 renderItem={(record: MgmtTarget) => (
                                     <Flex
                                         key={record.controllerId}
                                         align="center"
                                         justify="space-between"
                                         style={{
-                                            padding: '8px 16px',
-                                            borderBottom: '1px solid rgba(0,0,0,0.04)',
+                                            padding: '6px 12px',
                                             cursor: 'pointer',
                                             height: '100%',
                                             width: '100%',
                                             background: 'rgba(0,0,0,0.01)',
-                                            borderRadius: 8,
+                                            borderRadius: 6,
                                         }}
                                         onClick={() => navigate(`/targets/${record.controllerId}`)}
                                     >
-                                        <Flex align="center" gap={16} style={{ flex: 1 }}>
+                                        <Flex align="center" gap={10} style={{ flex: 1, minWidth: 0 }}>
                                             <div style={{
-                                                width: 40, height: 40, borderRadius: '50%',
+                                                width: 32, height: 32, borderRadius: '50%',
                                                 background: record.pollStatus?.overdue ? '#fef3c7' : '#d1fae5',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                flexShrink: 0
                                             }}>
                                                 <WifiOutlined style={{
-                                                    fontSize: 20,
+                                                    fontSize: 16,
                                                     color: record.pollStatus?.overdue ? COLORS.offline : COLORS.online
                                                 }} />
                                             </div>
-                                            <Flex vertical gap={2}>
-                                                <Text strong style={{ fontSize: 14 }}>
+                                            <Flex vertical gap={0} style={{ minWidth: 0 }}>
+                                                <Text strong style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                                     {record.name || record.controllerId}
                                                 </Text>
-                                                <Flex gap={8} align="center">
-                                                    {record.ipAddress && (
-                                                        <Tag style={{ margin: 0, fontSize: 10, padding: '0 4px' }}>{record.ipAddress}</Tag>
-                                                    )}
-                                                    <Text type="secondary" style={{ fontSize: 11 }}>
-                                                        {record.pollStatus?.lastRequestAt ? dayjs(record.pollStatus.lastRequestAt).format('YYYY-MM-DD HH:mm:ss') : '-'}
-                                                    </Text>
-                                                </Flex>
+                                                <Text type="secondary" style={{ fontSize: 10 }}>
+                                                    {record.pollStatus?.lastRequestAt ? dayjs(record.pollStatus.lastRequestAt).format('HH:mm:ss') : '-'}
+                                                </Text>
                                             </Flex>
                                         </Flex>
-                                        <Flex vertical align="end" gap={2}>
-                                            <Tag color={record.pollStatus?.overdue ? 'warning' : 'success'} style={{ margin: 0, minWidth: 60, textAlign: 'center' }}>
-                                                {record.pollStatus?.overdue ? t('common:status.offline', 'Offline') : t('common:status.online', 'Online')}
-                                            </Tag>
-                                            <Text type="secondary" style={{ fontSize: 11 }}>
-                                                {record.description || ''}
-                                            </Text>
-                                        </Flex>
+                                        <Tag color={record.pollStatus?.overdue ? 'warning' : 'success'} style={{ margin: 0, fontSize: 10 }}>
+                                            {record.pollStatus?.overdue ? t('common:status.offline', 'Offline') : t('common:status.online', 'Online')}
+                                        </Tag>
                                     </Flex>
                                 )}
                             />
-                        ) : (
-                            <Flex justify="center" align="center" style={{ height: 200 }}>
-                                <Text type="secondary">{t('common:messages.noData')}</Text>
-                            </Flex>
-                        )}
-                    </ChartCard>
-                </Col>
+                        </div>
+                    ) : (
+                        <Flex justify="center" align="center" style={{ flex: 1 }}>
+                            <Text type="secondary">{t('common:messages.noData')}</Text>
+                        </Flex>
+                    )}
+                </ListCard>
 
                 {/* Recent Actions */}
-                <Col xs={24} lg={12}>
-                    <ChartCard
-                        title={t('recentActions.title', 'Recent Actions (24h)')}
-                        $delay={10}
-                        styles={{ body: { padding: '12px', minHeight: 280 } }}
-                    >
-                        {isLoading ? (
-                            <Skeleton active paragraph={{ rows: 5 }} />
-                        ) : recentActionsList.length > 0 ? (
+                <ListCard
+                    title={t('recentActions.title', 'Recent Actions (24h)')}
+                    $delay={10}
+                >
+                    {isLoading ? (
+                        <Skeleton active paragraph={{ rows: 4 }} />
+                    ) : recentActionsList.length > 0 ? (
+                        <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                             <AirportSlideList
                                 items={recentActionsList}
-                                itemHeight={64}
-                                visibleCount={5}
+                                itemHeight={52}
+                                visibleCount={4}
                                 interval={3500}
+                                fullHeight={true}
                                 renderItem={(record: MgmtAction) => {
                                     const displayStatus = getActionDisplayStatus(record);
                                     let targetId = record._links?.target?.href?.split('/').pop();
@@ -761,6 +859,11 @@ const Dashboard: React.FC = () => {
                                         const match = record._links.self.href.match(/targets\/([^/]+)\/actions/);
                                         if (match) targetId = match[1];
                                     }
+                                    const targetInfo = targetId ? targetMap.get(targetId) : undefined;
+                                    const actionType = record.type === 'update' ? t('actionType.update', 'Update') :
+                                        record.type === 'cancel' ? t('actionType.cancel', 'Cancel') :
+                                            record.type === 'download' ? t('actionType.download', 'Download') :
+                                                record.type || t('actionType.deploy', 'Deploy');
 
                                     return (
                                         <Flex
@@ -768,31 +871,40 @@ const Dashboard: React.FC = () => {
                                             align="center"
                                             justify="space-between"
                                             style={{
-                                                padding: '8px 16px',
-                                                borderBottom: '1px solid rgba(0,0,0,0.04)',
+                                                padding: '6px 12px',
                                                 cursor: 'pointer',
                                                 height: '100%',
                                                 width: '100%',
                                                 background: 'rgba(0,0,0,0.01)',
-                                                borderRadius: 8,
+                                                borderRadius: 6,
                                             }}
                                             onClick={() => navigate(`/actions/${record.id}`)}
                                         >
-                                            <Flex align="center" gap={16} style={{ flex: 1 }}>
+                                            <Flex align="center" gap={10} style={{ flex: 1, minWidth: 0 }}>
                                                 <div style={{
-                                                    width: 40, height: 40, borderRadius: 8,
-                                                    background: '#f1f5f9',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center'
+                                                    width: 32, height: 32, borderRadius: 6,
+                                                    background: displayStatus === 'error' ? '#fef2f2' :
+                                                        displayStatus === 'finished' ? '#f0fdf4' : '#eff6ff',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    flexShrink: 0
                                                 }}>
-                                                    <Text strong style={{ fontSize: 16, color: '#64748b' }}>#{record.id}</Text>
+                                                    {getActionStatusIcon(displayStatus)}
                                                 </div>
-                                                <Flex vertical gap={2}>
-                                                    <Text strong style={{ fontSize: 13 }}>
-                                                        {targetId || t('common:unknownDevice')}
-                                                    </Text>
+                                                <Flex vertical gap={0} style={{ flex: 1, minWidth: 0 }}>
+                                                    <Flex gap={6} align="center">
+                                                        <Text strong style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                            {targetInfo?.name || targetId || t('common:unknownDevice')}
+                                                        </Text>
+                                                        <Tag color="geekblue" style={{ margin: 0, fontSize: 9, padding: '0 4px', lineHeight: '16px' }}>
+                                                            {actionType}
+                                                        </Tag>
+                                                    </Flex>
                                                     <Flex gap={8} align="center">
-                                                        <Text type="secondary" style={{ fontSize: 11 }}>
-                                                            {record.createdAt ? dayjs(record.createdAt).format('YYYY-MM-DD HH:mm') : '-'}
+                                                        <Text type="secondary" style={{ fontSize: 10 }}>
+                                                            {targetInfo?.ip || '-'}
+                                                        </Text>
+                                                        <Text type="secondary" style={{ fontSize: 10 }}>
+                                                            {record.createdAt ? dayjs(record.createdAt).format('HH:mm') : '-'}
                                                         </Text>
                                                     </Flex>
                                                 </Flex>
@@ -800,7 +912,7 @@ const Dashboard: React.FC = () => {
                                             <Tag
                                                 color={getActionStatusColor(displayStatus)}
                                                 icon={getActionStatusIcon(displayStatus)}
-                                                style={{ margin: 0, borderRadius: 12, padding: '4px 10px', fontSize: 12 }}
+                                                style={{ margin: 0, fontSize: 10, padding: '2px 6px' }}
                                             >
                                                 {getStatusLabel(displayStatus)}
                                             </Tag>
@@ -808,23 +920,29 @@ const Dashboard: React.FC = () => {
                                     );
                                 }}
                             />
-                        ) : (
-                            <Flex justify="center" align="center" style={{ height: 200 }}>
-                                <Text type="secondary">{t('common:messages.noData')}</Text>
-                            </Flex>
-                        )}
-                    </ChartCard>
-                </Col>
-            </Row>
+                        </div>
+                    ) : (
+                        <Flex justify="center" align="center" style={{ flex: 1 }}>
+                            <Text type="secondary">{t('common:messages.noData')}</Text>
+                        </Flex>
+                    )}
+                </ListCard>
 
-            {/* Device Card Grid */}
-            <DeviceCardGrid
-                targets={targets}
-                actions={actions}
-                loading={isLoading}
-                title={t('deviceGrid.title', 'Device Status Grid')}
-                delay={11}
-            />
+                {/* Device Card Grid */}
+                <div style={{ flex: 1, minWidth: 0, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                    <DeviceCardGrid
+                        targets={targets}
+                        actions={actions}
+                        loading={isLoading}
+                        title={t('deviceGrid.title', 'Device Status Grid')}
+                        delay={11}
+                        cols={3}
+                        rows={3}
+                        gap={6}
+                        rowHeight={80}
+                    />
+                </div>
+            </BottomRow>
         </PageContainer>
     );
 };

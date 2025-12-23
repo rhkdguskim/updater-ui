@@ -34,6 +34,8 @@
         "total": "total",
         "recentActions": "Recent Actions (24h)",
         "activeRollouts": "Active Rollouts",
+        "targets": "targets",
+        "actions": "actions",
         "jobProgress": {
             "title": "Job Progress Feedback",
             "actionsTitle": "Action Progress",
