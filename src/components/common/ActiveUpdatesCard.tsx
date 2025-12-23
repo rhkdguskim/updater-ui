@@ -14,6 +14,7 @@ import {
     UpOutlined,
 } from '@ant-design/icons';
 import { useGetAction1 } from '@/api/generated/actions/actions';
+import { useGetActionStatus } from '@/hooks/useActionStatus';
 import type { MgmtAction } from '@/api/generated/model';
 import { ActionTimeline } from './ActionTimeline';
 
@@ -199,6 +200,7 @@ const ActiveUpdateRowComponent: React.FC<{
     const navigate = useNavigate();
     const [isExpanded, setIsExpanded] = useState(false);
     const [isCompleting, setIsCompleting] = useState(false);
+    const [isHovered, setIsHovered] = useState(false);
     const prevStatusRef = useRef<string | undefined>(item.action.status);
 
     // Real-time action data polling for active actions
@@ -217,11 +219,22 @@ const ActiveUpdateRowComponent: React.FC<{
         }
     );
 
+    // Fetch granular status history on hover
+    const { data: statusData } = useGetActionStatus(
+        item.action.id!,
+        {
+            query: {
+                enabled: !!item.action.id && isHovered,
+                staleTime: 5000 // Cache for 5s
+            }
+        }
+    );
+
     const displayAction = fetchedAction || item.action;
     const status = displayAction.status?.toLowerCase() || '';
 
-    // Extract messages for display (messages are part of action response)
-    const messages = (displayAction as any).messages as string[] | undefined;
+    // Prioritize messages fetched from status endpoint, fallback to action messages if any
+    const messages = (statusData?.messages || (displayAction as any).messages) as string[] | undefined;
     const lastMessage = messages && messages.length > 0 ? messages[messages.length - 1] : undefined;
     const displayStatus = lastMessage || displayAction.detailStatus || status;
 
@@ -290,7 +303,7 @@ const ActiveUpdateRowComponent: React.FC<{
                 <Text strong style={{ fontSize: 12, marginBottom: 4 }}>
                     {t('activeUpdates.statusHistory', 'Status History')}
                 </Text>
-                {messages.slice().reverse().slice(0, 8).map((msg, idx) => (
+                {messages.slice().reverse().slice(0, 8).map((msg: string, idx: number) => (
                     <Flex key={idx} gap={8} align="flex-start" style={{ padding: '4px 0', borderBottom: idx < 7 && idx < messages.length - 1 ? '1px solid var(--ant-color-border-secondary, rgba(0,0,0,0.06))' : 'none' }}>
                         <Tag color={idx === 0 ? 'blue' : 'default'} style={{ fontSize: 10, margin: 0, flexShrink: 0 }}>
                             {idx === 0 ? t('common:status.current', 'Current') : `#${messages.length - idx}`}
@@ -307,19 +320,30 @@ const ActiveUpdateRowComponent: React.FC<{
                 )}
             </Flex>
         </div>
-    ) : null;
+    ) : (
+        // Loading state or empty state if no messages
+        <div style={{ padding: 8, textAlign: 'center' }}>
+            {isHovered && !messages ? <SyncOutlined spin /> : <Text type="secondary">{t('common:messages.noData')}</Text>}
+        </div>
+    );
 
-    // Only show popover for active actions with multiple messages
-    const activeStatuses = ['running', 'pending', 'scheduled', 'retrieving', 'retrieved', 'downloading'];
-    const showPopover = activeStatuses.includes(status) && messages && messages.length > 0;
+    // Show popover for running actions
+    // We want to show it even if fetching, to show the loading spinner logic above if needed,
+    // but the original logic restricted it. Let's be broader to allow fetching feedback.
+    const showPopover = ['running', 'pending', 'scheduled', 'retrieving', 'retrieved', 'downloading'].includes(status);
 
     const rowContent = (
         <UpdateRow $isCompleting={isCompleting} $isExpanded={isExpanded}>
             <MainContent onClick={handleClick}>
                 <Flex align="center" gap={12} style={{ flex: 1, minWidth: 0 }}>
-                    <IconBadge $status={status}>
-                        {getStatusIcon()}
-                    </IconBadge>
+                    <div
+                        onMouseEnter={() => setIsHovered(true)}
+                        onMouseLeave={() => setIsHovered(false)}
+                    >
+                        <IconBadge $status={status}>
+                            {getStatusIcon()}
+                        </IconBadge>
+                    </div>
                     <Flex vertical gap={2} style={{ flex: 1, minWidth: 0 }}>
                         <Flex justify="space-between" align="center">
                             <Text strong style={{ fontSize: 13, color: '#1e293b' }}>
@@ -367,7 +391,7 @@ const ActiveUpdateRowComponent: React.FC<{
             {isExpanded && showHistory && messages && messages.length > 0 && (
                 <HistoryPanel onClick={(e) => e.stopPropagation()}>
                     <Timeline
-                        items={messages.slice().reverse().slice(0, 10).map((msg, idx) => ({
+                        items={messages.slice().reverse().slice(0, 10).map((msg: string, idx: number) => ({
                             color: idx === 0 ? 'blue' : 'gray',
                             children: (
                                 <Flex vertical gap={2}>
@@ -389,14 +413,14 @@ const ActiveUpdateRowComponent: React.FC<{
     );
 
     // Wrap with Popover for hover effect on active actions
-    if (showPopover && popoverContent) {
+    if (showPopover) {
         return (
             <Popover
                 content={popoverContent}
                 title={null}
-                placement="left"
+                placement="right" // Changed to right for better visibility usually, or auto
                 trigger="hover"
-                mouseEnterDelay={0.3}
+                mouseEnterDelay={0.2} // Slightly faster to feel responsive
                 overlayStyle={{ maxWidth: 350 }}
             >
                 {rowContent}
