@@ -24,6 +24,7 @@ import {
     OverviewPageContainer,
     OverviewPageHeader,
     HeaderContent,
+    OverviewScrollContent,
     GradientTitle,
     TopRow,
     BottomRow,
@@ -177,268 +178,270 @@ const ActionsOverview: React.FC = () => {
                 </Flex>
             </OverviewPageHeader>
 
-            {/* Top Row: KPI Cards + 2 Charts */}
-            <TopRow>
-                <KPIGridContainer>
-                    <OverviewStatsCard
-                        $accentColor="linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)"
-                        $delay={1}
-                        onClick={() => navigate('/actions')}
-                    >
-                        {isLoading ? <Skeleton.Avatar active size={40} /> : (
-                            <Flex vertical align="center" gap={4}>
-                                <IconBadge $theme="actions">
-                                    <ThunderboltOutlined />
-                                </IconBadge>
-                                <BigNumber $color="#3b82f6">{totalActions}</BigNumber>
-                                <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                    {t('overview.totalActions', 'Total Actions')}
-                                </Text>
-                            </Flex>
-                        )}
-                    </OverviewStatsCard>
-                    <OverviewStatsCard
-                        $accentColor="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
-                        $delay={2}
-                        onClick={() => navigate('/actions')}
-                    >
-                        {isLoading ? <Skeleton.Avatar active size={40} /> : (
-                            <Flex vertical align="center" gap={4}>
-                                <IconBadge $color="linear-gradient(135deg, #10b981 0%, #059669 100%)">
-                                    <CheckCircleOutlined />
-                                </IconBadge>
-                                <BigNumber $color={ACTION_COLORS.finished}>
-                                    {successRate !== null ? `${successRate}%` : '-'}
-                                </BigNumber>
-                                <Progress
-                                    percent={successRate ?? 0}
-                                    size="small"
-                                    strokeColor={ACTION_COLORS.finished}
-                                    showInfo={false}
-                                    style={{ width: 60 }}
-                                />
-                            </Flex>
-                        )}
-                    </OverviewStatsCard>
-                    <OverviewStatsCard
-                        $accentColor="linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)"
-                        $delay={3}
-                        $pulse={runningCount > 0}
-                        onClick={() => navigate('/actions')}
-                    >
-                        {isLoading ? <Skeleton.Avatar active size={40} /> : (
-                            <Flex vertical align="center" gap={4}>
+            <OverviewScrollContent>
+                {/* Top Row: KPI Cards + 2 Charts */}
+                <TopRow>
+                    <KPIGridContainer>
+                        <OverviewStatsCard
+                            $accentColor="linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)"
+                            $delay={1}
+                            onClick={() => navigate('/actions')}
+                        >
+                            {isLoading ? <Skeleton.Avatar active size={40} /> : (
+                                <Flex vertical align="center" gap={4}>
+                                    <IconBadge $theme="actions">
+                                        <ThunderboltOutlined />
+                                    </IconBadge>
+                                    <BigNumber $color="#3b82f6">{totalActions}</BigNumber>
+                                    <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
+                                        {t('overview.totalActions', 'Total Actions')}
+                                    </Text>
+                                </Flex>
+                            )}
+                        </OverviewStatsCard>
+                        <OverviewStatsCard
+                            $accentColor="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
+                            $delay={2}
+                            onClick={() => navigate('/actions')}
+                        >
+                            {isLoading ? <Skeleton.Avatar active size={40} /> : (
+                                <Flex vertical align="center" gap={4}>
+                                    <IconBadge $color="linear-gradient(135deg, #10b981 0%, #059669 100%)">
+                                        <CheckCircleOutlined />
+                                    </IconBadge>
+                                    <BigNumber $color={ACTION_COLORS.finished}>
+                                        {successRate !== null ? `${successRate}%` : '-'}
+                                    </BigNumber>
+                                    <Progress
+                                        percent={successRate ?? 0}
+                                        size="small"
+                                        strokeColor={ACTION_COLORS.finished}
+                                        showInfo={false}
+                                        style={{ width: 60 }}
+                                    />
+                                </Flex>
+                            )}
+                        </OverviewStatsCard>
+                        <OverviewStatsCard
+                            $accentColor="linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)"
+                            $delay={3}
+                            $pulse={runningCount > 0}
+                            onClick={() => navigate('/actions')}
+                        >
+                            {isLoading ? <Skeleton.Avatar active size={40} /> : (
+                                <Flex vertical align="center" gap={4}>
+                                    <IconBadge $color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)">
+                                        <PlayCircleOutlined />
+                                    </IconBadge>
+                                    <BigNumber $color={ACTION_COLORS.running}>{runningCount}</BigNumber>
+                                    <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
+                                        {t('status.running', 'Running')}
+                                    </Text>
+                                </Flex>
+                            )}
+                        </OverviewStatsCard>
+                        <OverviewStatsCard
+                            $accentColor="linear-gradient(135deg, #ef4444 0%, #f87171 100%)"
+                            $delay={4}
+                            $pulse={errorCount > 0}
+                            onClick={() => navigate('/actions')}
+                        >
+                            {isLoading ? <Skeleton.Avatar active size={40} /> : (
+                                <Flex vertical align="center" gap={4}>
+                                    <IconBadge $color="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)">
+                                        <ExclamationCircleOutlined />
+                                    </IconBadge>
+                                    <BigNumber $color={errorCount > 0 ? ACTION_COLORS.error : '#64748b'}>{errorCount}</BigNumber>
+                                    <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
+                                        {t('status.error', 'Error')}
+                                    </Text>
+                                </Flex>
+                            )}
+                        </OverviewStatsCard>
+                    </KPIGridContainer>
+
+                    <ChartsContainer>
+                        <OverviewChartCard
+                            $theme="actions"
+                            title={
+                                <Flex align="center" gap={10}>
+                                    <IconBadge $theme="actions">
+                                        <ThunderboltOutlined />
+                                    </IconBadge>
+                                    <Flex vertical gap={0}>
+                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.statusDistribution', 'Status Distribution')}</span>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>{totalActions} actions</Text>
+                                    </Flex>
+                                </Flex>
+                            }
+                            $delay={5}
+                        >
+                            {isLoading ? (
+                                <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
+                            ) : statusDistribution.length > 0 ? (
+                                <Flex vertical style={{ flex: 1 }}>
+                                    <ResponsiveContainer width="100%" height={100}>
+                                        <PieChart>
+                                            <Pie data={statusDistribution} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                                                {statusDistribution.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
+                                                ))}
+                                            </Pie>
+                                            <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    {renderCustomLegend(statusDistribution.slice(0, 4))}
+                                </Flex>
+                            ) : (
+                                <Flex justify="center" align="center" style={{ flex: 1 }}>
+                                    <Text type="secondary">{t('common:messages.noData')}</Text>
+                                </Flex>
+                            )}
+                        </OverviewChartCard>
+
+                        <OverviewChartCard
+                            $theme="actions"
+                            title={
+                                <Flex align="center" gap={10}>
+                                    <IconBadge $color="linear-gradient(135deg, #10b981 0%, #059669 100%)">
+                                        <SyncOutlined spin={runningCount > 0} />
+                                    </IconBadge>
+                                    <Flex vertical gap={0}>
+                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.activeSummary', 'Active Summary')}</span>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>{runningCount + pendingCount} active</Text>
+                                    </Flex>
+                                </Flex>
+                            }
+                            $delay={6}
+                        >
+                            {isLoading ? (
+                                <Skeleton active paragraph={{ rows: 3 }} />
+                            ) : (
+                                <Flex vertical gap={8} style={{ flex: 1 }}>
+                                    <Flex align="center" justify="space-between" style={{ padding: '8px 12px', background: `${ACTION_COLORS.running}10`, borderRadius: 8 }}>
+                                        <Flex align="center" gap={8}>
+                                            <SyncOutlined spin style={{ color: ACTION_COLORS.running }} />
+                                            <Text style={{ fontSize: 12 }}>{t('status.running', 'Running')}</Text>
+                                        </Flex>
+                                        <Text strong style={{ fontSize: 16, color: ACTION_COLORS.running }}>{runningCount}</Text>
+                                    </Flex>
+                                    <Flex align="center" justify="space-between" style={{ padding: '8px 12px', background: `${ACTION_COLORS.pending}10`, borderRadius: 8 }}>
+                                        <Flex align="center" gap={8}>
+                                            <ClockCircleOutlined style={{ color: ACTION_COLORS.pending }} />
+                                            <Text style={{ fontSize: 12 }}>{t('status.pending', 'Pending')}</Text>
+                                        </Flex>
+                                        <Text strong style={{ fontSize: 16, color: ACTION_COLORS.pending }}>{pendingCount}</Text>
+                                    </Flex>
+                                    <Flex align="center" justify="space-between" style={{ padding: '8px 12px', background: `${ACTION_COLORS.finished}10`, borderRadius: 8 }}>
+                                        <Flex align="center" gap={8}>
+                                            <CheckCircleOutlined style={{ color: ACTION_COLORS.finished }} />
+                                            <Text style={{ fontSize: 12 }}>{t('status.finished', 'Finished')}</Text>
+                                        </Flex>
+                                        <Text strong style={{ fontSize: 16, color: ACTION_COLORS.finished }}>{finishedCount}</Text>
+                                    </Flex>
+                                </Flex>
+                            )}
+                        </OverviewChartCard>
+                    </ChartsContainer>
+                </TopRow>
+
+                {/* Bottom Row: Active Actions + Recent Actions */}
+                <BottomRow>
+                    <OverviewListCard
+                        $theme="actions"
+                        title={
+                            <Flex align="center" gap={10}>
                                 <IconBadge $color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)">
                                     <PlayCircleOutlined />
                                 </IconBadge>
-                                <BigNumber $color={ACTION_COLORS.running}>{runningCount}</BigNumber>
-                                <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                    {t('status.running', 'Running')}
-                                </Text>
+                                <Flex vertical gap={0}>
+                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.activeActions', 'Active Actions')}</span>
+                                    <Text type="secondary" style={{ fontSize: 11 }}>{activeActions.length} active</Text>
+                                </Flex>
                             </Flex>
-                        )}
-                    </OverviewStatsCard>
-                    <OverviewStatsCard
-                        $accentColor="linear-gradient(135deg, #ef4444 0%, #f87171 100%)"
-                        $delay={4}
-                        $pulse={errorCount > 0}
-                        onClick={() => navigate('/actions')}
+                        }
+                        $delay={7}
                     >
-                        {isLoading ? <Skeleton.Avatar active size={40} /> : (
-                            <Flex vertical align="center" gap={4}>
-                                <IconBadge $color="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)">
-                                    <ExclamationCircleOutlined />
-                                </IconBadge>
-                                <BigNumber $color={errorCount > 0 ? ACTION_COLORS.error : '#64748b'}>{errorCount}</BigNumber>
-                                <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                    {t('status.error', 'Error')}
-                                </Text>
-                            </Flex>
+                        {isLoading ? (
+                            <Skeleton active paragraph={{ rows: 5 }} />
+                        ) : (
+                            <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                                <ActiveUpdatesCard
+                                    items={activeActions.map(action => ({
+                                        action,
+                                        controllerId: getTargetId(action),
+                                    }))}
+                                    isLoading={false}
+                                    showHistory={true}
+                                    emptyText={t('overview.noActiveActions', 'No active actions')}
+                                />
+                            </div>
                         )}
-                    </OverviewStatsCard>
-                </KPIGridContainer>
+                    </OverviewListCard>
 
-                <ChartsContainer>
-                    <OverviewChartCard
+                    <OverviewListCard
                         $theme="actions"
                         title={
                             <Flex align="center" gap={10}>
                                 <IconBadge $theme="actions">
-                                    <ThunderboltOutlined />
+                                    <HistoryOutlined />
                                 </IconBadge>
                                 <Flex vertical gap={0}>
-                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.statusDistribution', 'Status Distribution')}</span>
-                                    <Text type="secondary" style={{ fontSize: 11 }}>{totalActions} actions</Text>
+                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.recentActions', 'Recent Actions (24h)')}</span>
+                                    <Text type="secondary" style={{ fontSize: 11 }}>{recentActions.length} actions</Text>
                                 </Flex>
                             </Flex>
                         }
-                        $delay={5}
+                        $delay={8}
                     >
                         {isLoading ? (
-                            <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
-                        ) : statusDistribution.length > 0 ? (
-                            <Flex vertical style={{ flex: 1 }}>
-                                <ResponsiveContainer width="100%" height={100}>
-                                    <PieChart>
-                                        <Pie data={statusDistribution} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
-                                            {statusDistribution.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
-                                            ))}
-                                        </Pie>
-                                        <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                {renderCustomLegend(statusDistribution.slice(0, 4))}
-                            </Flex>
+                            <Skeleton active paragraph={{ rows: 5 }} />
+                        ) : recentActions.length > 0 ? (
+                            <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                                <AirportSlideList
+                                    items={recentActions}
+                                    itemHeight={52}
+                                    visibleCount={5}
+                                    interval={3500}
+                                    fullHeight={true}
+                                    renderItem={(record: MgmtAction) => (
+                                        <ActivityItem
+                                            key={record.id}
+                                            onClick={() => navigate(`/actions/${record.id}`)}
+                                        >
+                                            <Flex align="center" gap={10} style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{
+                                                    width: 32, height: 32, borderRadius: 8,
+                                                    background: record.status === 'finished' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%)' :
+                                                        record.status === 'error' ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%)' :
+                                                            'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    flexShrink: 0
+                                                }}>
+                                                    {getStatusIcon(record.status)}
+                                                </div>
+                                                <Flex vertical gap={0} style={{ minWidth: 0 }}>
+                                                    <Text strong style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                        {getTargetId(record)}
+                                                    </Text>
+                                                    <Text type="secondary" style={{ fontSize: 10 }}>
+                                                        {record.createdAt ? dayjs(record.createdAt).fromNow() : '-'}
+                                                    </Text>
+                                                </Flex>
+                                            </Flex>
+                                            <ActionTimeline action={record} />
+                                        </ActivityItem>
+                                    )}
+                                />
+                            </div>
                         ) : (
                             <Flex justify="center" align="center" style={{ flex: 1 }}>
-                                <Text type="secondary">{t('common:messages.noData')}</Text>
+                                <Text type="secondary">{t('overview.noRecentActions', 'No recent actions')}</Text>
                             </Flex>
                         )}
-                    </OverviewChartCard>
-
-                    <OverviewChartCard
-                        $theme="actions"
-                        title={
-                            <Flex align="center" gap={10}>
-                                <IconBadge $color="linear-gradient(135deg, #10b981 0%, #059669 100%)">
-                                    <SyncOutlined spin={runningCount > 0} />
-                                </IconBadge>
-                                <Flex vertical gap={0}>
-                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.activeSummary', 'Active Summary')}</span>
-                                    <Text type="secondary" style={{ fontSize: 11 }}>{runningCount + pendingCount} active</Text>
-                                </Flex>
-                            </Flex>
-                        }
-                        $delay={6}
-                    >
-                        {isLoading ? (
-                            <Skeleton active paragraph={{ rows: 3 }} />
-                        ) : (
-                            <Flex vertical gap={8} style={{ flex: 1 }}>
-                                <Flex align="center" justify="space-between" style={{ padding: '8px 12px', background: `${ACTION_COLORS.running}10`, borderRadius: 8 }}>
-                                    <Flex align="center" gap={8}>
-                                        <SyncOutlined spin style={{ color: ACTION_COLORS.running }} />
-                                        <Text style={{ fontSize: 12 }}>{t('status.running', 'Running')}</Text>
-                                    </Flex>
-                                    <Text strong style={{ fontSize: 16, color: ACTION_COLORS.running }}>{runningCount}</Text>
-                                </Flex>
-                                <Flex align="center" justify="space-between" style={{ padding: '8px 12px', background: `${ACTION_COLORS.pending}10`, borderRadius: 8 }}>
-                                    <Flex align="center" gap={8}>
-                                        <ClockCircleOutlined style={{ color: ACTION_COLORS.pending }} />
-                                        <Text style={{ fontSize: 12 }}>{t('status.pending', 'Pending')}</Text>
-                                    </Flex>
-                                    <Text strong style={{ fontSize: 16, color: ACTION_COLORS.pending }}>{pendingCount}</Text>
-                                </Flex>
-                                <Flex align="center" justify="space-between" style={{ padding: '8px 12px', background: `${ACTION_COLORS.finished}10`, borderRadius: 8 }}>
-                                    <Flex align="center" gap={8}>
-                                        <CheckCircleOutlined style={{ color: ACTION_COLORS.finished }} />
-                                        <Text style={{ fontSize: 12 }}>{t('status.finished', 'Finished')}</Text>
-                                    </Flex>
-                                    <Text strong style={{ fontSize: 16, color: ACTION_COLORS.finished }}>{finishedCount}</Text>
-                                </Flex>
-                            </Flex>
-                        )}
-                    </OverviewChartCard>
-                </ChartsContainer>
-            </TopRow>
-
-            {/* Bottom Row: Active Actions + Recent Actions */}
-            <BottomRow>
-                <OverviewListCard
-                    $theme="actions"
-                    title={
-                        <Flex align="center" gap={10}>
-                            <IconBadge $color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)">
-                                <PlayCircleOutlined />
-                            </IconBadge>
-                            <Flex vertical gap={0}>
-                                <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.activeActions', 'Active Actions')}</span>
-                                <Text type="secondary" style={{ fontSize: 11 }}>{activeActions.length} active</Text>
-                            </Flex>
-                        </Flex>
-                    }
-                    $delay={7}
-                >
-                    {isLoading ? (
-                        <Skeleton active paragraph={{ rows: 5 }} />
-                    ) : (
-                        <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                            <ActiveUpdatesCard
-                                items={activeActions.map(action => ({
-                                    action,
-                                    controllerId: getTargetId(action),
-                                }))}
-                                isLoading={false}
-                                showHistory={true}
-                                emptyText={t('overview.noActiveActions', 'No active actions')}
-                            />
-                        </div>
-                    )}
-                </OverviewListCard>
-
-                <OverviewListCard
-                    $theme="actions"
-                    title={
-                        <Flex align="center" gap={10}>
-                            <IconBadge $theme="actions">
-                                <HistoryOutlined />
-                            </IconBadge>
-                            <Flex vertical gap={0}>
-                                <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.recentActions', 'Recent Actions (24h)')}</span>
-                                <Text type="secondary" style={{ fontSize: 11 }}>{recentActions.length} actions</Text>
-                            </Flex>
-                        </Flex>
-                    }
-                    $delay={8}
-                >
-                    {isLoading ? (
-                        <Skeleton active paragraph={{ rows: 5 }} />
-                    ) : recentActions.length > 0 ? (
-                        <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                            <AirportSlideList
-                                items={recentActions}
-                                itemHeight={52}
-                                visibleCount={5}
-                                interval={3500}
-                                fullHeight={true}
-                                renderItem={(record: MgmtAction) => (
-                                    <ActivityItem
-                                        key={record.id}
-                                        onClick={() => navigate(`/actions/${record.id}`)}
-                                    >
-                                        <Flex align="center" gap={10} style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{
-                                                width: 32, height: 32, borderRadius: 8,
-                                                background: record.status === 'finished' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%)' :
-                                                    record.status === 'error' ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%)' :
-                                                        'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%)',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                flexShrink: 0
-                                            }}>
-                                                {getStatusIcon(record.status)}
-                                            </div>
-                                            <Flex vertical gap={0} style={{ minWidth: 0 }}>
-                                                <Text strong style={{ fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                    {getTargetId(record)}
-                                                </Text>
-                                                <Text type="secondary" style={{ fontSize: 10 }}>
-                                                    {record.createdAt ? dayjs(record.createdAt).fromNow() : '-'}
-                                                </Text>
-                                            </Flex>
-                                        </Flex>
-                                        <ActionTimeline action={record} />
-                                    </ActivityItem>
-                                )}
-                            />
-                        </div>
-                    ) : (
-                        <Flex justify="center" align="center" style={{ flex: 1 }}>
-                            <Text type="secondary">{t('overview.noRecentActions', 'No recent actions')}</Text>
-                        </Flex>
-                    )}
-                </OverviewListCard>
-            </BottomRow>
+                    </OverviewListCard>
+                </BottomRow>
+            </OverviewScrollContent>
         </OverviewPageContainer>
     );
 };

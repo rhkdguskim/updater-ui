@@ -53,7 +53,6 @@ const BulkActionBar = styled.div`
     padding: 12px 16px;
     background: var(--ant-color-primary-bg, linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%));
     border-radius: 12px;
-    margin-bottom: 12px;
 `;
 
 const isActionErrored = (action: MgmtAction) => {

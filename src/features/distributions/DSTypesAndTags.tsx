@@ -1,20 +1,12 @@
 import React, { useState } from 'react';
-import { Typography, Card, Tabs } from 'antd';
+import { Card, Tabs } from 'antd';
 import { TagOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { PageLayout, PageHeader } from '@/components/patterns';
 
 // Import tag and type management components
 import { DistributionSetTypeList } from './types';
 import { DistributionSetTagList } from './tags';
-
-const { Title } = Typography;
-
-const PageContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-`;
 
 const DSTypesAndTags: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -44,10 +36,8 @@ const DSTypesAndTags: React.FC = () => {
     ];
 
     return (
-        <PageContainer>
-            <Title level={3} style={{ margin: 0 }}>
-                {t('dsTypesAndTags.title')}
-            </Title>
+        <PageLayout>
+            <PageHeader title={t('dsTypesAndTags.title')} />
             <Card>
                 <Tabs
                     activeKey={activeTab}
@@ -56,7 +46,7 @@ const DSTypesAndTags: React.FC = () => {
                     size="large"
                 />
             </Card>
-        </PageContainer>
+        </PageLayout>
     );
 };
 

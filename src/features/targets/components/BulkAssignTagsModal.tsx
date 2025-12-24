@@ -67,27 +67,27 @@ const BulkAssignTagsModal: React.FC<BulkAssignTagsModalProps> = ({
             okText={t('common:actions.assign')}
             cancelText={t('common:actions.cancel')}
         >
-            <div style={{ marginBottom: 16 }}>
+            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                 <Typography.Text strong>
                     {t('bulkAssign.selectedTargetsCount', { count: targetIds.length })}
                 </Typography.Text>
-            </div>
-            <Select
-                mode="multiple"
-                placeholder={t('bulkAssign.selectTagsPlaceholder')}
-                style={{ width: '100%' }}
-                value={selectedTagIds}
-                onChange={setSelectedTagIds}
-                loading={tagsLoading}
-                options={(tagsData?.content as MgmtTag[] || []).map((tag) => ({
-                    value: tag.id,
-                    label: (
-                        <Space>
-                            <Tag color={tag.colour || 'default'}>{tag.name}</Tag>
-                        </Space>
-                    ),
-                }))}
-            />
+                <Select
+                    mode="multiple"
+                    placeholder={t('bulkAssign.selectTagsPlaceholder')}
+                    style={{ width: '100%' }}
+                    value={selectedTagIds}
+                    onChange={setSelectedTagIds}
+                    loading={tagsLoading}
+                    options={(tagsData?.content as MgmtTag[] || []).map((tag) => ({
+                        value: tag.id,
+                        label: (
+                            <Space>
+                                <Tag color={tag.colour || 'default'}>{tag.name}</Tag>
+                            </Space>
+                        ),
+                    }))}
+                />
+            </Space>
         </Modal>
     );
 };

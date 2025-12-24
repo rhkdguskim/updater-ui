@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useGetAssignedTargets1, useGetInstalledTargets } from '@/api/generated/distribution-sets/distribution-sets';
-import { Table, Typography, Segmented } from 'antd';
+import { Table, Typography, Segmented, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -61,8 +61,8 @@ const SetTargetsTab: React.FC<SetTargetsTabProps> = ({ distributionSetId }) => {
     ];
 
     return (
-        <div style={{ padding: '16px' }}>
-            <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Space direction="vertical" size="middle" style={{ width: '100%', padding: 16 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Segmented
                     options={[
                         { label: t('detail.assignedTargets'), value: 'assigned' },
@@ -92,7 +92,7 @@ const SetTargetsTab: React.FC<SetTargetsTabProps> = ({ distributionSetId }) => {
                 onChange={(p) => setPagination({ current: p.current || 1, pageSize: p.pageSize || 10 })}
                 size="small"
             />
-        </div>
+        </Space>
     );
 };
 

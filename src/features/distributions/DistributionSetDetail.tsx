@@ -178,17 +178,15 @@ const DistributionSetDetail: React.FC = () => {
     ];
 
     const modulesTab = (
-        <div>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             {isAdmin && (
-                <div style={{ marginBottom: 16 }}>
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={() => setIsAssignModalVisible(true)}
-                    >
-                        {t('detail.assignModule')}
-                    </Button>
-                </div>
+                <Button
+                    type="primary"
+                    icon={<PlusOutlined />}
+                    onClick={() => setIsAssignModalVisible(true)}
+                >
+                    {t('detail.assignModule')}
+                </Button>
             )}
             <Table
                 dataSource={assignedModulesData?.content || []}
@@ -204,7 +202,7 @@ const DistributionSetDetail: React.FC = () => {
                 isAssigning={assignMutation.isPending}
                 excludedModuleIds={assignedModulesData?.content?.map((m) => m.id).filter((id): id is number => id !== undefined) || []}
             />
-        </div>
+        </Space>
     );
 
     return (

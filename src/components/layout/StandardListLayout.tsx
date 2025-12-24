@@ -1,9 +1,7 @@
 import React from 'react';
-import { Card, Typography, Space } from 'antd';
-import { PageContainer, HeaderRow } from './PageLayout';
+import { Card } from 'antd';
+import { PageLayout, PageHeader } from '@/components/patterns';
 import styled from 'styled-components';
-
-const { Title, Text } = Typography;
 
 const ContentCard = styled(Card)`
     display: flex;
@@ -31,8 +29,8 @@ const TableWrapper = styled.div`
 interface StandardListLayoutProps {
     title: React.ReactNode;
     subtitle?: React.ReactNode;
-    headerExtra?: React.ReactNode;
     headerSubtitleExtra?: React.ReactNode;
+    headerExtra?: React.ReactNode;
     searchBar?: React.ReactNode;
     bulkActionBar?: React.ReactNode;
     children: React.ReactNode;
@@ -42,33 +40,21 @@ interface StandardListLayoutProps {
 export const StandardListLayout: React.FC<StandardListLayoutProps> = ({
     title,
     subtitle,
-    headerExtra,
     headerSubtitleExtra,
+    headerExtra,
     searchBar,
     bulkActionBar,
     children,
     noCardPadding = true,
 }) => {
     return (
-        <PageContainer>
-            <HeaderRow>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    {typeof title === 'string' ? (
-                        <Title level={2} style={{ margin: 0 }}>{title}</Title>
-                    ) : (
-                        title
-                    )}
-                    <Space size={12}>
-                        {typeof subtitle === 'string' ? (
-                            <Text type="secondary">{subtitle}</Text>
-                        ) : (
-                            subtitle
-                        )}
-                        {headerSubtitleExtra}
-                    </Space>
-                </div>
-                {headerExtra && <Space>{headerExtra}</Space>}
-            </HeaderRow>
+        <PageLayout>
+            <PageHeader
+                title={title}
+                subtitle={subtitle}
+                subtitleExtra={headerSubtitleExtra}
+                actions={headerExtra}
+            />
 
             {searchBar}
 
@@ -79,7 +65,7 @@ export const StandardListLayout: React.FC<StandardListLayoutProps> = ({
                     {children}
                 </TableWrapper>
             </ContentCard>
-        </PageContainer>
+        </PageLayout>
     );
 };
 

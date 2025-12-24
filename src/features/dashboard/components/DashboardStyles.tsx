@@ -21,14 +21,34 @@ export const shimmer = keyframes`
 export const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 12px;
     flex: 1;
     min-height: 0;
     height: 100%;
+    overflow: hidden;
+    padding: 24px;
+    animation: ${fadeInUp} 0.5s ease-out;
+`;
+
+export const DashboardScrollContent = styled.div`
+    flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: 4px; /* Space for scrollbar */
-    animation: ${fadeInUp} 0.5s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 0;
+    
+    /* Custom scrollbar for premium feel */
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: var(--ant-color-primary-bg-hover, rgba(99, 102, 241, 0.1));
+        border-radius: 10px;
+    }
 `;
 
 export const KPIGridContainer = styled.div`
@@ -41,7 +61,7 @@ export const KPIGridContainer = styled.div`
 
 export const ChartsContainer = styled.div`
     display: flex;
-    gap: 12px;
+    gap: 16px;
     flex: 1;
     min-width: 0;
 `;

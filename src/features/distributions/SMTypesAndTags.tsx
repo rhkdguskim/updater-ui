@@ -1,19 +1,11 @@
 import React, { useState } from 'react';
-import { Typography, Card, Tabs } from 'antd';
+import { Card, Tabs } from 'antd';
 import { AppstoreOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
+import { PageLayout, PageHeader } from '@/components/patterns';
 
 // Import type management component
 import { SoftwareModuleTypeList } from './types';
-
-const { Title } = Typography;
-
-const PageContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-`;
 
 const SMTypesAndTags: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -33,10 +25,8 @@ const SMTypesAndTags: React.FC = () => {
     ];
 
     return (
-        <PageContainer>
-            <Title level={3} style={{ margin: 0 }}>
-                {t('smTypesAndTags.title')}
-            </Title>
+        <PageLayout>
+            <PageHeader title={t('smTypesAndTags.title')} />
             <Card>
                 <Tabs
                     activeKey={activeTab}
@@ -45,7 +35,7 @@ const SMTypesAndTags: React.FC = () => {
                     size="large"
                 />
             </Card>
-        </PageContainer>
+        </PageLayout>
     );
 };
 

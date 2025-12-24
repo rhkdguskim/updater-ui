@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Table, Space, Button, Select, Typography, Progress, Input, Tooltip } from 'antd';
 import { ReloadOutlined, PlusOutlined, EyeOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -8,8 +8,7 @@ import type { TableProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { keepPreviousData } from '@tanstack/react-query';
-import { SearchLayout } from '@/components/common';
-
+import { FilterBar, DataView } from '@/components/patterns';
 import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import { useServerTable } from '@/hooks/useServerTable';
 import dayjs from 'dayjs';
@@ -25,8 +24,6 @@ const RolloutList: React.FC = () => {
     const [searchParams, setSearchParams] = useSearchParams();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
-    const tableContainerRef = useRef<HTMLDivElement | null>(null);
-    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
     const {
@@ -38,26 +35,6 @@ const RolloutList: React.FC = () => {
 
     const [statusFilter, setStatusFilter] = useState<string>('');
     const [searchValue, setSearchValue] = useState<string>('');
-
-    useLayoutEffect(() => {
-        if (!tableContainerRef.current) {
-            return;
-        }
-        const element = tableContainerRef.current;
-        const updateHeight = () => {
-            const height = element.getBoundingClientRect().height;
-            const scrollHeight = Math.max(240, Math.floor(height - 55)); // Adjust buffer for header/pagination
-            setTableScrollY(scrollHeight);
-        };
-        updateHeight();
-        if (typeof ResizeObserver === 'undefined') {
-            window.addEventListener('resize', updateHeight);
-            return () => window.removeEventListener('resize', updateHeight);
-        }
-        const observer = new ResizeObserver(updateHeight);
-        observer.observe(element);
-        return () => observer.disconnect();
-    }, []);
 
     useEffect(() => {
         const statusParam = searchParams.get('status') || '';
@@ -72,13 +49,12 @@ const RolloutList: React.FC = () => {
             query = appendFilter(query, buildCondition({ field: 'status', operator: '==', value: statusFilter }));
         }
         if (searchValue) {
-            // Assuming name search for rollouts
             query = appendFilter(query, buildWildcardSearch('name', searchValue));
         }
         return query || undefined;
     };
 
-    const { data, isLoading, isFetching, refetch } = useGetRollouts(
+    const { data, isLoading, isFetching, error, refetch } = useGetRollouts(
         {
             offset,
             limit: pagination.pageSize,
@@ -93,8 +69,6 @@ const RolloutList: React.FC = () => {
             },
         }
     );
-
-
 
     const statusOptions = useMemo(() => [
         { value: 'creating', label: t('filter.creating') },
@@ -111,7 +85,7 @@ const RolloutList: React.FC = () => {
     const handleSearch = (value: string) => {
         setSearchValue(value);
         resetPagination();
-        const newParams: any = {};
+        const newParams: Record<string, string> = {};
         if (statusFilter) newParams.status = statusFilter;
         if (value) newParams.q_search = value;
         setSearchParams(newParams);
@@ -121,7 +95,7 @@ const RolloutList: React.FC = () => {
         const nextValue = value || '';
         setStatusFilter(nextValue);
         resetPagination();
-        const newParams: any = {};
+        const newParams: Record<string, string> = {};
         if (nextValue) newParams.status = nextValue;
         if (searchValue) newParams.q_search = searchValue;
         setSearchParams(newParams);
@@ -177,7 +151,6 @@ const RolloutList: React.FC = () => {
             key: 'progress',
             width: 200,
             render: (_, record) => {
-                // If rollout is finished, always show 100%
                 let percent = 0;
                 if (record.status === 'finished') {
                     percent = 100;
@@ -221,8 +194,29 @@ const RolloutList: React.FC = () => {
         <StandardListLayout
             title={t('pageTitle')}
             searchBar={
-                <SearchLayout>
-                    <SearchLayout.SearchGroup>
+                <FilterBar
+                    extra={
+                        <Space size="small">
+                            <Tooltip title={t('refresh')}>
+                                <Button
+                                    icon={<ReloadOutlined />}
+                                    onClick={() => refetch()}
+                                    loading={isLoading}
+                                />
+                            </Tooltip>
+                            {isAdmin && (
+                                <Button
+                                    type="primary"
+                                    icon={<PlusOutlined />}
+                                    onClick={() => setIsCreateModalOpen(true)}
+                                >
+                                    {t('createRollout')}
+                                </Button>
+                            )}
+                        </Space>
+                    }
+                >
+                    <Space size="small">
                         <Select
                             placeholder={t('filter.placeholder')}
                             value={statusFilter || undefined}
@@ -241,29 +235,16 @@ const RolloutList: React.FC = () => {
                             style={{ maxWidth: 300 }}
                             enterButton={<SearchOutlined />}
                         />
-                    </SearchLayout.SearchGroup>
-                    <SearchLayout.ActionGroup>
-                        <Tooltip title={t('refresh')}>
-                            <Button
-                                icon={<ReloadOutlined />}
-                                onClick={() => refetch()}
-                                loading={isLoading}
-                            />
-                        </Tooltip>
-                        {isAdmin && (
-                            <Button
-                                type="primary"
-                                icon={<PlusOutlined />}
-                                onClick={() => setIsCreateModalOpen(true)}
-                            >
-                                {t('createRollout')}
-                            </Button>
-                        )}
-                    </SearchLayout.ActionGroup>
-                </SearchLayout>
+                    </Space>
+                </FilterBar>
             }
         >
-            <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <DataView
+                loading={isLoading || isFetching}
+                error={error as Error}
+                isEmpty={data?.content?.length === 0}
+                emptyText={t('empty')}
+            >
                 <Table
                     dataSource={data?.content || []}
                     columns={columns}
@@ -279,10 +260,10 @@ const RolloutList: React.FC = () => {
                         position: ['topRight'],
                     }}
                     onChange={handleTableChange}
-                    scroll={tableScrollY ? { x: 1000, y: tableScrollY } : { x: 1000 }}
+                    scroll={{ x: 1000 }}
                     size="small"
                 />
-            </div>
+            </DataView>
 
             <RolloutCreateModal
                 open={isCreateModalOpen}

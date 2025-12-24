@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useLayoutEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Table, Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import { EyeOutlined, DeleteOutlined, TagOutlined } from '@ant-design/icons';
@@ -13,16 +13,14 @@ import DistributionSearchBar from './components/DistributionSearchBar';
 import CreateDistributionSetWizard from './components/CreateDistributionSetWizard';
 import { format } from 'date-fns';
 import { DistributionSetTagsCell } from './components/DistributionSetTagsCell';
-
 import { useTranslation } from 'react-i18next';
 import { keepPreviousData } from '@tanstack/react-query';
-
 import BulkManageSetTagsModal from './components/BulkManageSetTagsModal';
 import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import { useServerTable } from '@/hooks/useServerTable';
+import { DataView } from '@/components/patterns';
 
-
-const { } = Typography;
+const { Text } = Typography;
 
 const DistributionSetList: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -30,7 +28,6 @@ const DistributionSetList: React.FC = () => {
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
 
-    // Shared Hook
     const {
         pagination,
         offset,
@@ -41,30 +38,14 @@ const DistributionSetList: React.FC = () => {
     } = useServerTable<MgmtDistributionSet>({ syncToUrl: true });
 
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
-
     const [selectedSetIds, setSelectedSetIds] = useState<number[]>([]);
     const [bulkTagsModalOpen, setBulkTagsModalOpen] = useState(false);
-    const tableContainerRef = useRef<HTMLDivElement | null>(null);
-    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
 
-    useLayoutEffect(() => {
-        if (!tableContainerRef.current) return;
-        const element = tableContainerRef.current;
-        const updateHeight = () => {
-            const height = element.getBoundingClientRect().height;
-            setTableScrollY(Math.max(240, Math.floor(height - 40)));
-        };
-        updateHeight();
-        const observer = new ResizeObserver(updateHeight);
-        observer.observe(element);
-        return () => observer.disconnect();
-    }, []);
-
-    // API Query
     const {
         data,
         isLoading,
         isFetching,
+        error,
         refetch,
     } = useGetDistributionSets(
         {
@@ -82,7 +63,6 @@ const DistributionSetList: React.FC = () => {
         }
     );
 
-    // Delete Mutation
     const deleteMutation = useDeleteDistributionSet({
         mutation: {
             onSuccess: () => {
@@ -109,8 +89,6 @@ const DistributionSetList: React.FC = () => {
     const handleSearchInternal = useCallback((query: string) => {
         handleSearch(query);
     }, [handleSearch]);
-
-
 
     const columns: TableProps<MgmtDistributionSet>['columns'] = [
         {
@@ -206,17 +184,22 @@ const DistributionSetList: React.FC = () => {
                 />
             }
             bulkActionBar={selectedSetIds.length > 0 && (
-                <Space style={{ marginBottom: 16 }} wrap>
-                    <span style={{ marginRight: 8 }}>
+                <Space wrap>
+                    <Text strong>
                         {t('bulkAssignment.selectedSets', { count: selectedSetIds.length })}
-                    </span>
+                    </Text>
                     <Button icon={<TagOutlined />} onClick={() => setBulkTagsModalOpen(true)}>
                         {t('bulkAssignment.manageTags')}
                     </Button>
                 </Space>
             )}
         >
-            <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <DataView
+                loading={isLoading || isFetching}
+                error={error as Error}
+                isEmpty={data?.content?.length === 0}
+                emptyText={t('list.empty')}
+            >
                 <Table
                     columns={columns}
                     dataSource={data?.content || []}
@@ -233,10 +216,10 @@ const DistributionSetList: React.FC = () => {
                         selectedRowKeys: selectedSetIds,
                         onChange: (keys) => setSelectedSetIds(keys as number[]),
                     }}
-                    scroll={{ x: 1000, y: tableScrollY }}
+                    scroll={{ x: 1000 }}
                     size="small"
                 />
-            </div>
+            </DataView>
             <CreateDistributionSetWizard
                 visible={isCreateModalVisible}
                 onCancel={() => setIsCreateModalVisible(false)}

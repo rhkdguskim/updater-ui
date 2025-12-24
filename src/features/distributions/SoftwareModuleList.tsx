@@ -1,4 +1,4 @@
-import React, { useState, useRef, useLayoutEffect } from 'react';
+import React, { useState } from 'react';
 import { Table, Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -12,13 +12,13 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import DistributionSearchBar from './components/DistributionSearchBar';
 import CreateSoftwareModuleModal from './components/CreateSoftwareModuleModal';
 import { format } from 'date-fns';
-
 import { useTranslation } from 'react-i18next';
 import { keepPreviousData } from '@tanstack/react-query';
 import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import { useServerTable } from '@/hooks/useServerTable';
+import { DataView } from '@/components/patterns';
 
-const { } = Typography;
+const { Text } = Typography;
 
 const SoftwareModuleList: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -26,7 +26,6 @@ const SoftwareModuleList: React.FC = () => {
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
 
-    // Shared Hook
     const {
         pagination,
         offset,
@@ -39,27 +38,11 @@ const SoftwareModuleList: React.FC = () => {
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
     const [selectedModuleIds, setSelectedModuleIds] = useState<number[]>([]);
 
-    const tableContainerRef = useRef<HTMLDivElement | null>(null);
-    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
-
-    useLayoutEffect(() => {
-        if (!tableContainerRef.current) return;
-        const element = tableContainerRef.current;
-        const updateHeight = () => {
-            const height = element.getBoundingClientRect().height;
-            setTableScrollY(Math.max(240, Math.floor(height - 40)));
-        };
-        updateHeight();
-        const observer = new ResizeObserver(updateHeight);
-        observer.observe(element);
-        return () => observer.disconnect();
-    }, []);
-
-    // API Query
     const {
         data,
         isLoading,
         isFetching,
+        error,
         refetch,
     } = useGetSoftwareModules(
         {
@@ -77,7 +60,6 @@ const SoftwareModuleList: React.FC = () => {
         }
     );
 
-    // Delete Mutation
     const deleteMutation = useDeleteSoftwareModule({
         mutation: {
             onSuccess: () => {
@@ -205,17 +187,22 @@ const SoftwareModuleList: React.FC = () => {
                 />
             }
             bulkActionBar={selectedModuleIds.length > 0 && isAdmin && (
-                <Space style={{ marginBottom: 16 }} wrap>
-                    <span style={{ marginRight: 8 }}>
+                <Space wrap>
+                    <Text strong>
                         {t('moduleList.selectedCount', { count: selectedModuleIds.length })}
-                    </span>
+                    </Text>
                     <Button danger onClick={handleBulkDelete} icon={<DeleteOutlined />}>
                         {t('actions.deleteSelected')}
                     </Button>
                 </Space>
             )}
         >
-            <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <DataView
+                loading={isLoading || isFetching}
+                error={error as Error}
+                isEmpty={data?.content?.length === 0}
+                emptyText={t('moduleList.empty')}
+            >
                 <Table
                     columns={columns}
                     dataSource={data?.content || []}
@@ -233,10 +220,10 @@ const SoftwareModuleList: React.FC = () => {
                         selectedRowKeys: selectedModuleIds,
                         onChange: (keys) => setSelectedModuleIds(keys as number[]),
                     }}
-                    scroll={{ x: 1000, y: tableScrollY }}
+                    scroll={{ x: 1000 }}
                     size="small"
                 />
-            </div>
+            </DataView>
             <CreateSoftwareModuleModal
                 visible={isCreateModalVisible}
                 onCancel={() => setIsCreateModalVisible(false)}

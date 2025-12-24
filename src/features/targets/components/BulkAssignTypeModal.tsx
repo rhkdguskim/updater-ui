@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Select, message, Typography } from 'antd';
+import { Modal, Select, message, Typography, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAssignTargetType, getGetTargetsQueryKey } from '@/api/generated/targets/targets';
@@ -63,22 +63,22 @@ const BulkAssignTypeModal: React.FC<BulkAssignTypeModalProps> = ({
             okText={t('common:actions.assign')}
             cancelText={t('common:actions.cancel')}
         >
-            <div style={{ marginBottom: 16 }}>
+            <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                 <Typography.Text strong>
                     {t('bulkAssign.selectedTargetsCount', { count: targetIds.length })}
                 </Typography.Text>
-            </div>
-            <Select
-                placeholder={t('bulkAssign.selectTypePlaceholder')}
-                style={{ width: '100%' }}
-                loading={typesLoading}
-                value={selectedTypeId}
-                onChange={setSelectedTypeId}
-                options={(typesData?.content as MgmtTargetType[] || []).map((type) => ({
-                    value: type.id,
-                    label: type.name,
-                }))}
-            />
+                <Select
+                    placeholder={t('bulkAssign.selectTypePlaceholder')}
+                    style={{ width: '100%' }}
+                    loading={typesLoading}
+                    value={selectedTypeId}
+                    onChange={setSelectedTypeId}
+                    options={(typesData?.content as MgmtTargetType[] || []).map((type) => ({
+                        value: type.id,
+                        label: type.name,
+                    }))}
+                />
+            </Space>
         </Modal>
     );
 };

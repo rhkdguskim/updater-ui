@@ -153,13 +153,11 @@ const ModuleMetadataTab: React.FC<ModuleMetadataTabProps> = ({ softwareModuleId,
     ];
 
     return (
-        <div>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             {isAdmin && (
-                <div style={{ marginBottom: 16 }}>
-                    <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
-                        {t('metadataTab.add')}
-                    </Button>
-                </div>
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
+                    {t('metadataTab.add')}
+                </Button>
             )}
             <Table
                 dataSource={data?.content || []}
@@ -196,7 +194,7 @@ const ModuleMetadataTab: React.FC<ModuleMetadataTabProps> = ({ softwareModuleId,
                     </Form.Item>
                 </Form>
             </Modal>
-        </div>
+        </Space>
     );
 };
 

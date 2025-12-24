@@ -1,5 +1,5 @@
 import React from 'react';
-import { Descriptions, Typography, Skeleton, Empty, Tag, Card, List, Button } from 'antd';
+import { Descriptions, Typography, Skeleton, Empty, Tag, Card, List, Button, Space } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import type { MgmtDistributionSet } from '@/api/generated/model';
 import dayjs from 'dayjs';
@@ -105,9 +105,9 @@ const DistributionSetTab: React.FC<DistributionSetTabProps> = ({
     const hasAnyDS = installedDS || assignedDS;
 
     return (
-        <>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             {canAssign && (
-                <div style={{ marginBottom: 16, textAlign: 'right' }}>
+                <div style={{ textAlign: 'right' }}>
                     <Button
                         type="primary"
                         icon={<SyncOutlined />}
@@ -126,7 +126,7 @@ const DistributionSetTab: React.FC<DistributionSetTabProps> = ({
                     <DSCard ds={assignedDS} title={t('ds.assigned')} type="assigned" />
                 </>
             )}
-        </>
+        </Space>
     );
 };
 

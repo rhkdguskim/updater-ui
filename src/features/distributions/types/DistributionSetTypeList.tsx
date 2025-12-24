@@ -162,8 +162,8 @@ const DistributionSetTypeList: React.FC = () => {
     ];
 
     return (
-        <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Space>
                     <Button icon={<ReloadOutlined />} onClick={() => refetch()} loading={isLoading}>
                         {t('common:actions.refresh')}
@@ -194,7 +194,7 @@ const DistributionSetTypeList: React.FC = () => {
                 onClose={handleDialogClose}
                 onSuccess={handleDialogSuccess}
             />
-        </>
+        </Space>
     );
 };
 

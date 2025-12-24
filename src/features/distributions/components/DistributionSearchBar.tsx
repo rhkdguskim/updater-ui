@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Input, Button, Space, Select } from 'antd';
 import { SearchOutlined, ReloadOutlined, PlusOutlined } from '@ant-design/icons';
 import { buildWildcardSearch } from '@/utils/fiql';
+import { FilterBar } from '@/components/patterns';
+import { useTranslation } from 'react-i18next';
 
 interface DistributionSearchBarProps {
     onSearch: (query: string) => void;
@@ -12,8 +14,6 @@ interface DistributionSearchBarProps {
     placeholder?: string;
     type?: 'set' | 'module';
 }
-
-import { useTranslation } from 'react-i18next';
 
 const DistributionSearchBar: React.FC<DistributionSearchBarProps> = ({
     onSearch,
@@ -28,7 +28,6 @@ const DistributionSearchBar: React.FC<DistributionSearchBarProps> = ({
     const [searchText, setSearchText] = useState('');
     const [searchField, setSearchField] = useState('name');
 
-    // Default placeholder handling if not provided
     const displayPlaceholder = placeholder || t('list.searchPlaceholder', { field: t(`list.searchFields.${searchField}`) });
 
     const handleSearch = () => {
@@ -36,8 +35,6 @@ const DistributionSearchBar: React.FC<DistributionSearchBarProps> = ({
             onSearch('');
             return;
         }
-
-        // Use centralized FIQL utility
         const query = buildWildcardSearch(searchField, searchText);
         onSearch(query);
     };
@@ -49,8 +46,21 @@ const DistributionSearchBar: React.FC<DistributionSearchBarProps> = ({
     };
 
     return (
-        <div style={{ marginBottom: 16, display: 'flex', justifyContent: 'space-between' }}>
-            <Space>
+        <FilterBar
+            extra={
+                <Space size="small">
+                    <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
+                        {t('list.refresh')}
+                    </Button>
+                    {canAdd && onAdd && (
+                        <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
+                            {type === 'set' ? t('list.addSet') : t('list.addModule')}
+                        </Button>
+                    )}
+                </Space>
+            }
+        >
+            <Space size="small">
                 <Select
                     defaultValue="name"
                     options={[
@@ -73,17 +83,8 @@ const DistributionSearchBar: React.FC<DistributionSearchBarProps> = ({
                 <Button type="primary" onClick={handleSearch} loading={loading}>
                     {t('list.search')}
                 </Button>
-                <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
-                    {t('list.refresh')}
-                </Button>
             </Space>
-
-            {canAdd && onAdd && (
-                <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
-                    {type === 'set' ? t('list.addSet') : t('list.addModule')}
-                </Button>
-            )}
-        </div>
+        </FilterBar>
     );
 };
 

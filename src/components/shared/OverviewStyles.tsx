@@ -48,28 +48,48 @@ export const OVERVIEW_THEMES = {
 export const OverviewPageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 12px;
     flex: 1;
     min-height: 0;
     height: 100%;
+    overflow: hidden;
+    padding: 24px;
+    animation: ${fadeInUp} 0.5s ease-out;
+`;
+
+export const OverviewScrollContent = styled.div`
+    flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding-right: 4px;
-    animation: ${fadeInUp} 0.5s ease-out;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    min-height: 0;
+    
+    /* Custom scrollbar for premium feel */
+    &::-webkit-scrollbar {
+        width: 6px;
+    }
+    &::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: var(--ant-color-primary-bg-hover, rgba(99, 102, 241, 0.1));
+        border-radius: 10px;
+    }
 `;
 
 export const OverviewPageHeader = styled.div`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 4px 0;
+    padding: 0 0 8px 0;
     flex-shrink: 0;
 `;
 
 export const HeaderContent = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 8px;
 `;
 
 export const GradientTitle = styled(Typography.Title) <{ $theme?: keyof typeof OVERVIEW_THEMES }>`
@@ -94,14 +114,14 @@ export const GradientTitle = styled(Typography.Title) <{ $theme?: keyof typeof O
 
 export const TopRow = styled.div`
     display: flex;
-    gap: 12px;
+    gap: 16px;
     min-height: 240px;
     flex-shrink: 0;
 `;
 
 export const BottomRow = styled.div`
     display: flex;
-    gap: 12px;
+    gap: 16px;
     min-height: 300px;
     flex: 1;
 `;
@@ -116,7 +136,7 @@ export const KPIGridContainer = styled.div`
 
 export const ChartsContainer = styled.div`
     display: flex;
-    gap: 12px;
+    gap: 16px;
     flex: 1;
     min-width: 0;
 `;
@@ -285,7 +305,7 @@ color: ${props => props.$color || 'var(--ant-color-primary, #3b82f6)'};
 export const LiveIndicator = styled.div<{ $color?: string; $active?: boolean }>`
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     font-size: 12px;
     color: ${props => props.$color || '#64748b'};
     font-weight: 500;
@@ -304,7 +324,7 @@ export const ChartLegendItem = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 10px;
+    padding: 8px 12px;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.8) 0%, rgba(248, 250, 252, 0.6) 100%);
     border-radius: 8px;
     cursor: pointer;
@@ -355,8 +375,8 @@ export const ActivityItem = styled.div`
 export const StatusBadge = styled.div<{ $status?: string }>`
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 4px 10px;
+    gap: 8px;
+    padding: 8px 12px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 500;

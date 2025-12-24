@@ -1,5 +1,5 @@
-import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
-import { message, Alert, Space, Tag, Tooltip, Typography } from 'antd';
+import React, { useState, useCallback } from 'react';
+import { message, Space, Tag, Tooltip, Typography, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import { useServerTable } from '@/hooks/useServerTable';
@@ -15,7 +15,6 @@ import {
     SavedFiltersModal,
 } from './components';
 import type { AssignPayload } from './components';
-import { Button } from 'antd';
 import { useTranslation } from 'react-i18next';
 import {
     useGetTargets,
@@ -34,13 +33,10 @@ import { useGetFilters } from '@/api/generated/target-filter-queries/target-filt
 import type { MgmtTag, MgmtTargetType, MgmtTargetFilterQuery } from '@/api/generated/model';
 
 import { FilterOutlined } from '@ant-design/icons';
-
 import { appendFilter, buildCondition } from '@/utils/fiql';
+import { DataView } from '@/components/patterns';
 
 const { Text } = Typography;
-
-// Styled components removed in favor of PageLayout
-
 
 const TargetList: React.FC = () => {
     const navigate = useNavigate();
@@ -72,8 +68,6 @@ const TargetList: React.FC = () => {
     const [savedFiltersOpen, setSavedFiltersOpen] = useState(false);
     const [activeSavedFilter, setActiveSavedFilter] = useState<{ id?: number; name?: string; query: string } | null>(null);
     const [searchResetSignal, setSearchResetSignal] = useState(0);
-    const tableContainerRef = useRef<HTMLDivElement | null>(null);
-    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
 
     // Modal States
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -81,28 +75,6 @@ const TargetList: React.FC = () => {
     const [formModalOpen, setFormModalOpen] = useState(false);
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [targetToAssign, setTargetToAssign] = useState<MgmtTarget | null>(null);
-
-
-
-    useLayoutEffect(() => {
-        if (!tableContainerRef.current) {
-            return;
-        }
-        const element = tableContainerRef.current;
-        const updateHeight = () => {
-            const height = element.getBoundingClientRect().height;
-            const scrollHeight = Math.max(240, Math.floor(height - 100)); // Increased offset to account for quick filters
-            setTableScrollY(scrollHeight);
-        };
-        updateHeight();
-        if (typeof ResizeObserver === 'undefined') {
-            window.addEventListener('resize', updateHeight);
-            return () => window.removeEventListener('resize', updateHeight);
-        }
-        const observer = new ResizeObserver(updateHeight);
-        observer.observe(element);
-        return () => observer.disconnect();
-    }, []);
 
     // FR-06: Target Tags
     const { data: tagsData } = useGetTargetTags(
@@ -300,17 +272,6 @@ const TargetList: React.FC = () => {
         [targetToAssign, assignDSMutation]
     );
 
-    if (targetsError) {
-        return (
-            <Alert
-                type="error"
-                message={t('messages.loadFailed')}
-                description={(targetsError as Error).message}
-                showIcon
-            />
-        );
-    }
-
     return (
         <StandardListLayout
             title={t('title')}
@@ -326,9 +287,9 @@ const TargetList: React.FC = () => {
                 />
             }
             bulkActionBar={(activeSavedFilter || searchQuery || selectedTagName || selectedTypeName || selectedTargetIds.length > 0) && (
-                <div style={{ marginBottom: 16 }}>
+                <Space direction="vertical" size="small" style={{ width: '100%' }}>
                     {(activeSavedFilter || searchQuery || selectedTagName || selectedTypeName) && (
-                        <Space style={{ marginBottom: selectedTargetIds.length > 0 ? 16 : 0 }} wrap>
+                        <Space wrap>
                             {activeSavedFilter && (
                                 <Tag
                                     color="blue"
@@ -400,9 +361,9 @@ const TargetList: React.FC = () => {
 
                     {selectedTargetIds.length > 0 && (
                         <Space wrap>
-                            <span style={{ marginRight: 8 }}>
+                            <Text strong>
                                 {t('bulkAssign.selectedCount', { count: selectedTargetIds.length })}
-                            </span>
+                            </Text>
                             <Button onClick={() => setBulkTagsModalOpen(true)}>
                                 {t('bulkAssign.assignTag')}
                             </Button>
@@ -414,14 +375,19 @@ const TargetList: React.FC = () => {
                             </Button>
                         </Space>
                     )}
-                </div>
+                </Space>
             )}
         >
-            <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+            <DataView
+                loading={targetsLoading || targetsFetching}
+                error={targetsError as Error}
+                isEmpty={targetsData?.content?.length === 0}
+                emptyText={t('noTargets')}
+            >
                 {/* Saved Filters Quick Access */}
-                <div style={{ padding: '8px 2px', marginBottom: 8, flexShrink: 0 }}>
-                    <Space wrap size={[8, 8]}>
-                        <Text type="secondary" style={{ fontSize: 13, marginRight: 4 }}>
+                <div style={{ padding: '4px 0', marginBottom: 8 }}>
+                    <Space wrap size="small">
+                        <Text type="secondary">
                             {t('quickFilters')}:
                         </Text>
                         {savedFilters.slice(0, 5).map(filter => (
@@ -429,11 +395,6 @@ const TargetList: React.FC = () => {
                                 key={filter.id}
                                 checked={activeSavedFilter?.id === filter.id}
                                 onChange={() => handleFilterSelect(filter)}
-                                style={{
-                                    border: '1px solid var(--ant-color-border, #d9d9d9)',
-                                    padding: '2px 8px',
-                                    fontSize: 13
-                                }}
                             >
                                 {filter.name}
                             </Tag.CheckableTag>
@@ -443,7 +404,6 @@ const TargetList: React.FC = () => {
                             size="small"
                             icon={<FilterOutlined />}
                             onClick={() => setSavedFiltersOpen(true)}
-                            style={{ padding: 0, marginLeft: 8 }}
                         >
                             {t('manageFilters')}
                         </Button>
@@ -455,7 +415,6 @@ const TargetList: React.FC = () => {
                     loading={targetsLoading || targetsFetching}
                     total={targetsData?.total || 0}
                     pagination={pagination}
-                    scrollY={tableScrollY}
                     onChange={handleTableChange}
                     onPaginationChange={() => { }} // Handled by onChange
                     onSortChange={() => { }} // Handled by onChange
@@ -475,7 +434,7 @@ const TargetList: React.FC = () => {
                         resetPagination();
                     }}
                 />
-            </div>
+            </DataView>
 
             <BulkAssignTagsModal
                 open={bulkTagsModalOpen}

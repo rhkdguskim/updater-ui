@@ -24,6 +24,7 @@ import {
     OverviewPageContainer,
     OverviewPageHeader,
     HeaderContent,
+    OverviewScrollContent,
     GradientTitle,
     TopRow,
     BottomRow,
@@ -188,213 +189,215 @@ const TargetsOverview: React.FC = () => {
                 </Flex>
             </OverviewPageHeader>
 
-            {/* Top Row: KPI Cards + 2 Pie Charts */}
-            <TopRow>
-                <KPIGridContainer>
-                    <OverviewStatsCard
-                        $accentColor="linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)"
-                        $delay={1}
-                        onClick={() => navigate('/targets/list')}
-                    >
-                        {isLoading ? <Skeleton.Avatar active size={40} /> : (
-                            <Flex vertical align="center" gap={4}>
-                                <IconBadge $color="linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)">
-                                    <AppstoreOutlined />
-                                </IconBadge>
-                                <BigNumber $color="#3b82f6">{totalDevices}</BigNumber>
-                                <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                    {t('overview.totalDevices', 'Total Devices')}
-                                </Text>
-                            </Flex>
-                        )}
-                    </OverviewStatsCard>
-                    <OverviewStatsCard
-                        $accentColor="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
-                        $delay={2}
-                        onClick={() => navigate('/targets/list')}
-                    >
-                        {isLoading ? <Skeleton.Avatar active size={40} /> : (
-                            <Flex vertical align="center" gap={4}>
-                                <IconBadge $color="linear-gradient(135deg, #10b981 0%, #059669 100%)">
-                                    <CheckCircleOutlined />
-                                </IconBadge>
-                                <BigNumber $color={COLORS.inSync}>{inSyncCount}</BigNumber>
-                                <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                    {t('status.inSync', 'In Sync')}
-                                </Text>
-                            </Flex>
-                        )}
-                    </OverviewStatsCard>
-                    <OverviewStatsCard
-                        $accentColor="linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)"
-                        $delay={3}
-                        $pulse={pendingCount > 0}
-                        onClick={() => navigate('/targets/list')}
-                    >
-                        {isLoading ? <Skeleton.Avatar active size={40} /> : (
-                            <Flex vertical align="center" gap={4}>
-                                <IconBadge $color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)">
-                                    <ClockCircleOutlined />
-                                </IconBadge>
-                                <BigNumber $color={COLORS.pending}>{pendingCount}</BigNumber>
-                                <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                    {t('status.pending', 'Pending')}
-                                </Text>
-                            </Flex>
-                        )}
-                    </OverviewStatsCard>
-                    <OverviewStatsCard
-                        $accentColor="linear-gradient(135deg, #ef4444 0%, #f87171 100%)"
-                        $delay={4}
-                        $pulse={errorCount > 0}
-                        onClick={() => navigate('/targets/list')}
-                    >
-                        {isLoading ? <Skeleton.Avatar active size={40} /> : (
-                            <Flex vertical align="center" gap={4}>
-                                <IconBadge $color="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)">
-                                    <ExclamationCircleOutlined />
-                                </IconBadge>
-                                <BigNumber $color={errorCount > 0 ? COLORS.error : '#64748b'}>{errorCount}</BigNumber>
-                                <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                    {t('status.error', 'Error')}
-                                </Text>
-                            </Flex>
-                        )}
-                    </OverviewStatsCard>
-                </KPIGridContainer>
-
-                <ChartsContainer>
-                    <OverviewChartCard
-                        $theme="targets"
-                        title={
-                            <Flex align="center" gap={10}>
-                                <IconBadge $theme="targets">
-                                    <ApiOutlined />
-                                </IconBadge>
-                                <Flex vertical gap={0}>
-                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.connectivityStatus', 'Connectivity')}</span>
-                                    <Text type="secondary" style={{ fontSize: 11 }}>{onlinePercent}% online</Text>
+            <OverviewScrollContent>
+                {/* Top Row: KPI Cards + 3 Pie Charts */}
+                <TopRow>
+                    <KPIGridContainer>
+                        <OverviewStatsCard
+                            $accentColor="linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)"
+                            $delay={1}
+                            onClick={() => navigate('/targets/list')}
+                        >
+                            {isLoading ? <Skeleton.Avatar active size={40} /> : (
+                                <Flex vertical align="center" gap={4}>
+                                    <IconBadge $color="linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)">
+                                        <AppstoreOutlined />
+                                    </IconBadge>
+                                    <BigNumber $color="#3b82f6">{totalDevices}</BigNumber>
+                                    <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
+                                        {t('overview.totalDevices', 'Total Devices')}
+                                    </Text>
                                 </Flex>
-                            </Flex>
-                        }
-                        $delay={5}
-                    >
-                        {isLoading ? (
-                            <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
-                        ) : connectivityPieData.length > 0 ? (
-                            <Flex vertical style={{ flex: 1 }}>
-                                <ResponsiveContainer width="100%" height={100}>
-                                    <PieChart>
-                                        <Pie data={connectivityPieData} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
-                                            {connectivityPieData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
-                                            ))}
-                                        </Pie>
-                                        <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                {renderCustomLegend(connectivityPieData)}
-                            </Flex>
-                        ) : (
-                            <Flex justify="center" align="center" style={{ flex: 1 }}>
-                                <Text type="secondary">{t('common:messages.noData')}</Text>
-                            </Flex>
-                        )}
-                    </OverviewChartCard>
-
-                    <OverviewChartCard
-                        $theme="targets"
-                        title={
-                            <Flex align="center" gap={10}>
-                                <IconBadge $color="linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)">
-                                    <TagsOutlined />
-                                </IconBadge>
-                                <Flex vertical gap={0}>
-                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.targetTypeDistribution', 'Target Types')}</span>
-                                    <Text type="secondary" style={{ fontSize: 11 }}>{targetTypePieData.length} types</Text>
+                            )}
+                        </OverviewStatsCard>
+                        <OverviewStatsCard
+                            $accentColor="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
+                            $delay={2}
+                            onClick={() => navigate('/targets/list')}
+                        >
+                            {isLoading ? <Skeleton.Avatar active size={40} /> : (
+                                <Flex vertical align="center" gap={4}>
+                                    <IconBadge $color="linear-gradient(135deg, #10b981 0%, #059669 100%)">
+                                        <CheckCircleOutlined />
+                                    </IconBadge>
+                                    <BigNumber $color={COLORS.inSync}>{inSyncCount}</BigNumber>
+                                    <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
+                                        {t('status.inSync', 'In Sync')}
+                                    </Text>
                                 </Flex>
-                            </Flex>
-                        }
-                        $delay={6}
-                    >
-                        {isLoading ? (
-                            <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
-                        ) : targetTypePieData.length > 0 ? (
-                            <Flex vertical style={{ flex: 1 }}>
-                                <ResponsiveContainer width="100%" height={100}>
-                                    <PieChart>
-                                        <Pie data={targetTypePieData} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
-                                            {targetTypePieData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
-                                            ))}
-                                        </Pie>
-                                        <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                {renderCustomLegend(targetTypePieData)}
-                            </Flex>
-                        ) : (
-                            <Flex justify="center" align="center" style={{ flex: 1 }}>
-                                <Text type="secondary">{t('common:messages.noData')}</Text>
-                            </Flex>
-                        )}
-                    </OverviewChartCard>
-
-                    <OverviewChartCard
-                        $theme="targets"
-                        title={
-                            <Flex align="center" gap={10}>
-                                <IconBadge $color="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)">
-                                    <SyncOutlined />
-                                </IconBadge>
-                                <Flex vertical gap={0}>
-                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.updateStatusDistribution', 'Update Status')}</span>
-                                    <Text type="secondary" style={{ fontSize: 11 }}>{targets.length} devices</Text>
+                            )}
+                        </OverviewStatsCard>
+                        <OverviewStatsCard
+                            $accentColor="linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)"
+                            $delay={3}
+                            $pulse={pendingCount > 0}
+                            onClick={() => navigate('/targets/list')}
+                        >
+                            {isLoading ? <Skeleton.Avatar active size={40} /> : (
+                                <Flex vertical align="center" gap={4}>
+                                    <IconBadge $color="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)">
+                                        <ClockCircleOutlined />
+                                    </IconBadge>
+                                    <BigNumber $color={COLORS.pending}>{pendingCount}</BigNumber>
+                                    <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
+                                        {t('status.pending', 'Pending')}
+                                    </Text>
                                 </Flex>
-                            </Flex>
-                        }
-                        $delay={6}
-                    >
-                        {isLoading ? (
-                            <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
-                        ) : updateStatusPieData.length > 0 ? (
-                            <Flex vertical style={{ flex: 1 }}>
-                                <ResponsiveContainer width="100%" height={100}>
-                                    <PieChart>
-                                        <Pie data={updateStatusPieData} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
-                                            {updateStatusPieData.map((entry, index) => (
-                                                <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
-                                            ))}
-                                        </Pie>
-                                        <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
-                                    </PieChart>
-                                </ResponsiveContainer>
-                                {renderCustomLegend(updateStatusPieData)}
-                            </Flex>
-                        ) : (
-                            <Flex justify="center" align="center" style={{ flex: 1 }}>
-                                <Text type="secondary">{t('common:messages.noData')}</Text>
-                            </Flex>
-                        )}
-                    </OverviewChartCard>
-                </ChartsContainer>
-            </TopRow>
+                            )}
+                        </OverviewStatsCard>
+                        <OverviewStatsCard
+                            $accentColor="linear-gradient(135deg, #ef4444 0%, #f87171 100%)"
+                            $delay={4}
+                            $pulse={errorCount > 0}
+                            onClick={() => navigate('/targets/list')}
+                        >
+                            {isLoading ? <Skeleton.Avatar active size={40} /> : (
+                                <Flex vertical align="center" gap={4}>
+                                    <IconBadge $color="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)">
+                                        <ExclamationCircleOutlined />
+                                    </IconBadge>
+                                    <BigNumber $color={errorCount > 0 ? COLORS.error : '#64748b'}>{errorCount}</BigNumber>
+                                    <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
+                                        {t('status.error', 'Error')}
+                                    </Text>
+                                </Flex>
+                            )}
+                        </OverviewStatsCard>
+                    </KPIGridContainer>
 
-            {/* Bottom Row: Device Grid (Full Width) */}
-            <BottomRow style={{ display: 'block' }}>
-                <DeviceCardGrid
-                    targets={targets}
-                    actions={actions}
-                    loading={isLoading}
-                    title={t('overview.deviceGrid', 'Device Status Grid')}
-                    delay={7}
-                    cols={5}
-                    rows={4}
-                    gap={8}
-                    rowHeight={90}
-                    targetTypeColorMap={targetTypeColorMap}
-                />
-            </BottomRow>
+                    <ChartsContainer>
+                        <OverviewChartCard
+                            $theme="targets"
+                            title={
+                                <Flex align="center" gap={10}>
+                                    <IconBadge $theme="targets">
+                                        <ApiOutlined />
+                                    </IconBadge>
+                                    <Flex vertical gap={0}>
+                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.connectivityStatus', 'Connectivity')}</span>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>{onlinePercent}% online</Text>
+                                    </Flex>
+                                </Flex>
+                            }
+                            $delay={5}
+                        >
+                            {isLoading ? (
+                                <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
+                            ) : connectivityPieData.length > 0 ? (
+                                <Flex vertical style={{ flex: 1 }}>
+                                    <ResponsiveContainer width="100%" height={100}>
+                                        <PieChart>
+                                            <Pie data={connectivityPieData} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                                                {connectivityPieData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
+                                                ))}
+                                            </Pie>
+                                            <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    {renderCustomLegend(connectivityPieData)}
+                                </Flex>
+                            ) : (
+                                <Flex justify="center" align="center" style={{ flex: 1 }}>
+                                    <Text type="secondary">{t('common:messages.noData')}</Text>
+                                </Flex>
+                            )}
+                        </OverviewChartCard>
+
+                        <OverviewChartCard
+                            $theme="targets"
+                            title={
+                                <Flex align="center" gap={10}>
+                                    <IconBadge $color="linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)">
+                                        <TagsOutlined />
+                                    </IconBadge>
+                                    <Flex vertical gap={0}>
+                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.targetTypeDistribution', 'Target Types')}</span>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>{targetTypePieData.length} types</Text>
+                                    </Flex>
+                                </Flex>
+                            }
+                            $delay={6}
+                        >
+                            {isLoading ? (
+                                <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
+                            ) : targetTypePieData.length > 0 ? (
+                                <Flex vertical style={{ flex: 1 }}>
+                                    <ResponsiveContainer width="100%" height={100}>
+                                        <PieChart>
+                                            <Pie data={targetTypePieData} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                                                {targetTypePieData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
+                                                ))}
+                                            </Pie>
+                                            <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    {renderCustomLegend(targetTypePieData)}
+                                </Flex>
+                            ) : (
+                                <Flex justify="center" align="center" style={{ flex: 1 }}>
+                                    <Text type="secondary">{t('common:messages.noData')}</Text>
+                                </Flex>
+                            )}
+                        </OverviewChartCard>
+
+                        <OverviewChartCard
+                            $theme="targets"
+                            title={
+                                <Flex align="center" gap={10}>
+                                    <IconBadge $color="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)">
+                                        <SyncOutlined />
+                                    </IconBadge>
+                                    <Flex vertical gap={0}>
+                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.updateStatusDistribution', 'Update Status')}</span>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>{targets.length} devices</Text>
+                                    </Flex>
+                                </Flex>
+                            }
+                            $delay={6}
+                        >
+                            {isLoading ? (
+                                <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
+                            ) : updateStatusPieData.length > 0 ? (
+                                <Flex vertical style={{ flex: 1 }}>
+                                    <ResponsiveContainer width="100%" height={100}>
+                                        <PieChart>
+                                            <Pie data={updateStatusPieData} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                                                {updateStatusPieData.map((entry, index) => (
+                                                    <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
+                                                ))}
+                                            </Pie>
+                                            <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    {renderCustomLegend(updateStatusPieData)}
+                                </Flex>
+                            ) : (
+                                <Flex justify="center" align="center" style={{ flex: 1 }}>
+                                    <Text type="secondary">{t('common:messages.noData')}</Text>
+                                </Flex>
+                            )}
+                        </OverviewChartCard>
+                    </ChartsContainer>
+                </TopRow>
+
+                {/* Bottom Row: Device Grid (Full Width) */}
+                <BottomRow style={{ display: 'block' }}>
+                    <DeviceCardGrid
+                        targets={targets}
+                        actions={actions}
+                        loading={isLoading}
+                        title={t('overview.deviceGrid', 'Device Status Grid')}
+                        delay={7}
+                        cols={5}
+                        rows={4}
+                        gap={8}
+                        rowHeight={90}
+                        targetTypeColorMap={targetTypeColorMap}
+                    />
+                </BottomRow>
+            </OverviewScrollContent>
         </OverviewPageContainer>
     );
 };

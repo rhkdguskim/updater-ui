@@ -238,8 +238,8 @@ const TargetTypeList: React.FC = () => {
         addCompatibleMutation.isPending || removeCompatibleMutation.isPending;
 
     return (
-        <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 {isAdmin && (
                     <Button
                         type="primary"
@@ -281,7 +281,7 @@ const TargetTypeList: React.FC = () => {
                     setEditingType(null);
                 }}
             />
-        </>
+        </Space>
     );
 };
 

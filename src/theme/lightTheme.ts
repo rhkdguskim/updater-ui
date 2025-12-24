@@ -42,7 +42,7 @@ export const lightTheme: ThemeConfig = {
         marginXS: 8,
         marginSM: 12,
         margin: 16,
-        marginMD: 20,
+        marginMD: 16,
         marginLG: 24,
         marginXL: 32,
 

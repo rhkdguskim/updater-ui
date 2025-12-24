@@ -162,8 +162,8 @@ const TargetTagList: React.FC = () => {
     ];
 
     return (
-        <>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 16 }}>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Button
                     type="primary"
                     icon={<PlusOutlined />}
@@ -213,7 +213,7 @@ const TargetTagList: React.FC = () => {
                     colourLabel: t('tagManagement.colour'),
                 }}
             />
-        </>
+        </Space>
     );
 };
 

@@ -86,9 +86,9 @@ const MetadataTab: React.FC<MetadataTabProps> = ({
     }
 
     return (
-        <>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             {canEdit && (
-                <div style={{ marginBottom: 16, textAlign: 'right' }}>
+                <div style={{ textAlign: 'right' }}>
                     <Button type="primary" icon={<PlusOutlined />} onClick={onAdd}>
                         {t('metadata.add')}
                     </Button>
@@ -102,7 +102,7 @@ const MetadataTab: React.FC<MetadataTabProps> = ({
                 size="middle"
                 locale={{ emptyText: <Empty description={t('metadata.emptyText')} /> }}
             />
-        </>
+        </Space>
     );
 };
 

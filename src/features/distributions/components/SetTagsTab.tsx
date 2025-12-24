@@ -150,29 +150,27 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
     }
 
     return (
-        <div>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             {/* Assigned Tags Display */}
-            <div style={{ marginBottom: 16 }}>
-                <Space wrap>
-                    {assignedTags.length === 0 ? (
-                        <span style={{ color: '#999' }}>{t('tagsTab.noTags')}</span>
-                    ) : (
-                        assignedTags.map(tag => (
-                            <Tag
-                                key={tag.id}
-                                color={tag.colour || 'blue'}
-                                closable={isAdmin}
-                                onClose={(e) => {
-                                    e.preventDefault();
-                                    if (tag.id) handleUnassign(tag.id);
-                                }}
-                            >
-                                {tag.name}
-                            </Tag>
-                        ))
-                    )}
-                </Space>
-            </div>
+            <Space wrap>
+                {assignedTags.length === 0 ? (
+                    <span style={{ color: '#999' }}>{t('tagsTab.noTags')}</span>
+                ) : (
+                    assignedTags.map(tag => (
+                        <Tag
+                            key={tag.id}
+                            color={tag.colour || 'blue'}
+                            closable={isAdmin}
+                            onClose={(e) => {
+                                e.preventDefault();
+                                if (tag.id) handleUnassign(tag.id);
+                            }}
+                        >
+                            {tag.name}
+                        </Tag>
+                    ))
+                )}
+            </Space>
 
             {/* Add Tag Button */}
             {isAdmin && (
@@ -216,7 +214,7 @@ const SetTagsTab: React.FC<SetTagsTabProps> = ({
                     </div>
                 )}
             </Modal>
-        </div>
+        </Space>
     );
 };
 

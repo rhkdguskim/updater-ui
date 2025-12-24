@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Modal, Typography, Alert, Progress, App } from 'antd';
+import { Modal, Typography, Alert, Progress, App, Space } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { deleteTarget } from '@/api/generated/targets/targets';
@@ -101,7 +101,7 @@ const BulkDeleteTargetModal: React.FC<BulkDeleteTargetModalProps> = ({
                     </Text>
                 </div>
             ) : (
-                <>
+                <Space direction="vertical" size="middle" style={{ width: '100%' }}>
                     <Alert
                         type="warning"
                         showIcon
@@ -112,7 +112,6 @@ const BulkDeleteTargetModal: React.FC<BulkDeleteTargetModalProps> = ({
                         description={t('bulkDelete.confirmDesc', {
                             defaultValue: 'This action cannot be undone.',
                         })}
-                        style={{ marginBottom: 16 }}
                     />
                     {errors.length > 0 && (
                         <Alert
@@ -130,7 +129,7 @@ const BulkDeleteTargetModal: React.FC<BulkDeleteTargetModalProps> = ({
                             }
                         />
                     )}
-                </>
+                </Space>
             )}
         </Modal>
     );

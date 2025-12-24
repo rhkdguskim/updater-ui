@@ -141,16 +141,14 @@ const SetMetadataTab: React.FC<SetMetadataTabProps> = ({ distributionSetId, isAd
     ];
 
     return (
-        <div>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             {isAdmin && (
-                <div style={{ marginBottom: 16 }}>
-                    <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
-                        {t('metadataTab.add')}
-                    </Button>
-                </div>
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
+                    {t('metadataTab.add')}
+                </Button>
             )}
             <Table
-                dataSource={data?.content || []} // Assuming content is the array
+                dataSource={data?.content || []}
                 columns={columns}
                 rowKey="key"
                 loading={isLoading}
@@ -181,7 +179,7 @@ const SetMetadataTab: React.FC<SetMetadataTabProps> = ({ distributionSetId, isAd
                     </Form.Item>
                 </Form>
             </Modal>
-        </div>
+        </Space>
     );
 };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Input, Select, Button, Tooltip } from 'antd';
+import { Input, Select, Button, Tooltip, Space } from 'antd';
 import {
     SearchOutlined,
     PlusOutlined,
@@ -9,7 +9,7 @@ import {
 } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { buildWildcardSearch } from '@/utils/fiql';
-import { SearchLayout } from '@/components/common';
+import { FilterBar } from '@/components/patterns';
 
 const { Search } = Input;
 
@@ -61,7 +61,6 @@ const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
 
     const handleSearch = (value: string) => {
         setSearchValue(value);
-        // Use centralized FIQL utility
         const query = buildWildcardSearch(searchField, value);
         manualSearchRef.current = true;
         onSearch(query);
@@ -106,8 +105,34 @@ const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
     }, [searchField, searchValue, fiqlQuery, isAdvancedMode, onSearch]);
 
     return (
-        <SearchLayout>
-            <SearchLayout.SearchGroup>
+        <FilterBar
+            extra={
+                <Space size="small">
+                    {onOpenSavedFilters && (
+                        <Tooltip title={t('list.savedFilters')}>
+                            <Button icon={<BookOutlined />} onClick={onOpenSavedFilters} />
+                        </Tooltip>
+                    )}
+                    <Tooltip title={t('actions.refresh')}>
+                        <Button
+                            icon={<ReloadOutlined />}
+                            onClick={onRefresh}
+                            loading={loading}
+                        />
+                    </Tooltip>
+                    {canAddTarget && (
+                        <Button
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={onAddTarget}
+                        >
+                            {t('list.addTarget')}
+                        </Button>
+                    )}
+                </Space>
+            }
+        >
+            <Space size="small">
                 <Tooltip title={isAdvancedMode ? t('search.switchToSimple') : t('search.switchToAdvanced')}>
                     <Button
                         icon={isAdvancedMode ? <SearchOutlined /> : <FilterOutlined />}
@@ -134,7 +159,7 @@ const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
                             allowClear
                             onClear={handleClear}
                             enterButton={<SearchOutlined />}
-                            style={{ maxWidth: 400 }}
+                            style={{ width: 300 }}
                             loading={loading}
                         />
                     </>
@@ -147,37 +172,13 @@ const TargetSearchBar: React.FC<TargetSearchBarProps> = ({
                         allowClear
                         onClear={handleClear}
                         enterButton={<SearchOutlined />}
-                        style={{ flex: 1, maxWidth: 600 }}
+                        style={{ width: 450 }}
                         loading={loading}
                         prefix={<span style={{ color: '#aaa', fontSize: 12, marginRight: 4 }}>FIQL:</span>}
                     />
                 )}
-            </SearchLayout.SearchGroup>
-
-            <SearchLayout.ActionGroup>
-                {onOpenSavedFilters && (
-                    <Tooltip title={t('list.savedFilters')}>
-                        <Button icon={<BookOutlined />} onClick={onOpenSavedFilters} />
-                    </Tooltip>
-                )}
-                <Tooltip title={t('actions.refresh')}>
-                    <Button
-                        icon={<ReloadOutlined />}
-                        onClick={onRefresh}
-                        loading={loading}
-                    />
-                </Tooltip>
-                {canAddTarget && (
-                    <Button
-                        type="primary"
-                        icon={<PlusOutlined />}
-                        onClick={onAddTarget}
-                    >
-                        {t('list.addTarget')}
-                    </Button>
-                )}
-            </SearchLayout.ActionGroup>
-        </SearchLayout>
+            </Space>
+        </FilterBar>
     );
 };
 

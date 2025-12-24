@@ -191,14 +191,13 @@ const SoftwareModuleDetail: React.FC = () => {
     );
 
     const artifactsTab = (
-        <div>
+        <Space direction="vertical" size="middle" style={{ width: '100%' }}>
             {isAdmin && (
                 <Upload.Dragger
                     beforeUpload={handleBeforeUpload}
                     multiple
                     showUploadList={false}
                     disabled={moduleData?.locked}
-                    style={{ marginBottom: 16 }}
                 >
                     <p className="ant-upload-drag-icon">
                         <InboxOutlined />
@@ -227,7 +226,6 @@ const SoftwareModuleDetail: React.FC = () => {
                             </Space>
                         </List.Item>
                     )}
-                    style={{ marginBottom: 16 }}
                 />
             )}
             <Table
@@ -293,7 +291,7 @@ const SoftwareModuleDetail: React.FC = () => {
                     },
                 ]}
             />
-        </div>
+        </Space>
     );
 
     return (

@@ -169,7 +169,6 @@ const AssignDSModal: React.FC<AssignDSModalProps> = ({
                             {t('assign.targetLabel')} <Text strong>{targetId}</Text>
                         </>
                     }
-                    style={{ marginBottom: 16 }}
                 />
 
                 <Form.Item
