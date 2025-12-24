@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Table, Card, Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
+import React, { useState, useCallback, useRef, useLayoutEffect } from 'react';
+import { Table, Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import { EyeOutlined, DeleteOutlined, TagOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -18,11 +18,11 @@ import { useTranslation } from 'react-i18next';
 import { keepPreviousData } from '@tanstack/react-query';
 
 import BulkManageSetTagsModal from './components/BulkManageSetTagsModal';
-import { PageContainer, HeaderRow } from '@/components/layout/PageLayout';
+import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import { useServerTable } from '@/hooks/useServerTable';
 
 
-const { Title } = Typography;
+const { } = Typography;
 
 const DistributionSetList: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -42,11 +42,23 @@ const DistributionSetList: React.FC = () => {
 
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
 
-    // Bulk Action State
     const [selectedSetIds, setSelectedSetIds] = useState<number[]>([]);
     const [bulkTagsModalOpen, setBulkTagsModalOpen] = useState(false);
+    const tableContainerRef = useRef<HTMLDivElement | null>(null);
+    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
 
-
+    useLayoutEffect(() => {
+        if (!tableContainerRef.current) return;
+        const element = tableContainerRef.current;
+        const updateHeight = () => {
+            const height = element.getBoundingClientRect().height;
+            setTableScrollY(Math.max(240, Math.floor(height - 40)));
+        };
+        updateHeight();
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
 
     // API Query
     const {
@@ -181,17 +193,9 @@ const DistributionSetList: React.FC = () => {
     ];
 
     return (
-        <PageContainer>
-            <HeaderRow>
-                <Title level={2} style={{ margin: 0 }}>
-                    {t('list.title')}
-                </Title>
-            </HeaderRow>
-
-            <Card
-                style={{ flex: 1, height: '100%', overflow: 'hidden' }}
-                styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}
-            >
+        <StandardListLayout
+            title={t('list.title')}
+            searchBar={
                 <DistributionSearchBar
                     type="set"
                     onSearch={handleSearchInternal}
@@ -200,59 +204,58 @@ const DistributionSetList: React.FC = () => {
                     canAdd={isAdmin}
                     loading={isLoading || isFetching}
                 />
-
-                {selectedSetIds.length > 0 && (
-                    <Space style={{ marginTop: 16, marginBottom: 16 }} wrap>
-                        <span style={{ marginRight: 8 }}>
-                            {t('bulkAssignment.selectedSets', { count: selectedSetIds.length })}
-                        </span>
-                        <Button icon={<TagOutlined />} onClick={() => setBulkTagsModalOpen(true)}>
-                            {t('bulkAssignment.manageTags')}
-                        </Button>
-                    </Space>
-                )}
-
-                <div style={{ flex: 1, minHeight: 0 }}>
-                    <Table
-                        columns={columns}
-                        dataSource={data?.content || []}
-                        rowKey="id"
-                        pagination={{
-                            ...pagination,
-                            total: data?.total || 0,
-                            showSizeChanger: true,
-                            position: ['topRight'],
-                        }}
-                        loading={isLoading || isFetching}
-                        onChange={handleTableChange}
-                        rowSelection={{
-                            selectedRowKeys: selectedSetIds,
-                            onChange: (keys) => setSelectedSetIds(keys as number[]),
-                        }}
-                        scroll={{ x: 1000, y: '100%' }}
-                        size="small"
-                    />
-                </div>
-                <CreateDistributionSetWizard
-                    visible={isCreateModalVisible}
-                    onCancel={() => setIsCreateModalVisible(false)}
-                    onSuccess={() => {
-                        setIsCreateModalVisible(false);
-                        refetch();
+            }
+            bulkActionBar={selectedSetIds.length > 0 && (
+                <Space style={{ marginBottom: 16 }} wrap>
+                    <span style={{ marginRight: 8 }}>
+                        {t('bulkAssignment.selectedSets', { count: selectedSetIds.length })}
+                    </span>
+                    <Button icon={<TagOutlined />} onClick={() => setBulkTagsModalOpen(true)}>
+                        {t('bulkAssignment.manageTags')}
+                    </Button>
+                </Space>
+            )}
+        >
+            <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <Table
+                    columns={columns}
+                    dataSource={data?.content || []}
+                    rowKey="id"
+                    pagination={{
+                        ...pagination,
+                        total: data?.total || 0,
+                        showSizeChanger: true,
+                        position: ['topRight'],
                     }}
-                />
-                <BulkManageSetTagsModal
-                    open={bulkTagsModalOpen}
-                    setIds={selectedSetIds}
-                    onCancel={() => setBulkTagsModalOpen(false)}
-                    onSuccess={() => {
-                        setBulkTagsModalOpen(false);
-                        setSelectedSetIds([]);
-                        refetch();
+                    loading={isLoading || isFetching}
+                    onChange={handleTableChange}
+                    rowSelection={{
+                        selectedRowKeys: selectedSetIds,
+                        onChange: (keys) => setSelectedSetIds(keys as number[]),
                     }}
+                    scroll={{ x: 1000, y: tableScrollY }}
+                    size="small"
                 />
-            </Card>
-        </PageContainer>
+            </div>
+            <CreateDistributionSetWizard
+                visible={isCreateModalVisible}
+                onCancel={() => setIsCreateModalVisible(false)}
+                onSuccess={() => {
+                    setIsCreateModalVisible(false);
+                    refetch();
+                }}
+            />
+            <BulkManageSetTagsModal
+                open={bulkTagsModalOpen}
+                setIds={selectedSetIds}
+                onCancel={() => setBulkTagsModalOpen(false)}
+                onSuccess={() => {
+                    setBulkTagsModalOpen(false);
+                    setSelectedSetIds([]);
+                    refetch();
+                }}
+            />
+        </StandardListLayout >
     );
 };
 

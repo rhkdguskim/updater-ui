@@ -59,14 +59,14 @@ const LogoContainer = styled.div`
   .logo-icon {
     width: 26px;
     height: 26px;
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    background: var(--ant-color-primary, linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%));
     border-radius: 6px;
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-size: 14px;
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+    box-shadow: 0 2px 8px var(--ant-color-primary-hover, rgba(99, 102, 241, 0.3));
   }
   
   .logo-text {
@@ -98,7 +98,7 @@ const SettingsGroup = styled.div`
     align-items: center;
     gap: 4px;
     padding: 4px;
-    background: rgba(99, 102, 241, 0.06);
+    background: var(--ant-color-primary-bg, rgba(99, 102, 241, 0.06));
     border-radius: 10px;
 `;
 
@@ -107,14 +107,14 @@ const UserSection = styled.div`
     align-items: center;
     gap: 10px;
     padding: 4px 8px 4px 12px;
-    background: rgba(99, 102, 241, 0.06);
+    background: var(--ant-color-primary-bg, rgba(99, 102, 241, 0.06));
     border-radius: 10px;
     cursor: pointer;
     transition: all 0.2s ease;
     height: 40px;
     
     &:hover {
-        background: rgba(99, 102, 241, 0.1);
+        background: var(--ant-color-primary-bg-hover, rgba(99, 102, 241, 0.1));
     }
 `;
 
@@ -136,8 +136,8 @@ const UserRole = styled(Text)`
 `;
 
 const StyledAvatar = styled(Avatar)`
-    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.25);
+    background: var(--ant-color-primary, linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%));
+    box-shadow: 0 2px 8px var(--ant-color-primary-hover, rgba(99, 102, 241, 0.25));
     font-size: 14px;
 `;
 
@@ -308,7 +308,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
                     <div className="logo-icon">
                         <MdRocketLaunch />
                     </div>
-                    <span className="logo-text">{import.meta.env.VITE_APP_TITLE || 'Updater UI'}</span>
+                    <span className="logo-text">{import.meta.env.VITE_APP_TITLE || t('common:appName', 'Updater UI')}</span>
                 </LogoContainer>
 
                 <StyledMenu

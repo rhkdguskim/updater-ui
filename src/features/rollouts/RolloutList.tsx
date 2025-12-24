@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Card, Table, Space, Button, Select, Typography, Progress, Input, Tooltip } from 'antd';
+import { Table, Space, Button, Select, Typography, Progress, Input, Tooltip } from 'antd';
 import { ReloadOutlined, PlusOutlined, EyeOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useGetRollouts } from '@/api/generated/rollouts/rollouts';
@@ -8,16 +8,16 @@ import type { TableProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { keepPreviousData } from '@tanstack/react-query';
-import { SearchLayout, StatusTag } from '@/components/common';
+import { SearchLayout } from '@/components/common';
 
-import { PageContainer } from '@/components/layout/PageLayout';
+import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import { useServerTable } from '@/hooks/useServerTable';
 import dayjs from 'dayjs';
 import { buildWildcardSearch, appendFilter, buildCondition } from '@/utils/fiql';
 import RolloutCreateModal from './RolloutCreateModal';
+import { StatusTag } from '@/components/common/StatusTag';
 
 const { Text } = Typography;
-const { Search } = Input;
 
 const RolloutList: React.FC = () => {
     const { t } = useTranslation(['rollouts', 'common']);
@@ -188,7 +188,7 @@ const RolloutList: React.FC = () => {
                             percent={percent}
                             size="small"
                             status={record.status === 'stopped' ? 'exception' : undefined}
-                            strokeColor={record.status === 'stopped' ? undefined : '#3b82f6'}
+                            strokeColor={record.status === 'stopped' ? undefined : 'var(--ant-color-primary, #3b82f6)'}
                         />
                         <Text type="secondary" style={{ fontSize: 12 }}>
                             {t('columns.progressLabel', { percent })}
@@ -214,12 +214,9 @@ const RolloutList: React.FC = () => {
     ];
 
     return (
-        <PageContainer>
-            <Card
-                title={t('pageTitle')}
-                style={{ flex: 1, height: '100%', overflow: 'hidden' }}
-                styles={{ body: { height: 'calc(100% - 57px)', display: 'flex', flexDirection: 'column' } }}
-            >
+        <StandardListLayout
+            title={t('pageTitle')}
+            searchBar={
                 <SearchLayout>
                     <SearchLayout.SearchGroup>
                         <Select
@@ -231,7 +228,7 @@ const RolloutList: React.FC = () => {
                             suffixIcon={<FilterOutlined />}
                             options={statusOptions}
                         />
-                        <Search
+                        <Input.Search
                             placeholder={t('search.placeholder', { defaultValue: 'Search by Name' })}
                             value={searchValue}
                             onChange={(e) => setSearchValue(e.target.value)}
@@ -260,28 +257,28 @@ const RolloutList: React.FC = () => {
                         )}
                     </SearchLayout.ActionGroup>
                 </SearchLayout>
-
-                <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                    <Table
-                        dataSource={data?.content || []}
-                        columns={columns}
-                        rowKey="id"
-                        loading={isLoading || isFetching}
-                        locale={{ emptyText: t('empty') }}
-                        pagination={{
-                            current: pagination.current,
-                            pageSize: pagination.pageSize,
-                            total: data?.total || 0,
-                            showSizeChanger: true,
-                            showTotal: (total, range) => t('pagination.range', { start: range[0], end: range[1], total }),
-                            position: ['topRight'],
-                        }}
-                        onChange={handleTableChange}
-                        scroll={tableScrollY ? { x: 1000, y: tableScrollY } : { x: 1000 }}
-                        size="small"
-                    />
-                </div>
-            </Card>
+            }
+        >
+            <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <Table
+                    dataSource={data?.content || []}
+                    columns={columns}
+                    rowKey="id"
+                    loading={isLoading || isFetching}
+                    locale={{ emptyText: t('empty') }}
+                    pagination={{
+                        current: pagination.current,
+                        pageSize: pagination.pageSize,
+                        total: data?.total || 0,
+                        showSizeChanger: true,
+                        showTotal: (total, range) => t('pagination.range', { start: range[0], end: range[1], total }),
+                        position: ['topRight'],
+                    }}
+                    onChange={handleTableChange}
+                    scroll={tableScrollY ? { x: 1000, y: tableScrollY } : { x: 1000 }}
+                    size="small"
+                />
+            </div>
 
             <RolloutCreateModal
                 open={isCreateModalOpen}
@@ -291,7 +288,7 @@ const RolloutList: React.FC = () => {
                     navigate(`/rollouts/${id}`);
                 }}
             />
-        </PageContainer>
+        </StandardListLayout>
     );
 };
 

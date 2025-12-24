@@ -1,5 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import { Table, Card, Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
+import React, { useState, useRef, useLayoutEffect } from 'react';
+import { Table, Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -14,25 +14,11 @@ import CreateSoftwareModuleModal from './components/CreateSoftwareModuleModal';
 import { format } from 'date-fns';
 
 import { useTranslation } from 'react-i18next';
-import styled from 'styled-components';
 import { keepPreviousData } from '@tanstack/react-query';
+import { StandardListLayout } from '@/components/layout/StandardListLayout';
+import { useServerTable } from '@/hooks/useServerTable';
 
-const { Title } = Typography;
-
-const PageContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    height: 100%;
-`;
-
-const HeaderRow = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-`;
+const { } = Typography;
 
 const SoftwareModuleList: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -40,16 +26,34 @@ const SoftwareModuleList: React.FC = () => {
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
 
-    // Pagination & Sorting State
-    const [pagination, setPagination] = useState({ current: 1, pageSize: 20 });
-    const [sort, setSort] = useState<string>('');
-    const [searchQuery, setSearchQuery] = useState<string>('');
-    const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
+    // Shared Hook
+    const {
+        pagination,
+        offset,
+        sort,
+        searchQuery,
+        handleTableChange,
+        handleSearch,
+    } = useServerTable<MgmtSoftwareModule>({ syncToUrl: true });
 
+    const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
     const [selectedModuleIds, setSelectedModuleIds] = useState<number[]>([]);
 
-    // Calculate offset for API
-    const offset = (pagination.current - 1) * pagination.pageSize;
+    const tableContainerRef = useRef<HTMLDivElement | null>(null);
+    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
+
+    useLayoutEffect(() => {
+        if (!tableContainerRef.current) return;
+        const element = tableContainerRef.current;
+        const updateHeight = () => {
+            const height = element.getBoundingClientRect().height;
+            setTableScrollY(Math.max(240, Math.floor(height - 40)));
+        };
+        updateHeight();
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
 
     // API Query
     const {
@@ -79,7 +83,7 @@ const SoftwareModuleList: React.FC = () => {
             onSuccess: () => {
                 message.success(t('messages.deleteModuleSuccess'));
                 refetch();
-                setSelectedModuleIds(ids => ids.filter(id => id !== deleteMutation.variables?.softwareModuleId)); // Optimistic update or just refetch
+                setSelectedModuleIds(ids => ids.filter(id => id !== deleteMutation.variables?.softwareModuleId));
             },
             onError: (error) => {
                 message.error((error as Error).message || t('messages.deleteModuleError'));
@@ -106,10 +110,6 @@ const SoftwareModuleList: React.FC = () => {
             okType: 'danger',
             cancelText: t('common:actions.cancel'),
             onOk: async () => {
-                // Execute deletes sequentially or parallel
-                // Since hooks are involved, better to just iterate calls if possible or use a service function.
-                // React Query mutation variable is single. We can iterate mutateAsync.
-                // But we need to use mutation object inside loop? No, use mutateAsync.
                 for (const id of selectedModuleIds) {
                     await deleteMutation.mutateAsync({ softwareModuleId: id }).catch(() => { });
                 }
@@ -118,33 +118,6 @@ const SoftwareModuleList: React.FC = () => {
                 message.success(t('messages.bulkDeleteModuleSuccess'));
             },
         });
-    };
-
-    const handleSearch = useCallback((query: string) => {
-        setSearchQuery(query);
-        setPagination((prev) => ({ ...prev, current: 1 }));
-    }, []);
-
-    const handleTableChange: TableProps<MgmtSoftwareModule>['onChange'] = (
-        newPagination,
-        _,
-        sorter
-    ) => {
-        setPagination((prev) => ({
-            ...prev,
-            current: newPagination.current || 1,
-            pageSize: newPagination.pageSize || 20,
-        }));
-
-        if (Array.isArray(sorter)) {
-            // Handle multiple sorters if needed
-        } else if (sorter.field && sorter.order) {
-            const field = sorter.field as string;
-            const order = sorter.order === 'ascend' ? 'ASC' : 'DESC';
-            setSort(`${field}:${order}`);
-        } else {
-            setSort('');
-        }
     };
 
     const columns: TableProps<MgmtSoftwareModule>['columns'] = [
@@ -219,17 +192,9 @@ const SoftwareModuleList: React.FC = () => {
     ];
 
     return (
-        <PageContainer>
-            <HeaderRow>
-                <Title level={2} style={{ margin: 0 }}>
-                    {t('moduleList.title')}
-                </Title>
-            </HeaderRow>
-
-            <Card
-                style={{ flex: 1, height: '100%', overflow: 'hidden' }}
-                styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}
-            >
+        <StandardListLayout
+            title={t('moduleList.title')}
+            searchBar={
                 <DistributionSearchBar
                     type="module"
                     onSearch={handleSearch}
@@ -238,47 +203,49 @@ const SoftwareModuleList: React.FC = () => {
                     canAdd={isAdmin}
                     loading={isLoading || isFetching}
                 />
-                {selectedModuleIds.length > 0 && isAdmin && (
-                    <Space style={{ marginTop: 16, marginBottom: 16 }} wrap>
-                        <span style={{ marginRight: 8 }}>
-                            {t('moduleList.selectedCount', { count: selectedModuleIds.length })}
-                        </span>
-                        <Button danger onClick={handleBulkDelete} icon={<DeleteOutlined />}>
-                            {t('actions.deleteSelected')}
-                        </Button>
-                    </Space>
-                )}
-                <div style={{ flex: 1, minHeight: 0 }}>
-                    <Table
-                        columns={columns}
-                        dataSource={data?.content || []}
-                        rowKey="id"
-                        pagination={{
-                            ...pagination,
-                            total: data?.total || 0,
-                            showSizeChanger: true,
-                            position: ['topRight'],
-                        }}
-                        loading={isLoading || isFetching}
-                        onChange={handleTableChange}
-                        rowSelection={{
-                            selectedRowKeys: selectedModuleIds,
-                            onChange: (keys) => setSelectedModuleIds(keys as number[]),
-                        }}
-                        scroll={{ x: 1000, y: '100%' }}
-                        size="small"
-                    />
-                </div>
-                <CreateSoftwareModuleModal
-                    visible={isCreateModalVisible}
-                    onCancel={() => setIsCreateModalVisible(false)}
-                    onSuccess={() => {
-                        setIsCreateModalVisible(false);
-                        refetch();
+            }
+            bulkActionBar={selectedModuleIds.length > 0 && isAdmin && (
+                <Space style={{ marginBottom: 16 }} wrap>
+                    <span style={{ marginRight: 8 }}>
+                        {t('moduleList.selectedCount', { count: selectedModuleIds.length })}
+                    </span>
+                    <Button danger onClick={handleBulkDelete} icon={<DeleteOutlined />}>
+                        {t('actions.deleteSelected')}
+                    </Button>
+                </Space>
+            )}
+        >
+            <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                <Table
+                    columns={columns}
+                    dataSource={data?.content || []}
+                    rowKey="id"
+                    pagination={{
+                        current: pagination.current,
+                        pageSize: pagination.pageSize,
+                        total: data?.total || 0,
+                        showSizeChanger: true,
+                        position: ['topRight'],
                     }}
+                    loading={isLoading || isFetching}
+                    onChange={handleTableChange}
+                    rowSelection={{
+                        selectedRowKeys: selectedModuleIds,
+                        onChange: (keys) => setSelectedModuleIds(keys as number[]),
+                    }}
+                    scroll={{ x: 1000, y: tableScrollY }}
+                    size="small"
                 />
-            </Card>
-        </PageContainer>
+            </div>
+            <CreateSoftwareModuleModal
+                visible={isCreateModalVisible}
+                onCancel={() => setIsCreateModalVisible(false)}
+                onSuccess={() => {
+                    setIsCreateModalVisible(false);
+                    refetch();
+                }}
+            />
+        </StandardListLayout>
     );
 };
 

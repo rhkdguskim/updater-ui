@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from 'react';
-import { Card, Table, Tag, Space, Button, Tooltip, message, Popconfirm, Typography } from 'antd'; // Removed unused imports
+import React, { useCallback, useState, useRef, useLayoutEffect } from 'react';
+import { Table, Tag, Button, Tooltip, message, Popconfirm, Typography } from 'antd'; // Removed Card, Space
 import {
     EyeOutlined,
     StopOutlined,
@@ -13,18 +13,16 @@ import type { TableProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import styled, { keyframes } from 'styled-components';
 import { keepPreviousData } from '@tanstack/react-query';
-import { PageContainer, HeaderRow } from '@/components/layout/PageLayout';
+import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
-import { useServerTable } from '@/hooks/useServerTable'; // Added
-import ActionSearchBar from './components/ActionSearchBar'; // Added
-import { StatusTag } from '@/components/common/StatusTag'; // Added
+import { useServerTable } from '@/hooks/useServerTable';
+import ActionSearchBar from './components/ActionSearchBar';
+import { StatusTag } from '@/components/common/StatusTag';
 
 dayjs.extend(relativeTime);
 
-const { Title, Text } = Typography;
-
-// Animations (Keeping pulse and LiveIndicator for now)
+const { Text } = Typography; // Removed Title
 
 const pulse = keyframes`
     0%, 100% { opacity: 1; }
@@ -36,14 +34,14 @@ const LiveIndicator = styled.div`
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: #64748b;
+    color: var(--ant-color-text-secondary, #64748b);
 
     &::before {
         content: '';
         width: 8px;
         height: 8px;
         border-radius: 50%;
-        background: #10b981;
+        background: var(--ant-color-success, #10b981);
         animation: ${pulse} 1.5s ease-in-out infinite;
     }
 `;
@@ -53,9 +51,9 @@ const BulkActionBar = styled.div`
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%);
+    background: var(--ant-color-primary-bg, linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(99, 102, 241, 0.1) 100%));
     border-radius: 12px;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
 `;
 
 const isActionErrored = (action: MgmtAction) => {
@@ -92,6 +90,23 @@ const ActionList: React.FC = () => {
 
     const [selectedActionIds, setSelectedActionIds] = useState<number[]>([]);
     const [selectedTargetIdsMap, setSelectedTargetIdsMap] = useState<Record<number, string>>({});
+    const tableContainerRef = useRef<HTMLDivElement | null>(null);
+    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
+
+    useLayoutEffect(() => {
+        if (!tableContainerRef.current) return;
+        const element = tableContainerRef.current;
+        const updateHeight = () => {
+            const height = element.getBoundingClientRect().height;
+            // Subtracting for header/bulk action bar if needed.
+            // ActionList structure is slightly different, offset might need adjustment.
+            setTableScrollY(Math.max(240, Math.floor(height - 40)));
+        };
+        updateHeight();
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
 
 
     // Check if any running actions exist for auto-refresh
@@ -267,32 +282,27 @@ const ActionList: React.FC = () => {
     }, []);
 
     return (
-        <PageContainer>
-            <HeaderRow>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    <Title level={2} style={{ margin: 0 }}>{t('pageTitle')}</Title>
-                    <Space size={12}>
-                        <Text type="secondary">{t('subtitle')}</Text>
-                        <LiveIndicator>
-                            {isActivePolling ? t('polling.live', { defaultValue: 'Live (5s)' }) : t('polling.idle', { defaultValue: 'Idle (30s)' })}
-                        </LiveIndicator>
-                    </Space>
-                </div>
-                <Space>
-                    <Text type="secondary" style={{ fontSize: 12 }}>
-                        {t('lastUpdated', { defaultValue: 'Updated' })}: {lastUpdated}
-                    </Text>
-                </Space>
-            </HeaderRow>
-
-            <ActionSearchBar
-                onSearch={handleSearch}
-                onRefresh={refetch}
-                loading={isLoading || isFetching}
-            />
-
-            {/* Bulk Action Bar */}
-            {selectedActionIds.length > 0 && (
+        <StandardListLayout
+            title={t('pageTitle')}
+            subtitle={t('subtitle')}
+            headerSubtitleExtra={
+                <LiveIndicator>
+                    {isActivePolling ? t('polling.live', { defaultValue: 'Live (5s)' }) : t('polling.idle', { defaultValue: 'Idle (30s)' })}
+                </LiveIndicator>
+            }
+            headerExtra={
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                    {t('lastUpdated', { defaultValue: 'Updated' })}: {lastUpdated}
+                </Text>
+            }
+            searchBar={
+                <ActionSearchBar
+                    onSearch={handleSearch}
+                    onRefresh={refetch}
+                    loading={isLoading || isFetching}
+                />
+            }
+            bulkActionBar={selectedActionIds.length > 0 && (
                 <BulkActionBar>
                     <Text strong>{t('bulk.selected', { count: selectedActionIds.length, defaultValue: `${selectedActionIds.length} selected` })}</Text>
                     <Popconfirm
@@ -313,12 +323,8 @@ const ActionList: React.FC = () => {
                     </Button>
                 </BulkActionBar>
             )}
-
-            {/* Table */}
-            <Card
-                style={{ flex: 1, height: '100%', overflow: 'hidden' }}
-                styles={{ body: { height: '100%', display: 'flex', flexDirection: 'column' } }}
-            >
+        >
+            <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
                 <Table
                     dataSource={data?.content || []}
                     columns={columns}
@@ -333,7 +339,6 @@ const ActionList: React.FC = () => {
                                 const tid = getTargetId(row);
                                 if (tid && row.id) newMap[row.id] = tid;
                             });
-                            // Filter map to only keep keys present in 'keys' to avoid memory leak
                             const finalMap: Record<number, string> = {};
                             (keys as number[]).forEach(k => {
                                 if (newMap[k]) finalMap[k] = newMap[k];
@@ -354,12 +359,12 @@ const ActionList: React.FC = () => {
                         position: ['topRight'],
                     }}
                     onChange={handleTableChange}
-                    scroll={{ x: 900, y: 'calc(100vh - 380px)' }}
+                    scroll={{ x: 900, y: tableScrollY }}
                     size="small"
                     locale={{ emptyText: t('common:messages.noData') }}
                 />
-            </Card>
-        </PageContainer>
+            </div>
+        </StandardListLayout>
     );
 };
 

@@ -1,7 +1,7 @@
 import React, { useLayoutEffect, useRef, useState, useCallback } from 'react';
-import { Card, message, Alert, Space, Tag, Tooltip, Typography } from 'antd';
+import { message, Alert, Space, Tag, Tooltip, Typography } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import { PageContainer } from '@/components/layout/PageLayout';
+import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import { useServerTable } from '@/hooks/useServerTable';
 import {
     TargetTable,
@@ -91,7 +91,7 @@ const TargetList: React.FC = () => {
         const element = tableContainerRef.current;
         const updateHeight = () => {
             const height = element.getBoundingClientRect().height;
-            const scrollHeight = Math.max(240, Math.floor(height - 72));
+            const scrollHeight = Math.max(240, Math.floor(height - 100)); // Increased offset to account for quick filters
             setTableScrollY(scrollHeight);
         };
         updateHeight();
@@ -312,12 +312,9 @@ const TargetList: React.FC = () => {
     }
 
     return (
-        <PageContainer>
-            <Card
-                title={t('title')}
-                style={{ flex: 1, height: '100%', overflow: 'hidden' }}
-                styles={{ body: { height: 'calc(100% - 57px)', display: 'flex', flexDirection: 'column' } }}
-            >
+        <StandardListLayout
+            title={t('title')}
+            searchBar={
                 <TargetSearchBar
                     onSearch={handleSearchWrapper}
                     onRefresh={() => refetchTargets()}
@@ -327,155 +324,158 @@ const TargetList: React.FC = () => {
                     onOpenSavedFilters={() => setSavedFiltersOpen(true)}
                     resetSignal={searchResetSignal}
                 />
-
-                {(activeSavedFilter || searchQuery || selectedTagName || selectedTypeName) && (
-                    <Space style={{ marginBottom: 16 }} wrap>
-                        {activeSavedFilter && (
-                            <Tag
-                                color="blue"
-                                closable
-                                onClose={() => {
-                                    setActiveSavedFilter(null);
-                                    setSearchQuery('');
-                                    setPagination((prev) => ({ ...prev, current: 1 }));
-                                    setSearchResetSignal((prev) => prev + 1);
-                                }}
-                            >
-                                {t('filters.savedFilter', { name: activeSavedFilter.name || activeSavedFilter.query })}
-                            </Tag>
-                        )}
-                        {!activeSavedFilter && searchQuery && (
-                            <Tooltip title={searchQuery}>
+            }
+            bulkActionBar={(activeSavedFilter || searchQuery || selectedTagName || selectedTypeName || selectedTargetIds.length > 0) && (
+                <div style={{ marginBottom: 16 }}>
+                    {(activeSavedFilter || searchQuery || selectedTagName || selectedTypeName) && (
+                        <Space style={{ marginBottom: selectedTargetIds.length > 0 ? 16 : 0 }} wrap>
+                            {activeSavedFilter && (
                                 <Tag
                                     color="blue"
                                     closable
                                     onClose={() => {
+                                        setActiveSavedFilter(null);
                                         setSearchQuery('');
                                         setPagination((prev) => ({ ...prev, current: 1 }));
                                         setSearchResetSignal((prev) => prev + 1);
                                     }}
                                 >
-                                    {t('filters.query')}
+                                    {t('filters.savedFilter', { name: activeSavedFilter.name || activeSavedFilter.query })}
                                 </Tag>
-                            </Tooltip>
-                        )}
-                        {selectedTagName && (
-                            <Tag
-                                color="gold"
-                                closable
-                                onClose={() => {
-                                    setSelectedTagName(undefined);
-                                    setPagination((prev) => ({ ...prev, current: 1 }));
-                                }}
-                            >
-                                {t('filters.tag', { name: selectedTagName })}
-                            </Tag>
-                        )}
-                        {selectedTypeName && (
-                            <Tag
-                                color="purple"
-                                closable
-                                onClose={() => {
-                                    setSelectedTypeName(undefined);
-                                    setPagination((prev) => ({ ...prev, current: 1 }));
-                                }}
-                            >
-                                {t('filters.type', { name: selectedTypeName })}
-                            </Tag>
-                        )}
-                        <Button
-                            size="small"
-                            onClick={() => {
-                                setActiveSavedFilter(null);
-                                setSearchQuery('');
-                                setSelectedTagName(undefined);
-                                setSelectedTypeName(undefined);
-                                setPagination((prev) => ({ ...prev, current: 1 }));
-                                setSearchResetSignal((prev) => prev + 1);
-                            }}
-                        >
-                            {t('filters.clearAll')}
-                        </Button>
-                    </Space>
-                )}
-
-                {selectedTargetIds.length > 0 && (
-                    <Space style={{ marginTop: 16, marginBottom: 16 }} wrap>
-                        <span style={{ marginRight: 8 }}>
-                            {t('bulkAssign.selectedCount', { count: selectedTargetIds.length })}
-                        </span>
-                        <Button onClick={() => setBulkTagsModalOpen(true)}>
-                            {t('bulkAssign.assignTag')}
-                        </Button>
-                        <Button onClick={() => setBulkTypeModalOpen(true)}>
-                            {t('bulkAssign.assignType')}
-                        </Button>
-                        <Button danger onClick={() => setBulkDeleteModalOpen(true)}>
-                            {t('bulkDelete.button', { defaultValue: 'Delete' })}
-                        </Button>
-                    </Space>
-                )}
-
-                <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
-                    {/* Saved Filters Quick Access */}
-                    <div style={{ padding: '0 2px', marginBottom: 16 }}>
-                        <Space wrap size={[8, 8]}>
-                            <Text type="secondary" style={{ fontSize: 13, marginRight: 4 }}>
-                                {t('quickFilters')}:
-                            </Text>
-                            {savedFilters.slice(0, 5).map(filter => (
-                                <Tag.CheckableTag
-                                    key={filter.id}
-                                    checked={activeSavedFilter?.id === filter.id}
-                                    onChange={() => handleFilterSelect(filter)}
-                                    style={{
-                                        border: '1px solid #d9d9d9',
-                                        padding: '2px 8px',
-                                        fontSize: 13
+                            )}
+                            {!activeSavedFilter && searchQuery && (
+                                <Tooltip title={searchQuery}>
+                                    <Tag
+                                        color="blue"
+                                        closable
+                                        onClose={() => {
+                                            setSearchQuery('');
+                                            setPagination((prev) => ({ ...prev, current: 1 }));
+                                            setSearchResetSignal((prev) => prev + 1);
+                                        }}
+                                    >
+                                        {t('filters.query')}
+                                    </Tag>
+                                </Tooltip>
+                            )}
+                            {selectedTagName && (
+                                <Tag
+                                    color="gold"
+                                    closable
+                                    onClose={() => {
+                                        setSelectedTagName(undefined);
+                                        setPagination((prev) => ({ ...prev, current: 1 }));
                                     }}
                                 >
-                                    {filter.name}
-                                </Tag.CheckableTag>
-                            ))}
+                                    {t('filters.tag', { name: selectedTagName })}
+                                </Tag>
+                            )}
+                            {selectedTypeName && (
+                                <Tag
+                                    color="purple"
+                                    closable
+                                    onClose={() => {
+                                        setSelectedTypeName(undefined);
+                                        setPagination((prev) => ({ ...prev, current: 1 }));
+                                    }}
+                                >
+                                    {t('filters.type', { name: selectedTypeName })}
+                                </Tag>
+                            )}
                             <Button
-                                type="link"
                                 size="small"
-                                icon={<FilterOutlined />}
-                                onClick={() => setSavedFiltersOpen(true)}
-                                style={{ padding: 0, marginLeft: 8 }}
+                                onClick={() => {
+                                    setActiveSavedFilter(null);
+                                    setSearchQuery('');
+                                    setSelectedTagName(undefined);
+                                    setSelectedTypeName(undefined);
+                                    setPagination((prev) => ({ ...prev, current: 1 }));
+                                    setSearchResetSignal((prev) => prev + 1);
+                                }}
                             >
-                                {t('manageFilters')}
+                                {t('filters.clearAll')}
                             </Button>
                         </Space>
-                    </div>
+                    )}
 
-                    <TargetTable
-                        data={targetsData?.content || []}
-                        loading={targetsLoading || targetsFetching}
-                        total={targetsData?.total || 0}
-                        pagination={pagination}
-                        scrollY={tableScrollY}
-                        onChange={handleTableChange}
-                        onPaginationChange={() => { }} // Handled by onChange
-                        onSortChange={() => { }} // Handled by onChange
-                        onView={handleViewTarget}
-                        onDelete={handleDeleteClick}
-                        canDelete={isAdmin}
-                        rowSelection={{
-                            selectedRowKeys: selectedTargetIds,
-                            onChange: (keys: React.Key[]) => setSelectedTargetIds(keys as string[]),
-                        }}
-                        availableTags={(tagsData?.content as MgmtTag[]) || []}
-                        availableTypes={(typesData?.content as MgmtTargetType[]) || []}
-                        filters={{ tagName: selectedTagName, typeName: selectedTypeName }}
-                        onFilterChange={(filters) => {
-                            setSelectedTagName(filters.tagName);
-                            setSelectedTypeName(filters.typeName);
-                            resetPagination();
-                        }}
-                    />
+                    {selectedTargetIds.length > 0 && (
+                        <Space wrap>
+                            <span style={{ marginRight: 8 }}>
+                                {t('bulkAssign.selectedCount', { count: selectedTargetIds.length })}
+                            </span>
+                            <Button onClick={() => setBulkTagsModalOpen(true)}>
+                                {t('bulkAssign.assignTag')}
+                            </Button>
+                            <Button onClick={() => setBulkTypeModalOpen(true)}>
+                                {t('bulkAssign.assignType')}
+                            </Button>
+                            <Button danger onClick={() => setBulkDeleteModalOpen(true)}>
+                                {t('bulkDelete.button', { defaultValue: 'Delete' })}
+                            </Button>
+                        </Space>
+                    )}
                 </div>
-            </Card>
+            )}
+        >
+            <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                {/* Saved Filters Quick Access */}
+                <div style={{ padding: '8px 2px', marginBottom: 8, flexShrink: 0 }}>
+                    <Space wrap size={[8, 8]}>
+                        <Text type="secondary" style={{ fontSize: 13, marginRight: 4 }}>
+                            {t('quickFilters')}:
+                        </Text>
+                        {savedFilters.slice(0, 5).map(filter => (
+                            <Tag.CheckableTag
+                                key={filter.id}
+                                checked={activeSavedFilter?.id === filter.id}
+                                onChange={() => handleFilterSelect(filter)}
+                                style={{
+                                    border: '1px solid var(--ant-color-border, #d9d9d9)',
+                                    padding: '2px 8px',
+                                    fontSize: 13
+                                }}
+                            >
+                                {filter.name}
+                            </Tag.CheckableTag>
+                        ))}
+                        <Button
+                            type="link"
+                            size="small"
+                            icon={<FilterOutlined />}
+                            onClick={() => setSavedFiltersOpen(true)}
+                            style={{ padding: 0, marginLeft: 8 }}
+                        >
+                            {t('manageFilters')}
+                        </Button>
+                    </Space>
+                </div>
+
+                <TargetTable
+                    data={targetsData?.content || []}
+                    loading={targetsLoading || targetsFetching}
+                    total={targetsData?.total || 0}
+                    pagination={pagination}
+                    scrollY={tableScrollY}
+                    onChange={handleTableChange}
+                    onPaginationChange={() => { }} // Handled by onChange
+                    onSortChange={() => { }} // Handled by onChange
+                    onView={handleViewTarget}
+                    onDelete={handleDeleteClick}
+                    canDelete={isAdmin}
+                    rowSelection={{
+                        selectedRowKeys: selectedTargetIds,
+                        onChange: (keys: React.Key[]) => setSelectedTargetIds(keys as string[]),
+                    }}
+                    availableTags={(tagsData?.content as MgmtTag[]) || []}
+                    availableTypes={(typesData?.content as MgmtTargetType[]) || []}
+                    filters={{ tagName: selectedTagName, typeName: selectedTypeName }}
+                    onFilterChange={(filters) => {
+                        setSelectedTagName(filters.tagName);
+                        setSelectedTypeName(filters.typeName);
+                        resetPagination();
+                    }}
+                />
+            </div>
 
             <BulkAssignTagsModal
                 open={bulkTagsModalOpen}
@@ -562,7 +562,7 @@ const TargetList: React.FC = () => {
                 }}
                 onClose={() => setSavedFiltersOpen(false)}
             />
-        </PageContainer>
+        </StandardListLayout>
     );
 };
 

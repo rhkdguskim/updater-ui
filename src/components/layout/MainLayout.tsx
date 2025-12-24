@@ -19,7 +19,9 @@ const StyledContent = styled(Content) <{ $bg: string; $radius: number }>`
   margin: 8px;
   padding: 12px;
   height: calc(100vh - 64px - 16px);
-  overflow: auto;
+  overflow: hidden; /* Prevent double scrollbars, inner components will scroll */
+  display: flex;
+  flex-direction: column;
   background: ${(props) => props.$bg};
   border-radius: ${(props) => props.$radius}px;
   box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);

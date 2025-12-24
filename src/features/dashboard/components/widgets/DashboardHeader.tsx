@@ -23,7 +23,7 @@ const ContentWrapper = styled.div`
 const GradientTitle = styled(Title)`
     && {
         margin: 0;
-        background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+        background: var(--ant-color-text, linear-gradient(135deg, #1e293b 0%, #475569 100%));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;

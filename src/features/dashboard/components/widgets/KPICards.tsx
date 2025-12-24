@@ -30,7 +30,7 @@ export const KPICards: React.FC<KPICardsProps> = ({
     return (
         <KPIGridContainer>
             <StatsCard
-                $accentColor="linear-gradient(135deg, #10b981 0%, #34d399 100%)"
+                $accentColor="var(--ant-color-success, linear-gradient(135deg, #10b981 0%, #34d399 100%))"
                 $delay={1}
                 onClick={() => navigate('/targets')}
             >
@@ -47,7 +47,7 @@ export const KPICards: React.FC<KPICardsProps> = ({
                 )}
             </StatsCard>
             <StatsCard
-                $accentColor="linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)"
+                $accentColor="var(--ant-color-primary, linear-gradient(135deg, #3b82f6 0%, #6366f1 100%))"
                 $delay={2}
                 onClick={() => navigate('/actions')}
             >
@@ -69,7 +69,7 @@ export const KPICards: React.FC<KPICardsProps> = ({
                 )}
             </StatsCard>
             <StatsCard
-                $accentColor="linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)"
+                $accentColor="var(--ant-color-warning, linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%))"
                 $delay={3}
                 $pulse={pendingCount > 0}
                 onClick={() => navigate('/actions')}
@@ -87,7 +87,7 @@ export const KPICards: React.FC<KPICardsProps> = ({
                 )}
             </StatsCard>
             <StatsCard
-                $accentColor="linear-gradient(135deg, #ef4444 0%, #f87171 100%)"
+                $accentColor="var(--ant-color-error, linear-gradient(135deg, #ef4444 0%, #f87171 100%))"
                 $delay={4}
                 $pulse={errorCount > 0}
                 onClick={() => navigate('/actions')}

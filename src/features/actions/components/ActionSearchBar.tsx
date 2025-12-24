@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Input, Button } from 'antd';
-import { SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { ReloadOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { buildWildcardSearch } from '@/utils/fiql';
 import { SearchLayout } from '@/components/common';
@@ -33,35 +33,27 @@ const ActionSearchBar: React.FC<ActionSearchBarProps> = ({
         onSearch(query);
     };
 
-    const handleKeyPress = (e: React.KeyboardEvent) => {
-        if (e.key === 'Enter') {
-            handleSearch();
-        }
-    };
 
     return (
-        <SearchLayout>
-            <SearchLayout.SearchGroup>
-                <Input
+        <SearchLayout
+            searchContent={
+                <Input.Search
                     placeholder={t('filter.searchPlaceholder', { defaultValue: 'Search Target Name' })}
                     value={searchText}
                     onChange={(e) => setSearchText(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    style={{ width: 300 }}
+                    onSearch={handleSearch}
+                    style={{ width: 400 }}
                     allowClear
-                    prefix={<SearchOutlined />}
+                    enterButton={t('filter.search', { defaultValue: 'Search' })}
+                    loading={loading}
                 />
-                <Button type="primary" onClick={handleSearch} loading={loading}>
-                    {t('filter.search', { defaultValue: 'Search' })}
-                </Button>
-            </SearchLayout.SearchGroup>
-
-            <SearchLayout.ActionGroup>
+            }
+            actionContent={
                 <Button icon={<ReloadOutlined />} onClick={onRefresh} loading={loading}>
                     {t('refresh', { defaultValue: 'Refresh' })}
                 </Button>
-            </SearchLayout.ActionGroup>
-        </SearchLayout>
+            }
+        />
     );
 };
 

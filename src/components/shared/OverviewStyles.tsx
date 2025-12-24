@@ -19,28 +19,28 @@ export const OVERVIEW_THEMES = {
         accentLight: 'rgba(16, 185, 129, 0.08)',
         accentBorder: 'rgba(16, 185, 129, 0.2)',
         iconBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-        color: '#10b981',
+        color: 'var(--ant-color-success, #10b981)',
     },
     distributions: {
         gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
         accentLight: 'rgba(99, 102, 241, 0.08)',
         accentBorder: 'rgba(99, 102, 241, 0.2)',
         iconBg: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-        color: '#6366f1',
+        color: 'var(--ant-color-primary, #6366f1)',
     },
     actions: {
         gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
         accentLight: 'rgba(59, 130, 246, 0.08)',
         accentBorder: 'rgba(59, 130, 246, 0.2)',
         iconBg: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-        color: '#3b82f6',
+        color: 'var(--ant-color-info, #3b82f6)',
     },
     rollouts: {
         gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
         accentLight: 'rgba(245, 158, 11, 0.08)',
         accentBorder: 'rgba(245, 158, 11, 0.2)',
         iconBg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-        color: '#f59e0b',
+        color: 'var(--ant-color-warning, #f59e0b)',
     },
 };
 
@@ -49,8 +49,12 @@ export const OverviewPageContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 12px;
+    flex: 1;
+    min-height: 0;
     height: 100%;
-    min-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px;
     animation: ${fadeInUp} 0.5s ease-out;
 `;
 
@@ -79,7 +83,7 @@ export const GradientTitle = styled(Typography.Title) <{ $theme?: keyof typeof O
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
-    
+
     [data-theme='dark'] &,
     .dark-mode & {
         background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
@@ -91,15 +95,15 @@ export const GradientTitle = styled(Typography.Title) <{ $theme?: keyof typeof O
 export const TopRow = styled.div`
     display: flex;
     gap: 12px;
-    flex: 0 0 240px;
     min-height: 240px;
+    flex-shrink: 0;
 `;
 
 export const BottomRow = styled.div`
     display: flex;
     gap: 12px;
-    flex: 1;
     min-height: 300px;
+    flex: 1;
 `;
 
 export const KPIGridContainer = styled.div`
@@ -154,7 +158,7 @@ export const OverviewStatsCard = styled(Card) <{ $accentColor?: string; $delay?:
         background: linear-gradient(145deg, rgba(24, 24, 27, 0.95) 0%, rgba(9, 9, 11, 0.9) 100%);
         border: 1px solid rgba(255, 255, 255, 0.04);
     }
-    
+
     .ant-card-body {
         padding: 12px;
         height: 100%;
@@ -221,7 +225,7 @@ export const OverviewChartCard = styled(Card) <{ $delay?: number; $theme?: keyof
     .ant-card-head-title {
         font-size: 14px;
         font-weight: 600;
-        color: #1e293b;
+        color: var(--ant-color-text, #1e293b);
         padding: 4px 0;
     }
     
@@ -250,7 +254,7 @@ export const OverviewChartCard = styled(Card) <{ $delay?: number; $theme?: keyof
 
 export const OverviewListCard = styled(OverviewChartCard)`
     /* ListCard inherits all styles from ChartCard */
-`;
+    `;
 
 export const IconBadge = styled.div<{ $theme?: keyof typeof OVERVIEW_THEMES; $color?: string }>`
     width: 36px;
@@ -271,11 +275,11 @@ export const IconBadge = styled.div<{ $theme?: keyof typeof OVERVIEW_THEMES; $co
 `;
 
 export const BigNumber = styled.div<{ $color?: string }>`
-    font-size: 32px;
-    font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 4px;
-    color: ${props => props.$color || '#3b82f6'};
+font-size: 32px;
+font-weight: 700;
+line-height: 1.2;
+margin-bottom: 4px;
+color: ${props => props.$color || 'var(--ant-color-primary, #3b82f6)'};
 `;
 
 export const LiveIndicator = styled.div<{ $color?: string; $active?: boolean }>`

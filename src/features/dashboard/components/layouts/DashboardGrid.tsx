@@ -6,7 +6,6 @@ const TopRow = styled.div`
     display: flex;
     gap: 12px;
     flex: 0 0 auto;
-    height: 320px;
     min-height: 320px;
 `;
 

@@ -22,9 +22,12 @@ export const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
     gap: 12px;
-    height: calc(100vh - 80px);
-    min-height: 600px;
-    overflow: hidden;
+    flex: 1;
+    min-height: 0;
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 4px; /* Space for scrollbar */
     animation: ${fadeInUp} 0.5s ease-out;
 `;
 
@@ -34,7 +37,6 @@ export const KPIGridContainer = styled.div`
     grid-template-rows: 1fr 1fr;
     gap: 8px;
     flex: 0 0 280px;
-    height: 100%;
 `;
 
 export const ChartsContainer = styled.div`
@@ -86,9 +88,8 @@ export const CHART_THEMES = {
 
 // Card Components
 export const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number; $pulse?: boolean }>`
-    border: none;
+border: none;
     border-radius: 16px;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
     backdrop-filter: blur(20px);
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -98,7 +99,7 @@ export const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number;
     animation-delay: ${props => (props.$delay || 0) * 0.1}s;
     animation-fill-mode: both;
     cursor: pointer;
-    height: 100%;
+    min-height: 120px;
 
     &::before {
         content: '';
@@ -119,7 +120,7 @@ export const StatsCard = styled(Card) <{ $accentColor?: string; $delay?: number;
     .dark-mode & {
         background: linear-gradient(145deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.9) 100%);
     }
-    
+
     .ant-card-body {
         padding: 16px;
         height: 100%;
@@ -140,7 +141,7 @@ export const ChartCard = styled(Card) <{ $delay?: number; $theme?: keyof typeof 
             : 'linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%)';
     }};
     backdrop-filter: blur(20px);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--ant-box-shadow-tertiary, 0 4px 24px rgba(0, 0, 0, 0.06));
     animation: ${fadeInUp} 0.5s ease-out;
     animation-delay: ${props => (props.$delay || 0) * 0.1}s;
     animation-fill-mode: both;
@@ -214,7 +215,7 @@ export const ChartCard = styled(Card) <{ $delay?: number; $theme?: keyof typeof 
 
 export const ListCard = styled(ChartCard)`
     /* ListCard inherits all styles from ChartCard */
-`;
+    `;
 
 // Icon Badge for chart headers
 export const IconBadge = styled.div<{ $theme?: keyof typeof CHART_THEMES }>`
@@ -249,7 +250,7 @@ export const LiveIndicator = styled.div<{ $active?: boolean; $color?: string }>`
     align-items: center;
     gap: 6px;
     font-size: 12px;
-    color: ${props => props.$active ? (props.$color || '#10b981') : '#64748b'};
+    color: ${props => props.$active ? (props.$color || 'var(--ant-color-success)') : 'var(--ant-color-text-quaternary)'};
     font-weight: 500;
     
     &::before {

@@ -3,55 +3,62 @@ import type { ReactNode } from 'react';
 import styled from 'styled-components';
 import { Space } from 'antd';
 
-const Container = styled.div`
+const Container = styled.div<{ $withBackground?: boolean }>`
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 16px;
+    padding: ${props => props.$withBackground ? '16px' : '0'};
+    background: ${props => props.$withBackground ? 'var(--ant-color-bg-container, #ffffff)' : 'transparent'};
+    border-radius: ${props => props.$withBackground ? '12px' : '0'};
+    box-shadow: ${props => props.$withBackground ? 'var(--ant-box-shadow-tertiary, 0 1px 2px 0 rgba(0, 0, 0, 0.03))' : 'none'};
 `;
 
 const SearchGroup = styled(Space)`
     flex: 1;
-    min-width: 300px;
+    min-width: 280px;
     flex-wrap: wrap;
+    
+    .ant-space-item {
+        display: flex;
+        align-items: center;
+    }
 `;
 
 const ActionGroup = styled(Space)`
     flex-shrink: 0;
+    margin-left: auto;
 `;
 
 interface SearchLayoutProps {
     children?: ReactNode;
-    // We can also accept designated slots if we want to enforce structure
     searchContent?: ReactNode;
     actionContent?: ReactNode;
+    withBackground?: boolean;
 }
 
 export const SearchLayout: React.FC<SearchLayoutProps> & {
     SearchGroup: typeof SearchGroup;
     ActionGroup: typeof ActionGroup;
-} = ({ children, searchContent, actionContent }) => {
-    // If strict props are used
+} = ({ children, searchContent, actionContent, withBackground = false }) => {
     if (searchContent || actionContent) {
         return (
-            <Container>
-                <SearchGroup>
+            <Container $withBackground={withBackground}>
+                <SearchGroup size={12}>
                     {searchContent}
                 </SearchGroup>
-                <ActionGroup>
+                <ActionGroup size={12}>
                     {actionContent}
                 </ActionGroup>
             </Container>
         );
     }
 
-    // Default flexible children usage
-    return <Container>{children}</Container>;
+    return <Container $withBackground={withBackground}>{children}</Container>;
 };
 
-// Attach sub-components for flexible usage
 SearchLayout.SearchGroup = SearchGroup;
 SearchLayout.ActionGroup = ActionGroup;
 
