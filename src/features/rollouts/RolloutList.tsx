@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef, useLayoutEffect } from 'react';
 import { Table, Space, Button, Select, Typography, Progress, Input, Tooltip } from 'antd';
 import { ReloadOutlined, PlusOutlined, EyeOutlined, FilterOutlined, SearchOutlined } from '@ant-design/icons';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -35,6 +35,21 @@ const RolloutList: React.FC = () => {
 
     const [statusFilter, setStatusFilter] = useState<string>('');
     const [searchValue, setSearchValue] = useState<string>('');
+    const tableContainerRef = useRef<HTMLDivElement | null>(null);
+    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
+
+    useLayoutEffect(() => {
+        if (!tableContainerRef.current) return;
+        const element = tableContainerRef.current;
+        const updateHeight = () => {
+            const height = element.getBoundingClientRect().height;
+            setTableScrollY(Math.max(240, Math.floor(height - 56)));
+        };
+        updateHeight();
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         const statusParam = searchParams.get('status') || '';
@@ -245,24 +260,26 @@ const RolloutList: React.FC = () => {
                 isEmpty={data?.content?.length === 0}
                 emptyText={t('empty')}
             >
-                <Table
-                    dataSource={data?.content || []}
-                    columns={columns}
-                    rowKey="id"
-                    loading={isLoading || isFetching}
-                    locale={{ emptyText: t('empty') }}
-                    pagination={{
-                        current: pagination.current,
-                        pageSize: pagination.pageSize,
-                        total: data?.total || 0,
-                        showSizeChanger: true,
-                        showTotal: (total, range) => t('pagination.range', { start: range[0], end: range[1], total }),
-                        position: ['topRight'],
-                    }}
-                    onChange={handleTableChange}
-                    scroll={{ x: 1000 }}
-                    size="small"
-                />
+                <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <Table
+                        dataSource={data?.content || []}
+                        columns={columns}
+                        rowKey="id"
+                        loading={isLoading || isFetching}
+                        locale={{ emptyText: t('empty') }}
+                        pagination={{
+                            current: pagination.current,
+                            pageSize: pagination.pageSize,
+                            total: data?.total || 0,
+                            showSizeChanger: true,
+                            showTotal: (total, range) => t('pagination.range', { start: range[0], end: range[1], total }),
+                            position: ['topRight'],
+                        }}
+                        onChange={handleTableChange}
+                        scroll={{ x: 1000, y: tableScrollY }}
+                        size="small"
+                    />
+                </div>
             </DataView>
 
             <RolloutCreateModal

@@ -24,6 +24,61 @@ const TableWrapper = styled.div`
     display: flex;
     flex-direction: column;
     overflow: hidden;
+
+    /* Ant Design Table flex layout overrides */
+    .ant-table-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .ant-spin-nested-loading {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .ant-spin-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .ant-table {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .ant-table-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .ant-table-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+        overflow: auto !important;
+    }
+
+    .ant-table-content > table {
+        flex: 1;
+    }
+
+    .ant-table-thead > tr > th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--ant-color-bg-container, #fff);
+    }
 `;
 
 interface StandardListLayoutProps {

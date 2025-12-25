@@ -312,7 +312,7 @@ const TargetTable: React.FC<TargetTableProps> = ({
                 position: ['topRight'],
             }}
             onChange={onChange || handleTableChange}
-            scroll={scrollY ? { x: 1000, y: scrollY } : { x: 1000 }}
+            scroll={{ x: 1000 }}
             size="small"
             rowSelection={rowSelection}
         />

@@ -7,6 +7,7 @@ const Container = styled.div`
   min-height: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 `;
 
 const CenterContent = styled.div`

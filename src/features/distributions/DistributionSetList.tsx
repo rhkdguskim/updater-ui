@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useLayoutEffect } from 'react';
 import { Table, Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import { EyeOutlined, DeleteOutlined, TagOutlined } from '@ant-design/icons';
@@ -40,6 +40,21 @@ const DistributionSetList: React.FC = () => {
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
     const [selectedSetIds, setSelectedSetIds] = useState<number[]>([]);
     const [bulkTagsModalOpen, setBulkTagsModalOpen] = useState(false);
+    const tableContainerRef = useRef<HTMLDivElement | null>(null);
+    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
+
+    useLayoutEffect(() => {
+        if (!tableContainerRef.current) return;
+        const element = tableContainerRef.current;
+        const updateHeight = () => {
+            const height = element.getBoundingClientRect().height;
+            setTableScrollY(Math.max(240, Math.floor(height - 56)));
+        };
+        updateHeight();
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
 
     const {
         data,
@@ -200,25 +215,27 @@ const DistributionSetList: React.FC = () => {
                 isEmpty={data?.content?.length === 0}
                 emptyText={t('list.empty')}
             >
-                <Table
-                    columns={columns}
-                    dataSource={data?.content || []}
-                    rowKey="id"
-                    pagination={{
-                        ...pagination,
-                        total: data?.total || 0,
-                        showSizeChanger: true,
-                        position: ['topRight'],
-                    }}
-                    loading={isLoading || isFetching}
-                    onChange={handleTableChange}
-                    rowSelection={{
-                        selectedRowKeys: selectedSetIds,
-                        onChange: (keys) => setSelectedSetIds(keys as number[]),
-                    }}
-                    scroll={{ x: 1000 }}
-                    size="small"
-                />
+                <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <Table
+                        columns={columns}
+                        dataSource={data?.content || []}
+                        rowKey="id"
+                        pagination={{
+                            ...pagination,
+                            total: data?.total || 0,
+                            showSizeChanger: true,
+                            position: ['topRight'],
+                        }}
+                        loading={isLoading || isFetching}
+                        onChange={handleTableChange}
+                        rowSelection={{
+                            selectedRowKeys: selectedSetIds,
+                            onChange: (keys) => setSelectedSetIds(keys as number[]),
+                        }}
+                        scroll={{ x: 1000, y: tableScrollY }}
+                        size="small"
+                    />
+                </div>
             </DataView>
             <CreateDistributionSetWizard
                 visible={isCreateModalVisible}

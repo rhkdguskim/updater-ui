@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Card, Tabs } from 'antd';
 import { TagOutlined, AppstoreOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 

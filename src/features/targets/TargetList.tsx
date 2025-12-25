@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef, useLayoutEffect } from 'react';
 import { message, Space, Tag, Tooltip, Typography, Button } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { StandardListLayout } from '@/components/layout/StandardListLayout';
@@ -68,6 +68,21 @@ const TargetList: React.FC = () => {
     const [savedFiltersOpen, setSavedFiltersOpen] = useState(false);
     const [activeSavedFilter, setActiveSavedFilter] = useState<{ id?: number; name?: string; query: string } | null>(null);
     const [searchResetSignal, setSearchResetSignal] = useState(0);
+    const tableContainerRef = useRef<HTMLDivElement | null>(null);
+    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
+
+    useLayoutEffect(() => {
+        if (!tableContainerRef.current) return;
+        const element = tableContainerRef.current;
+        const updateHeight = () => {
+            const height = element.getBoundingClientRect().height;
+            setTableScrollY(Math.max(240, Math.floor(height - 56)));
+        };
+        updateHeight();
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
 
     // Modal States
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -384,56 +399,33 @@ const TargetList: React.FC = () => {
                 isEmpty={targetsData?.content?.length === 0}
                 emptyText={t('noTargets')}
             >
-                {/* Saved Filters Quick Access */}
-                <div style={{ padding: '4px 0', marginBottom: 8 }}>
-                    <Space wrap size="small">
-                        <Text type="secondary">
-                            {t('quickFilters')}:
-                        </Text>
-                        {savedFilters.slice(0, 5).map(filter => (
-                            <Tag.CheckableTag
-                                key={filter.id}
-                                checked={activeSavedFilter?.id === filter.id}
-                                onChange={() => handleFilterSelect(filter)}
-                            >
-                                {filter.name}
-                            </Tag.CheckableTag>
-                        ))}
-                        <Button
-                            type="link"
-                            size="small"
-                            icon={<FilterOutlined />}
-                            onClick={() => setSavedFiltersOpen(true)}
-                        >
-                            {t('manageFilters')}
-                        </Button>
-                    </Space>
+                <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <TargetTable
+                        data={targetsData?.content || []}
+                        loading={targetsLoading || targetsFetching}
+                        total={targetsData?.total || 0}
+                        pagination={pagination}
+                        scrollY={tableScrollY}
+                        onChange={handleTableChange}
+                        onPaginationChange={() => { }} // Handled by onChange
+                        onSortChange={() => { }} // Handled by onChange
+                        onView={handleViewTarget}
+                        onDelete={handleDeleteClick}
+                        canDelete={isAdmin}
+                        rowSelection={{
+                            selectedRowKeys: selectedTargetIds,
+                            onChange: (keys: React.Key[]) => setSelectedTargetIds(keys as string[]),
+                        }}
+                        availableTags={(tagsData?.content as MgmtTag[]) || []}
+                        availableTypes={(typesData?.content as MgmtTargetType[]) || []}
+                        filters={{ tagName: selectedTagName, typeName: selectedTypeName }}
+                        onFilterChange={(filters) => {
+                            setSelectedTagName(filters.tagName);
+                            setSelectedTypeName(filters.typeName);
+                            resetPagination();
+                        }}
+                    />
                 </div>
-
-                <TargetTable
-                    data={targetsData?.content || []}
-                    loading={targetsLoading || targetsFetching}
-                    total={targetsData?.total || 0}
-                    pagination={pagination}
-                    onChange={handleTableChange}
-                    onPaginationChange={() => { }} // Handled by onChange
-                    onSortChange={() => { }} // Handled by onChange
-                    onView={handleViewTarget}
-                    onDelete={handleDeleteClick}
-                    canDelete={isAdmin}
-                    rowSelection={{
-                        selectedRowKeys: selectedTargetIds,
-                        onChange: (keys: React.Key[]) => setSelectedTargetIds(keys as string[]),
-                    }}
-                    availableTags={(tagsData?.content as MgmtTag[]) || []}
-                    availableTypes={(typesData?.content as MgmtTargetType[]) || []}
-                    filters={{ tagName: selectedTagName, typeName: selectedTypeName }}
-                    onFilterChange={(filters) => {
-                        setSelectedTagName(filters.tagName);
-                        setSelectedTypeName(filters.typeName);
-                        resetPagination();
-                    }}
-                />
             </DataView>
 
             <BulkAssignTagsModal

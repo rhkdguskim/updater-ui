@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import { Table, Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import { EyeOutlined, DeleteOutlined } from '@ant-design/icons';
@@ -37,6 +37,21 @@ const SoftwareModuleList: React.FC = () => {
 
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
     const [selectedModuleIds, setSelectedModuleIds] = useState<number[]>([]);
+    const tableContainerRef = useRef<HTMLDivElement | null>(null);
+    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
+
+    useLayoutEffect(() => {
+        if (!tableContainerRef.current) return;
+        const element = tableContainerRef.current;
+        const updateHeight = () => {
+            const height = element.getBoundingClientRect().height;
+            setTableScrollY(Math.max(240, Math.floor(height - 56)));
+        };
+        updateHeight();
+        const observer = new ResizeObserver(updateHeight);
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
 
     const {
         data,
@@ -203,26 +218,28 @@ const SoftwareModuleList: React.FC = () => {
                 isEmpty={data?.content?.length === 0}
                 emptyText={t('moduleList.empty')}
             >
-                <Table
-                    columns={columns}
-                    dataSource={data?.content || []}
-                    rowKey="id"
-                    pagination={{
-                        current: pagination.current,
-                        pageSize: pagination.pageSize,
-                        total: data?.total || 0,
-                        showSizeChanger: true,
-                        position: ['topRight'],
-                    }}
-                    loading={isLoading || isFetching}
-                    onChange={handleTableChange}
-                    rowSelection={{
-                        selectedRowKeys: selectedModuleIds,
-                        onChange: (keys) => setSelectedModuleIds(keys as number[]),
-                    }}
-                    scroll={{ x: 1000 }}
-                    size="small"
-                />
+                <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                    <Table
+                        columns={columns}
+                        dataSource={data?.content || []}
+                        rowKey="id"
+                        pagination={{
+                            current: pagination.current,
+                            pageSize: pagination.pageSize,
+                            total: data?.total || 0,
+                            showSizeChanger: true,
+                            position: ['topRight'],
+                        }}
+                        loading={isLoading || isFetching}
+                        onChange={handleTableChange}
+                        rowSelection={{
+                            selectedRowKeys: selectedModuleIds,
+                            onChange: (keys) => setSelectedModuleIds(keys as number[]),
+                        }}
+                        scroll={{ x: 1000, y: tableScrollY }}
+                        size="small"
+                    />
+                </div>
             </DataView>
             <CreateSoftwareModuleModal
                 visible={isCreateModalVisible}

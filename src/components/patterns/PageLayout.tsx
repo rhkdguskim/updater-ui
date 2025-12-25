@@ -12,7 +12,7 @@ const StyledLayout = styled.div<{ $padding: string; $gap: string }>`
   padding: ${props => props.$padding};
   gap: ${props => props.$gap};
   background-color: var(--ant-color-bg-container);
-  overflow-y: auto;
+  overflow: hidden;
 `;
 
 export interface PageLayoutProps {
