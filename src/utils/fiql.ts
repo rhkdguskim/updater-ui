@@ -5,7 +5,7 @@
  * This utility provides a standardized way to build FIQL queries.
  */
 
-export type FiqlOperator = '==' | '!=' | '=lt=' | '=le=' | '=gt=' | '=ge=' | '=in=' | '=out=';
+export type FiqlOperator = '==' | '!=' | '=lt=' | '=le=' | '=gt=' | '=ge=' | '=in=' | '=out=' | '=like=';
 
 export interface FiqlCondition {
     field: string;

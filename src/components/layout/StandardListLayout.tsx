@@ -23,54 +23,11 @@ const TableWrapper = styled.div`
     min-height: 0;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
+    overflow: auto;
 
-    /* Ant Design Table flex layout overrides */
+    /* Table should not stretch rows - only use content height */
     .ant-table-wrapper {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    .ant-spin-nested-loading {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    .ant-spin-container {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    .ant-table {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    .ant-table-container {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-    }
-
-    .ant-table-content {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        min-height: 0;
-        overflow: auto !important;
-    }
-
-    .ant-table-content > table {
-        flex: 1;
+        /* Don't use flex: 1 here - let table size naturally */
     }
 
     .ant-table-thead > tr > th {
@@ -79,7 +36,17 @@ const TableWrapper = styled.div`
         z-index: 2;
         background: var(--ant-color-bg-container, #fff);
     }
+
+    /* Prevent tbody rows from stretching */
+    .ant-table-tbody > tr {
+        height: auto !important;
+    }
+
+    .ant-table-tbody > tr > td {
+        height: auto !important;
+    }
 `;
+
 
 interface StandardListLayoutProps {
     title: React.ReactNode;

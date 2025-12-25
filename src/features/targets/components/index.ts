@@ -10,3 +10,5 @@ export { default as SavedFiltersModal } from './SavedFiltersModal';
 export { default as BulkAssignTagsModal } from './BulkAssignTagsModal';
 export { default as BulkAssignTypeModal } from './BulkAssignTypeModal';
 export { default as BulkDeleteTargetModal } from './BulkDeleteTargetModal';
+export { TargetTagsCell } from './TargetTagsCell';
+export { TargetTypeCell } from './TargetTypeCell';

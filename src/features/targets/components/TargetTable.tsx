@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Table, Tag, Space, Button, Tooltip, Typography } from 'antd';
 import type { TableProps } from 'antd';
 import type { FilterValue } from 'antd/es/table/interface';
+import styled from 'styled-components';
 import {
     EyeOutlined,
     DeleteOutlined,
@@ -9,13 +10,111 @@ import {
     CloseCircleOutlined,
     SyncOutlined,
     ExclamationCircleOutlined,
+    TagOutlined,
+    AppstoreOutlined,
 } from '@ant-design/icons';
 import type { MgmtTarget, MgmtTag, MgmtTargetType } from '@/api/generated/model';
 
 import dayjs from 'dayjs';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
+import { TargetTagsCell } from './TargetTagsCell';
+import { TargetTypeCell } from './TargetTypeCell';
+import { SelectionToolbar, type ToolbarAction } from '@/components/patterns';
 
 const { Text } = Typography;
+
+// Monday.com style table container
+const TableContainer = styled.div`
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    /* Row hover effects - Monday.com style */
+    .ant-table-tbody > tr {
+        transition: background-color 0.15s ease;
+
+        &:hover {
+            background-color: var(--ant-color-primary-bg, #e6f4ff) !important;
+        }
+
+        /* Show checkbox on hover */
+        .ant-table-selection-column .ant-checkbox-wrapper {
+            opacity: 0.3;
+            transition: opacity 0.15s ease;
+        }
+
+        &:hover .ant-table-selection-column .ant-checkbox-wrapper,
+        &.ant-table-row-selected .ant-table-selection-column .ant-checkbox-wrapper {
+            opacity: 1;
+        }
+    }
+
+    /* Selected row style */
+    .ant-table-tbody > tr.ant-table-row-selected {
+        background-color: var(--ant-color-primary-bg-hover, #bae0ff) !important;
+
+        > td {
+            background: transparent !important;
+        }
+    }
+
+    /* Action cell hover effects */
+    .hover-action-cell {
+        opacity: 0;
+        transition: opacity 0.15s ease;
+    }
+
+    .ant-table-tbody > tr:hover .hover-action-cell {
+        opacity: 1;
+    }
+
+    /* Table flex layout for remaining space */
+    .ant-table-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .ant-spin-nested-loading,
+    .ant-spin-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .ant-table {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .ant-table-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .ant-table-content {
+        flex: 1;
+        min-height: 0;
+        overflow: auto !important;
+    }
+
+    /* Sticky header */
+    .ant-table-thead > tr > th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--ant-color-bg-container, #fff);
+    }
+`;
 
 export type TargetUpdateStatus = 'in_sync' | 'pending' | 'error' | 'unknown';
 
@@ -40,18 +139,20 @@ interface TargetTableProps {
     onFilterChange?: (filters: { tagName?: string; typeName?: string }) => void;
     filters?: { tagName?: string; typeName?: string };
     onChange?: TableProps<MgmtTarget>['onChange'];
+    // Bulk action props
+    selectedCount?: number;
+    onBulkAssignTags?: () => void;
+    onBulkAssignType?: () => void;
+    onBulkDelete?: () => void;
+    onClearSelection?: () => void;
 }
-
-import { useTranslation } from 'react-i18next';
-import { TargetTagsCell } from './TargetTagsCell';
-import { TargetTypeCell } from './TargetTypeCell';
 
 const TargetTable: React.FC<TargetTableProps> = ({
     data,
     loading,
     total,
     pagination,
-    scrollY,
+    scrollY: _scrollY,
     onPaginationChange,
     onSortChange,
     onView,
@@ -63,8 +164,45 @@ const TargetTable: React.FC<TargetTableProps> = ({
     onFilterChange,
     filters,
     onChange,
+    // Bulk action props
+    selectedCount = 0,
+    onBulkAssignTags,
+    onBulkAssignType,
+    onBulkDelete,
+    onClearSelection,
 }) => {
     const { t } = useTranslation('targets');
+
+    // Selection toolbar actions (Monday.com style)
+    const selectionActions: ToolbarAction[] = useMemo(() => {
+        const actions: ToolbarAction[] = [];
+        if (onBulkAssignTags) {
+            actions.push({
+                key: 'assignTags',
+                label: t('bulkAssign.assignTag'),
+                icon: <TagOutlined />,
+                onClick: onBulkAssignTags,
+            });
+        }
+        if (onBulkAssignType) {
+            actions.push({
+                key: 'assignType',
+                label: t('bulkAssign.assignType'),
+                icon: <AppstoreOutlined />,
+                onClick: onBulkAssignType,
+            });
+        }
+        if (onBulkDelete && canDelete) {
+            actions.push({
+                key: 'delete',
+                label: t('bulkDelete.button', { defaultValue: 'Delete' }),
+                icon: <DeleteOutlined />,
+                onClick: onBulkDelete,
+                danger: true,
+            });
+        }
+        return actions;
+    }, [t, onBulkAssignTags, onBulkAssignType, onBulkDelete, canDelete]);
 
     const getUpdateStatusTag = (updateStatus?: string) => {
         switch (updateStatus) {
@@ -227,15 +365,16 @@ const TargetTable: React.FC<TargetTableProps> = ({
                 value ? dayjs(value).format('YYYY-MM-DD HH:mm') : <Text type="secondary">-</Text>,
         },
         {
-            title: t('table.actions'),
+            title: '',
             key: 'actions',
-            width: 100,
+            width: 80,
             fixed: 'right',
             render: (_, record) => (
-                <Space size="small">
+                <Space size="small" className="hover-action-cell">
                     <Tooltip title={t('actions.viewDetails')}>
                         <Button
                             type="text"
+                            size="small"
                             icon={<EyeOutlined />}
                             onClick={() => onView(record)}
                         />
@@ -244,6 +383,7 @@ const TargetTable: React.FC<TargetTableProps> = ({
                         <Tooltip title={t('actions.delete')}>
                             <Button
                                 type="text"
+                                size="small"
                                 danger
                                 icon={<DeleteOutlined />}
                                 onClick={() => onDelete(record)}
@@ -294,28 +434,36 @@ const TargetTable: React.FC<TargetTableProps> = ({
     };
 
     return (
-        <Table<MgmtTarget>
-            columns={columns}
-            dataSource={data}
-            loading={loading}
-            rowKey="controllerId"
-            locale={{ emptyText: t('table.empty') }}
-            pagination={{
-                current: pagination.current,
-                pageSize: pagination.pageSize,
-                total,
-                showSizeChanger: true,
-                pageSizeOptions: ['10', '20', '50'],
-                showTotal: (total, range) => t('table.pagination', { start: range[0], end: range[1], total }),
-                onChange: (page, pageSize) => handlePaginationUpdate(page, pageSize),
-                onShowSizeChange: (_current, size) => handlePaginationUpdate(1, size),
-                position: ['topRight'],
-            }}
-            onChange={onChange || handleTableChange}
-            scroll={{ x: 1000 }}
-            size="small"
-            rowSelection={rowSelection}
-        />
+        <TableContainer>
+            <SelectionToolbar
+                selectedCount={selectedCount}
+                actions={selectionActions}
+                onClearSelection={onClearSelection}
+                selectionLabel="개 선택됨"
+            />
+            <Table<MgmtTarget>
+                columns={columns}
+                dataSource={data}
+                loading={loading}
+                rowKey="controllerId"
+                locale={{ emptyText: t('table.empty') }}
+                pagination={{
+                    current: pagination.current,
+                    pageSize: pagination.pageSize,
+                    total,
+                    showSizeChanger: true,
+                    pageSizeOptions: ['10', '20', '50'],
+                    showTotal: (total, range) => t('table.pagination', { start: range[0], end: range[1], total }),
+                    onChange: (page, pageSize) => handlePaginationUpdate(page, pageSize),
+                    onShowSizeChange: (_current, size) => handlePaginationUpdate(1, size),
+                    position: ['topRight'],
+                }}
+                onChange={onChange || handleTableChange}
+                scroll={{ x: 1000 }}
+                size="small"
+                rowSelection={rowSelection}
+            />
+        </TableContainer>
     );
 };
 

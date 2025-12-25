@@ -1,11 +1,20 @@
-import React, { useState, useCallback, useRef, useLayoutEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { message, Space, Tag, Tooltip, Typography, Button } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import {
+    EyeOutlined,
+    EditOutlined,
+    DeleteOutlined,
+    CheckCircleOutlined,
+    CloseCircleOutlined,
+    SyncOutlined,
+    ExclamationCircleOutlined,
+    TagOutlined,
+    AppstoreOutlined,
+} from '@ant-design/icons';
+import { useNavigate, Link } from 'react-router-dom';
 import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import { useServerTable } from '@/hooks/useServerTable';
 import {
-    TargetTable,
-    TargetSearchBar,
     DeleteTargetModal,
     TargetFormModal,
     AssignDSModal,
@@ -13,6 +22,8 @@ import {
     BulkAssignTypeModal,
     BulkDeleteTargetModal,
     SavedFiltersModal,
+    TargetTagsCell,
+    TargetTypeCell,
 } from './components';
 import type { AssignPayload } from './components';
 import { useTranslation } from 'react-i18next';
@@ -29,12 +40,11 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { keepPreviousData, useQueryClient } from '@tanstack/react-query';
 import { useGetTargetTags } from '@/api/generated/target-tags/target-tags';
 import { useGetTargetTypes } from '@/api/generated/target-types/target-types';
-import { useGetFilters } from '@/api/generated/target-filter-queries/target-filter-queries';
-import type { MgmtTag, MgmtTargetType, MgmtTargetFilterQuery } from '@/api/generated/model';
-
-import { FilterOutlined } from '@ant-design/icons';
+import type { MgmtTag, MgmtTargetType } from '@/api/generated/model';
 import { appendFilter, buildCondition } from '@/utils/fiql';
-import { DataView } from '@/components/patterns';
+import { DataView, EnhancedTable, FilterBuilder, type ToolbarAction, type FilterValue, type FilterField } from '@/components/patterns';
+import type { ColumnsType, TableProps } from 'antd/es/table';
+import dayjs from 'dayjs';
 
 const { Text } = Typography;
 
@@ -50,44 +60,24 @@ const TargetList: React.FC = () => {
         pagination,
         offset,
         sort,
-        searchQuery,
-        setSearchQuery,
-        handleTableChange,
-        handleSearch,
+        handleTableChange: serverTableChange,
         resetPagination,
         setPagination,
     } = useServerTable<MgmtTarget>({ syncToUrl: true });
 
-    // Additional Filters
-    const [selectedTagName, setSelectedTagName] = useState<string | undefined>(undefined);
-    const [selectedTypeName, setSelectedTypeName] = useState<string | undefined>(undefined);
-    const [selectedTargetIds, setSelectedTargetIds] = useState<string[]>([]);
+    // Filter state
+    const [filters, setFilters] = useState<FilterValue[]>([]);
+    const [selectedTargetIds, setSelectedTargetIds] = useState<React.Key[]>([]);
     const [bulkTagsModalOpen, setBulkTagsModalOpen] = useState(false);
     const [bulkTypeModalOpen, setBulkTypeModalOpen] = useState(false);
     const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
     const [savedFiltersOpen, setSavedFiltersOpen] = useState(false);
-    const [activeSavedFilter, setActiveSavedFilter] = useState<{ id?: number; name?: string; query: string } | null>(null);
-    const [searchResetSignal, setSearchResetSignal] = useState(0);
-    const tableContainerRef = useRef<HTMLDivElement | null>(null);
-    const [tableScrollY, setTableScrollY] = useState<number | undefined>(undefined);
-
-    useLayoutEffect(() => {
-        if (!tableContainerRef.current) return;
-        const element = tableContainerRef.current;
-        const updateHeight = () => {
-            const height = element.getBoundingClientRect().height;
-            setTableScrollY(Math.max(240, Math.floor(height - 56)));
-        };
-        updateHeight();
-        const observer = new ResizeObserver(updateHeight);
-        observer.observe(element);
-        return () => observer.disconnect();
-    }, []);
 
     // Modal States
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [targetToDelete, setTargetToDelete] = useState<MgmtTarget | null>(null);
     const [formModalOpen, setFormModalOpen] = useState(false);
+    const [editingTarget, setEditingTarget] = useState<MgmtTarget | null>(null);
     const [assignModalOpen, setAssignModalOpen] = useState(false);
     const [targetToAssign, setTargetToAssign] = useState<MgmtTarget | null>(null);
 
@@ -97,50 +87,72 @@ const TargetList: React.FC = () => {
         { query: { staleTime: 60000 } }
     );
 
-    // Get saved filters for Quick Access
-    const { data: filtersData } = useGetFilters(
-        { limit: 10 },
-        { query: { staleTime: 60000 } }
-    );
-    const savedFilters = filtersData?.content || [];
-
-    const handleFilterSelect = (filter: MgmtTargetFilterQuery) => {
-        if (activeSavedFilter?.id === filter.id) {
-            // Deselect
-            setActiveSavedFilter(null);
-            setSearchQuery('');
-            setSearchResetSignal((prev) => prev + 1);
-        } else {
-            // Select
-            setActiveSavedFilter({
-                id: filter.id,
-                name: filter.name,
-                query: filter.query || '',
-            });
-            setSearchQuery(filter.query || '');
-        }
-        setPagination((prev) => ({ ...prev, current: 1 }));
-    };
-
     // Get target types for filters
     const { data: typesData } = useGetTargetTypes(
         { limit: 100 },
         { query: { staleTime: 60000 } }
     );
 
-    // Build search query combining manual search, tag filter, type filter
-    const buildFinalQuery = useCallback(() => {
-        let query = searchQuery;
+    const availableTags = (tagsData?.content as MgmtTag[]) || [];
+    const availableTypes = (typesData?.content as MgmtTargetType[]) || [];
 
-        if (selectedTagName) {
-            query = appendFilter(query, buildCondition({ field: 'tag.name', operator: '==', value: selectedTagName }));
-        }
-        if (selectedTypeName) {
-            query = appendFilter(query, buildCondition({ field: 'targettype.name', operator: '==', value: selectedTypeName }));
-        }
-        // Return undefined if empty to avoid malformed query error
-        return query?.trim() || undefined;
-    }, [searchQuery, selectedTagName, selectedTypeName]);
+    // Filter fields for FilterBuilder
+    const filterFields: FilterField[] = useMemo(() => [
+        { key: 'name', label: t('table.name'), type: 'text' },
+        { key: 'controllerId', label: 'Controller ID', type: 'text' },
+        {
+            key: 'targetType',
+            label: t('table.targetType'),
+            type: 'select',
+            options: availableTypes.map(tp => ({ value: tp.name || '', label: tp.name || '' })),
+        },
+        {
+            key: 'tag',
+            label: t('table.tags'),
+            type: 'select',
+            options: availableTags.map(tag => ({ value: tag.name || '', label: tag.name || '' })),
+        },
+        {
+            key: 'updateStatus',
+            label: t('table.updateStatus'),
+            type: 'select',
+            options: [
+                { value: 'in_sync', label: t('status.inSync') },
+                { value: 'pending', label: t('status.pending') },
+                { value: 'error', label: t('status.error') },
+            ],
+        },
+    ], [t, availableTypes, availableTags]);
+
+    // Build RSQL query from filters
+    const buildFinalQuery = useCallback(() => {
+        if (filters.length === 0) return undefined;
+
+        const conditions = filters.map(f => {
+            let field = f.field;
+            let op: '==' | '!=' | '=like=' = '==';
+
+            // Map filter fields to RSQL fields
+            if (f.field === 'targetType') field = 'targettype.name';
+            if (f.field === 'tag') field = 'tag.name';
+
+            // Map operators
+            if (f.operator === 'contains') op = '=like=';
+            else if (f.operator === 'startsWith') op = '=like=';
+            else if (f.operator === 'endsWith') op = '=like=';
+            else if (f.operator === 'equals') op = '==';
+            else if (f.operator === 'notEquals') op = '!=';
+
+            let val = String(f.value);
+            if (f.operator === 'contains') val = `*${val}*`;
+            if (f.operator === 'startsWith') val = `${val}*`;
+            if (f.operator === 'endsWith') val = `*${val}`;
+
+            return buildCondition({ field, operator: op, value: val });
+        });
+
+        return conditions.reduce((acc, cond) => appendFilter(acc, cond), '');
+    }, [filters]);
 
     // API Queries
     const {
@@ -195,6 +207,7 @@ const TargetList: React.FC = () => {
             onSuccess: () => {
                 message.success(t('messages.createSuccess'));
                 setFormModalOpen(false);
+                setEditingTarget(null);
                 queryClient.invalidateQueries({ queryKey: getGetTargetsQueryKey() });
             },
             onError: (error) => {
@@ -223,18 +236,6 @@ const TargetList: React.FC = () => {
     });
 
     // Handlers
-    const handleSearchWrapper = useCallback((query: string) => {
-        handleSearch(query);
-        setActiveSavedFilter(null);
-    }, [handleSearch]);
-
-    const handleViewTarget = useCallback(
-        (target: MgmtTarget) => {
-            navigate(`/targets/${target.controllerId}`);
-        },
-        [navigate]
-    );
-
     const handleDeleteClick = useCallback((target: MgmtTarget) => {
         setTargetToDelete(target);
         setDeleteModalOpen(true);
@@ -247,8 +248,14 @@ const TargetList: React.FC = () => {
     }, [targetToDelete, deleteTargetMutation]);
 
     const handleAddTarget = useCallback(() => {
+        setEditingTarget(null);
         setFormModalOpen(true);
     }, []);
+
+    const handleEditTarget = useCallback((target: MgmtTarget) => {
+        // For now, navigate to detail page for editing
+        navigate(`/targets/${target.controllerId}`);
+    }, [navigate]);
 
     const handleCreateTarget = useCallback(
         (values: { controllerId?: string; name?: string; description?: string }) => {
@@ -257,7 +264,7 @@ const TargetList: React.FC = () => {
                     data: [
                         {
                             controllerId: values.controllerId,
-                            name: values.name || values.controllerId, // name is required, default to controllerId
+                            name: values.name || values.controllerId,
                             description: values.description,
                         },
                     ],
@@ -287,111 +294,218 @@ const TargetList: React.FC = () => {
         [targetToAssign, assignDSMutation]
     );
 
+    // Selection toolbar actions
+    const selectionActions: ToolbarAction[] = useMemo(() => {
+        const actions: ToolbarAction[] = [
+            {
+                key: 'assignTags',
+                label: t('bulkAssign.assignTag'),
+                icon: <TagOutlined />,
+                onClick: () => setBulkTagsModalOpen(true),
+            },
+            {
+                key: 'assignType',
+                label: t('bulkAssign.assignType'),
+                icon: <AppstoreOutlined />,
+                onClick: () => setBulkTypeModalOpen(true),
+            },
+        ];
+        if (isAdmin) {
+            actions.push({
+                key: 'delete',
+                label: t('bulkDelete.button', { defaultValue: 'Delete' }),
+                icon: <DeleteOutlined />,
+                onClick: () => setBulkDeleteModalOpen(true),
+                danger: true,
+            });
+        }
+        return actions;
+    }, [t, isAdmin]);
+
+    // Helper functions for column rendering
+    const getUpdateStatusTag = (updateStatus?: string) => {
+        switch (updateStatus) {
+            case 'in_sync':
+                return <Tag icon={<CheckCircleOutlined />} color="success">{t('status.inSync')}</Tag>;
+            case 'pending':
+                return <Tag icon={<SyncOutlined spin />} color="processing">{t('status.pending')}</Tag>;
+            case 'error':
+                return <Tag icon={<CloseCircleOutlined />} color="error">{t('status.error')}</Tag>;
+            default:
+                return <Tag icon={<ExclamationCircleOutlined />} color="default">{t('status.unknown')}</Tag>;
+        }
+    };
+
+    const getOnlineStatusTag = (pollStatus?: { overdue?: boolean; lastRequestAt?: number }) => {
+        if (!pollStatus || pollStatus.lastRequestAt === undefined) {
+            return <Tag color="default">{t('status.neverConnected')}</Tag>;
+        }
+        if (pollStatus.overdue) {
+            return <Tag color="red">{t('status.offline')}</Tag>;
+        }
+        return <Tag color="green">{t('status.online')}</Tag>;
+    };
+
+    const getInstalledDsInfo = (record: MgmtTarget) => {
+        const link = record._links?.installedDS as unknown as
+            | { name?: string; title?: string; href?: string }
+            | Array<{ name?: string; title?: string; href?: string }>
+            | undefined;
+        if (!link) return undefined;
+        const resolved = Array.isArray(link) ? link[0] : link;
+        const id = resolved?.href?.split('/').pop();
+        const label = resolved?.name || resolved?.title || id;
+        return id ? { id, label: label || id } : undefined;
+    };
+
+    // Column definitions with unified action buttons
+    const columns: ColumnsType<MgmtTarget> = [
+        {
+            title: t('table.name'),
+            dataIndex: 'name',
+            key: 'name',
+            sorter: true,
+            width: 200,
+            render: (_: string, record) => (
+                <Space direction="vertical" size={0}>
+                    <Text strong style={{ fontSize: 12 }}>{record.name || record.controllerId}</Text>
+                    {record.ipAddress && (
+                        <Text type="secondary" style={{ fontSize: 11 }}>
+                            {record.ipAddress}
+                        </Text>
+                    )}
+                </Space>
+            ),
+        },
+        {
+            title: t('table.targetType'),
+            dataIndex: 'targetTypeName',
+            key: 'targetTypeName',
+            width: 140,
+            render: (_, record) => {
+                const typeColour = availableTypes?.find(tp => tp.id === record.targetType)?.colour;
+                return (
+                    <TargetTypeCell
+                        controllerId={record.controllerId!}
+                        currentTypeId={record.targetType}
+                        currentTypeName={record.targetTypeName}
+                        currentTypeColour={typeColour}
+                    />
+                );
+            },
+        },
+        {
+            title: t('table.tags'),
+            key: 'tags',
+            width: 180,
+            render: (_, record) => <TargetTagsCell controllerId={record.controllerId!} />,
+        },
+        {
+            title: t('table.status'),
+            key: 'status',
+            width: 80,
+            render: (_, record) => getOnlineStatusTag(record.pollStatus),
+        },
+        {
+            title: t('table.updateStatus'),
+            dataIndex: 'updateStatus',
+            key: 'updateStatus',
+            width: 100,
+            render: (status: string) => getUpdateStatusTag(status),
+        },
+        {
+            title: t('table.installedDS'),
+            key: 'installedDS',
+            width: 160,
+            render: (_, record) => {
+                const dsInfo = getInstalledDsInfo(record);
+                return dsInfo ? (
+                    <Link to={`/distributions/sets/${dsInfo.id}`}>
+                        <Text style={{ fontSize: 12 }}>{dsInfo.label}</Text>
+                    </Link>
+                ) : (
+                    <Text type="secondary" style={{ fontSize: 12 }}>-</Text>
+                );
+            },
+        },
+        {
+            title: t('table.lastModified'),
+            dataIndex: 'lastModifiedAt',
+            key: 'lastModifiedAt',
+            sorter: true,
+            width: 130,
+            render: (value: number | undefined) =>
+                value ? (
+                    <Text style={{ fontSize: 12 }}>{dayjs(value).format('YYYY-MM-DD HH:mm')}</Text>
+                ) : (
+                    <Text type="secondary" style={{ fontSize: 12 }}>-</Text>
+                ),
+        },
+        {
+            title: t('table.actions'),
+            key: 'actions',
+            width: 100,
+            fixed: 'right',
+            render: (_, record) => (
+                <Space size={0} className="action-cell">
+                    <Tooltip title={t('actions.viewDetails')}>
+                        <Button
+                            type="text"
+                            size="small"
+                            icon={<EyeOutlined />}
+                            onClick={() => navigate(`/targets/${record.controllerId}`)}
+                        />
+                    </Tooltip>
+                    <Tooltip title={t('actions.edit', { defaultValue: 'Edit' })}>
+                        <Button
+                            type="text"
+                            size="small"
+                            icon={<EditOutlined />}
+                            onClick={() => handleEditTarget(record)}
+                        />
+                    </Tooltip>
+                    {isAdmin && (
+                        <Tooltip title={t('actions.delete')}>
+                            <Button
+                                type="text"
+                                size="small"
+                                danger
+                                icon={<DeleteOutlined />}
+                                onClick={() => handleDeleteClick(record)}
+                            />
+                        </Tooltip>
+                    )}
+                </Space>
+            ),
+        },
+    ];
+
+    // Handle table change
+    const handleTableChange: TableProps<MgmtTarget>['onChange'] = (paginationConfig, tableFilters, sorter, extra) => {
+        serverTableChange(paginationConfig, tableFilters, sorter, extra);
+    };
+
+    // Handle filter change
+    const handleFiltersChange = useCallback((newFilters: FilterValue[]) => {
+        setFilters(newFilters);
+        resetPagination();
+    }, [resetPagination]);
+
     return (
         <StandardListLayout
             title={t('title')}
             searchBar={
-                <TargetSearchBar
-                    onSearch={handleSearchWrapper}
+                <FilterBuilder
+                    fields={filterFields}
+                    filters={filters}
+                    onFiltersChange={handleFiltersChange}
                     onRefresh={() => refetchTargets()}
-                    onAddTarget={handleAddTarget}
-                    canAddTarget={isAdmin}
+                    onAdd={handleAddTarget}
+                    canAdd={isAdmin}
+                    addLabel={t('actions.addTarget')}
                     loading={targetsLoading || targetsFetching}
-                    onOpenSavedFilters={() => setSavedFiltersOpen(true)}
-                    resetSignal={searchResetSignal}
                 />
             }
-            bulkActionBar={(activeSavedFilter || searchQuery || selectedTagName || selectedTypeName || selectedTargetIds.length > 0) && (
-                <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                    {(activeSavedFilter || searchQuery || selectedTagName || selectedTypeName) && (
-                        <Space wrap>
-                            {activeSavedFilter && (
-                                <Tag
-                                    color="blue"
-                                    closable
-                                    onClose={() => {
-                                        setActiveSavedFilter(null);
-                                        setSearchQuery('');
-                                        setPagination((prev) => ({ ...prev, current: 1 }));
-                                        setSearchResetSignal((prev) => prev + 1);
-                                    }}
-                                >
-                                    {t('filters.savedFilter', { name: activeSavedFilter.name || activeSavedFilter.query })}
-                                </Tag>
-                            )}
-                            {!activeSavedFilter && searchQuery && (
-                                <Tooltip title={searchQuery}>
-                                    <Tag
-                                        color="blue"
-                                        closable
-                                        onClose={() => {
-                                            setSearchQuery('');
-                                            setPagination((prev) => ({ ...prev, current: 1 }));
-                                            setSearchResetSignal((prev) => prev + 1);
-                                        }}
-                                    >
-                                        {t('filters.query')}
-                                    </Tag>
-                                </Tooltip>
-                            )}
-                            {selectedTagName && (
-                                <Tag
-                                    color="gold"
-                                    closable
-                                    onClose={() => {
-                                        setSelectedTagName(undefined);
-                                        setPagination((prev) => ({ ...prev, current: 1 }));
-                                    }}
-                                >
-                                    {t('filters.tag', { name: selectedTagName })}
-                                </Tag>
-                            )}
-                            {selectedTypeName && (
-                                <Tag
-                                    color="purple"
-                                    closable
-                                    onClose={() => {
-                                        setSelectedTypeName(undefined);
-                                        setPagination((prev) => ({ ...prev, current: 1 }));
-                                    }}
-                                >
-                                    {t('filters.type', { name: selectedTypeName })}
-                                </Tag>
-                            )}
-                            <Button
-                                size="small"
-                                onClick={() => {
-                                    setActiveSavedFilter(null);
-                                    setSearchQuery('');
-                                    setSelectedTagName(undefined);
-                                    setSelectedTypeName(undefined);
-                                    setPagination((prev) => ({ ...prev, current: 1 }));
-                                    setSearchResetSignal((prev) => prev + 1);
-                                }}
-                            >
-                                {t('filters.clearAll')}
-                            </Button>
-                        </Space>
-                    )}
-
-                    {selectedTargetIds.length > 0 && (
-                        <Space wrap>
-                            <Text strong>
-                                {t('bulkAssign.selectedCount', { count: selectedTargetIds.length })}
-                            </Text>
-                            <Button onClick={() => setBulkTagsModalOpen(true)}>
-                                {t('bulkAssign.assignTag')}
-                            </Button>
-                            <Button onClick={() => setBulkTypeModalOpen(true)}>
-                                {t('bulkAssign.assignType')}
-                            </Button>
-                            <Button danger onClick={() => setBulkDeleteModalOpen(true)}>
-                                {t('bulkDelete.button', { defaultValue: 'Delete' })}
-                            </Button>
-                        </Space>
-                    )}
-                </Space>
-            )}
         >
             <DataView
                 loading={targetsLoading || targetsFetching}
@@ -399,60 +513,55 @@ const TargetList: React.FC = () => {
                 isEmpty={targetsData?.content?.length === 0}
                 emptyText={t('noTargets')}
             >
-                <div ref={tableContainerRef} style={{ flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-                    <TargetTable
-                        data={targetsData?.content || []}
-                        loading={targetsLoading || targetsFetching}
-                        total={targetsData?.total || 0}
-                        pagination={pagination}
-                        scrollY={tableScrollY}
-                        onChange={handleTableChange}
-                        onPaginationChange={() => { }} // Handled by onChange
-                        onSortChange={() => { }} // Handled by onChange
-                        onView={handleViewTarget}
-                        onDelete={handleDeleteClick}
-                        canDelete={isAdmin}
-                        rowSelection={{
-                            selectedRowKeys: selectedTargetIds,
-                            onChange: (keys: React.Key[]) => setSelectedTargetIds(keys as string[]),
-                        }}
-                        availableTags={(tagsData?.content as MgmtTag[]) || []}
-                        availableTypes={(typesData?.content as MgmtTargetType[]) || []}
-                        filters={{ tagName: selectedTagName, typeName: selectedTypeName }}
-                        onFilterChange={(filters) => {
-                            setSelectedTagName(filters.tagName);
-                            setSelectedTypeName(filters.typeName);
-                            resetPagination();
-                        }}
-                    />
-                </div>
+                <EnhancedTable<MgmtTarget>
+                    columns={columns}
+                    dataSource={targetsData?.content || []}
+                    rowKey="controllerId"
+                    loading={targetsLoading || targetsFetching}
+                    selectedRowKeys={selectedTargetIds}
+                    onSelectionChange={(keys) => setSelectedTargetIds(keys)}
+                    selectionActions={selectionActions}
+                    selectionLabel="개 선택됨"
+                    pagination={{
+                        current: pagination.current,
+                        pageSize: pagination.pageSize,
+                        total: targetsData?.total || 0,
+                        showSizeChanger: true,
+                        pageSizeOptions: ['10', '20', '50', '100'],
+                        showTotal: (total, range) => t('table.pagination', { start: range[0], end: range[1], total }),
+                        position: ['topRight'],
+                    }}
+                    onChange={handleTableChange}
+                    scroll={{ x: 1200 }}
+                    locale={{ emptyText: t('noTargets') }}
+                />
             </DataView>
 
             <BulkAssignTagsModal
                 open={bulkTagsModalOpen}
-                targetIds={selectedTargetIds}
+                targetIds={selectedTargetIds as string[]}
                 onCancel={() => setBulkTagsModalOpen(false)}
                 onSuccess={() => {
                     setBulkTagsModalOpen(false);
-                    setSelectedTargetIds([]); // Clear selection after success
+                    setSelectedTargetIds([]);
                     queryClient.invalidateQueries({ queryKey: getGetTargetsQueryKey() });
                 }}
             />
 
             <BulkAssignTypeModal
                 open={bulkTypeModalOpen}
-                targetIds={selectedTargetIds}
+                targetIds={selectedTargetIds as string[]}
                 onCancel={() => setBulkTypeModalOpen(false)}
                 onSuccess={() => {
                     setBulkTypeModalOpen(false);
-                    setSelectedTargetIds([]); // Clear selection after success
+                    setSelectedTargetIds([]);
                     queryClient.invalidateQueries({ queryKey: getGetTargetsQueryKey() });
                 }}
             />
 
             <BulkDeleteTargetModal
                 open={bulkDeleteModalOpen}
-                targetIds={selectedTargetIds}
+                targetIds={selectedTargetIds as string[]}
                 onCancel={() => setBulkDeleteModalOpen(false)}
                 onSuccess={() => {
                     setBulkDeleteModalOpen(false);
@@ -461,7 +570,6 @@ const TargetList: React.FC = () => {
                 }}
             />
 
-            {/* Delete Modal */}
             <DeleteTargetModal
                 open={deleteModalOpen}
                 target={targetToDelete}
@@ -473,16 +581,18 @@ const TargetList: React.FC = () => {
                 }}
             />
 
-            {/* Create Target Modal */}
             <TargetFormModal
                 open={formModalOpen}
-                mode="create"
+                mode={editingTarget ? 'edit' : 'create'}
+                target={editingTarget}
                 loading={createTargetMutation.isPending}
                 onSubmit={handleCreateTarget}
-                onCancel={() => setFormModalOpen(false)}
+                onCancel={() => {
+                    setFormModalOpen(false);
+                    setEditingTarget(null);
+                }}
             />
 
-            {/* Assign DS Modal */}
             <AssignDSModal
                 open={assignModalOpen}
                 targetId={targetToAssign?.controllerId ?? ''}
@@ -501,14 +611,19 @@ const TargetList: React.FC = () => {
                 open={savedFiltersOpen}
                 canEdit={isAdmin}
                 onApply={(filter) => {
-                    setSearchQuery(filter.query || '');
-                    setActiveSavedFilter({
-                        id: filter.id,
-                        name: filter.name,
-                        query: filter.query || '',
-                    });
+                    // Convert saved filter to FilterValue format
+                    if (filter.query) {
+                        setFilters([{
+                            id: `saved-${filter.id}`,
+                            field: 'query',
+                            fieldLabel: 'Query',
+                            operator: 'equals',
+                            operatorLabel: '=',
+                            value: filter.query,
+                            displayValue: filter.name || filter.query,
+                        }]);
+                    }
                     setPagination((prev) => ({ ...prev, current: 1 }));
-                    setSearchResetSignal((prev) => prev + 1);
                     setSavedFiltersOpen(false);
                 }}
                 onClose={() => setSavedFiltersOpen(false)}
