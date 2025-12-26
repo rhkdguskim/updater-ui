@@ -24,8 +24,6 @@ export const ROUTES = {
     ROLLOUTS: '/rollouts',
     ROLLOUT_DETAIL: '/rollouts/:id',
 
-    // Jobs
-    JOBS: '/jobs',
 
     // System
     SYSTEM_CONFIG: '/system/config',

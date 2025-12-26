@@ -128,9 +128,9 @@ export const BottomRow = styled.div`
 
 export const KPIGridContainer = styled.div`
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    flex: 0 0 380px;
+    flex: 0 0 260px;
     height: 100%;
 `;
 

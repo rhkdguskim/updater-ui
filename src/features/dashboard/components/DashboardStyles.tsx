@@ -263,6 +263,13 @@ export const BigNumber = styled.div`
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+
+    .dark-mode &,
+    [data-theme='dark'] & {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
 `;
 
 export const LiveIndicator = styled.div<{ $active?: boolean; $color?: string }>`
@@ -298,6 +305,20 @@ export const ChartLegendItem = styled.div`
         background: linear-gradient(135deg, rgba(255, 255, 255, 1) 0%, rgba(248, 250, 252, 0.9) 100%);
         transform: translateX(2px);
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .dark-mode &,
+    [data-theme='dark'] & {
+        background: linear-gradient(135deg, rgba(51, 65, 85, 0.8) 0%, rgba(30, 41, 59, 0.6) 100%);
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        
+        &:hover {
+            background: linear-gradient(135deg, rgba(51, 65, 85, 1) 0%, rgba(30, 41, 59, 0.9) 100%);
+        }
+        
+        span {
+            color: #e2e8f0 !important;
+        }
     }
 `;
 

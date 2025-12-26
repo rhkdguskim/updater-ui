@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Typography, Button, Flex, Skeleton, Progress, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -6,18 +6,22 @@ import {
     RocketOutlined,
     PlayCircleOutlined,
     CheckCircleOutlined,
-    CloseCircleOutlined,
     PlusOutlined,
     ClockCircleOutlined,
     ReloadOutlined,
     PauseCircleOutlined,
+    ThunderboltOutlined,
+    SyncOutlined,
 } from '@ant-design/icons';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 
 import { useGetRollouts } from '@/api/generated/rollouts/rollouts';
+import { useGetActions } from '@/api/generated/actions/actions';
 import { useAuthStore } from '@/stores/useAuthStore';
+import { AirportSlideList, ActiveUpdatesCard } from '@/components/common';
+import type { MgmtAction, MgmtRolloutResponseBody } from '@/api/generated/model';
 import {
     OverviewPageContainer,
     OverviewPageHeader,
@@ -53,6 +57,14 @@ const ROLLOUT_COLORS = {
     scheduled: '#8b5cf6',
 };
 
+const ACTION_COLORS = {
+    finished: '#10b981',
+    running: '#3b82f6',
+    pending: '#f59e0b',
+    error: '#ef4444',
+    canceled: '#94a3b8',
+};
+
 const statusColorMap: Record<string, string> = {
     running: 'blue',
     ready: 'cyan',
@@ -64,26 +76,83 @@ const statusColorMap: Record<string, string> = {
     starting: 'processing',
     stopped: 'default',
     waiting_for_approval: 'gold',
+    pending: 'orange',
+    canceled: 'default',
 };
 
 const RolloutsOverview: React.FC = () => {
-    const { t } = useTranslation(['rollouts', 'common']);
+    const { t } = useTranslation(['rollouts', 'actions', 'common']);
     const navigate = useNavigate();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
 
-    const { data: allRollouts, isLoading, refetch, dataUpdatedAt } = useGetRollouts({ limit: 100 });
+    // Fetch rollouts and actions
+    const { data: allRollouts, isLoading: isRolloutsLoading, refetch: refetchRollouts, dataUpdatedAt } = useGetRollouts(
+        { limit: 100 },
+        { query: { staleTime: 2000, refetchInterval: 5000 } }
+    );
+    const { data: allActions, isLoading: isActionsLoading, refetch: refetchActions } = useGetActions(
+        { limit: 200 },
+        { query: { staleTime: 2000, refetchInterval: 3000 } }
+    );
+
     const lastUpdated = dataUpdatedAt ? dayjs(dataUpdatedAt).fromNow() : '-';
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
+    const isLoading = isRolloutsLoading || isActionsLoading;
 
+    // Rollout stats
     const rollouts = allRollouts?.content || [];
-    const totalCount = rollouts.length;
+    const totalRollouts = rollouts.length;
+    const runningRollouts = rollouts.filter(r => r.status === 'running').length;
+    const finishedRollouts = rollouts.filter(r => r.status === 'finished').length;
+    const pausedRollouts = rollouts.filter(r => r.status === 'paused').length;
+    const errorRollouts = rollouts.filter(r => r.status === 'error' || r.status === 'stopped').length;
+    const scheduledRollouts = rollouts.filter(r => r.status === 'scheduled' || r.status === 'ready').length;
 
-    const runningCount = rollouts.filter(r => r.status === 'running').length;
-    const finishedCount = rollouts.filter(r => r.status === 'finished').length;
-    const pausedCount = rollouts.filter(r => r.status === 'paused').length;
-    const errorCount = rollouts.filter(r => r.status === 'error' || r.status === 'stopped').length;
-    const scheduledCount = rollouts.filter(r => r.status === 'scheduled' || r.status === 'ready').length;
+    // Action stats
+    const actions = allActions?.content || [];
+    const totalActions = allActions?.total ?? actions.length;
+    const runningActions = actions.filter(a => a.status === 'running').length;
+    const finishedActions = actions.filter(a => a.status === 'finished').length;
+    const pendingActions = actions.filter(a => a.status === 'pending' || a.status === 'scheduled').length;
+    const errorActions = actions.filter(a => a.status === 'error').length;
+
+    // Success rate
+    const completedActions = finishedActions + errorActions;
+    const successRate = completedActions > 0 ? Math.round((finishedActions / completedActions) * 100) : null;
+
+    // Active rollouts for list
+    const activeRollouts = React.useMemo(() => {
+        return rollouts
+            .filter(r => r.status === 'running' || r.status === 'paused' || r.status === 'scheduled' || r.status === 'ready')
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            .slice(0, 10);
+    }, [rollouts]);
+
+    // Active actions for list
+    const activeActions = React.useMemo(() => {
+        return actions
+            .filter(a => a.status === 'running' || a.status === 'pending' || a.status === 'scheduled')
+            .sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0))
+            .slice(0, 10);
+    }, [actions]);
+
+    // Rollout pie data
+    const rolloutPieData = [
+        { name: t('common:status.running', 'Running'), value: runningRollouts, color: ROLLOUT_COLORS.running },
+        { name: t('common:status.finished', 'Finished'), value: finishedRollouts, color: ROLLOUT_COLORS.finished },
+        { name: t('common:status.paused', 'Paused'), value: pausedRollouts, color: ROLLOUT_COLORS.paused },
+        { name: t('common:status.error', 'Error'), value: errorRollouts, color: ROLLOUT_COLORS.error },
+        { name: t('common:status.scheduled', 'Scheduled'), value: scheduledRollouts, color: ROLLOUT_COLORS.scheduled },
+    ].filter(d => d.value > 0);
+
+    // Action pie data
+    const actionPieData = [
+        { name: t('common:status.running', 'Running'), value: runningActions, color: ACTION_COLORS.running },
+        { name: t('common:status.finished', 'Finished'), value: finishedActions, color: ACTION_COLORS.finished },
+        { name: t('common:status.pending', 'Pending'), value: pendingActions, color: ACTION_COLORS.pending },
+        { name: t('common:status.error', 'Error'), value: errorActions, color: ACTION_COLORS.error },
+    ].filter(d => d.value > 0);
 
     const getStatusLabel = (status?: string) => {
         if (!status) return t('common:status.unknown', { defaultValue: 'UNKNOWN' });
@@ -91,21 +160,21 @@ const RolloutsOverview: React.FC = () => {
         return t(`common:status.${key}`, { defaultValue: status.replace(/_/g, ' ').toUpperCase() });
     };
 
-    const pieData = [
-        { name: t('overview.running', 'Running'), value: runningCount, color: ROLLOUT_COLORS.running },
-        { name: t('overview.finished', 'Finished'), value: finishedCount, color: ROLLOUT_COLORS.finished },
-        { name: t('common:status.paused', 'Paused'), value: pausedCount, color: ROLLOUT_COLORS.paused },
-        { name: t('overview.errorStopped', 'Error'), value: errorCount, color: ROLLOUT_COLORS.error },
-        { name: t('common:status.scheduled', 'Scheduled'), value: scheduledCount, color: ROLLOUT_COLORS.scheduled },
-    ].filter(d => d.value > 0);
-
-    const getRolloutProgress = (rollout: { status?: string; totalTargets?: number; totalTargetsPerStatus?: Record<string, number> }) => {
-        // If rollout is finished, always return 100%
+    const getRolloutProgress = (rollout: MgmtRolloutResponseBody) => {
         if (rollout.status === 'finished') return 100;
         const total = rollout.totalTargets || 0;
         const finished = rollout.totalTargetsPerStatus?.finished || 0;
         if (!total) return 0;
         return Math.round((finished / total) * 100);
+    };
+
+    const getTargetId = (action: MgmtAction) => {
+        let targetId = action._links?.target?.href?.split('/').pop();
+        if (!targetId && action._links?.self?.href) {
+            const match = action._links.self.href.match(/targets\/([^/]+)\/actions/);
+            if (match) targetId = match[1];
+        }
+        return targetId || `#${action.id}`;
     };
 
     const renderCustomLegend = (data: { name: string; value: number; color: string }[]) => (
@@ -122,6 +191,8 @@ const RolloutsOverview: React.FC = () => {
         </Flex>
     );
 
+    const totalActive = runningRollouts + runningActions;
+
     return (
         <OverviewPageContainer>
             <OverviewPageHeader>
@@ -133,8 +204,8 @@ const RolloutsOverview: React.FC = () => {
                         <Text type="secondary" style={{ fontSize: 13 }}>
                             {t('overview.subtitle', 'Deployment rollout overview and monitoring')}
                         </Text>
-                        <LiveIndicator $active={runningCount > 0} $color={COLORS.rollouts}>
-                            {runningCount > 0 ? t('common:status.active', 'Active') : t('common:status.idle', 'Idle')}
+                        <LiveIndicator $active={totalActive > 0} $color={COLORS.rollouts}>
+                            {totalActive > 0 ? `${totalActive} ${t('common:status.active', 'Active')}` : t('common:status.idle', 'Idle')}
                         </LiveIndicator>
                     </Flex>
                 </HeaderContent>
@@ -144,7 +215,7 @@ const RolloutsOverview: React.FC = () => {
                     </Text>
                     <Button
                         icon={<ReloadOutlined />}
-                        onClick={() => refetch()}
+                        onClick={() => { refetchRollouts(); refetchActions(); }}
                         loading={isLoading}
                         size="small"
                     >
@@ -164,9 +235,10 @@ const RolloutsOverview: React.FC = () => {
             </OverviewPageHeader>
 
             <OverviewScrollContent>
-                {/* Top Row: KPI Cards + Charts */}
+                {/* Top Row: 2x2 KPI Grid + 2 Pie Charts */}
                 <TopRow>
                     <KPIGridContainer>
+                        {/* Total Rollouts */}
                         <OverviewStatsCard
                             $accentColor="linear-gradient(135deg, #f59e0b 0%, #d97706 100%)"
                             $delay={1}
@@ -177,17 +249,19 @@ const RolloutsOverview: React.FC = () => {
                                     <IconBadge $theme="rollouts">
                                         <RocketOutlined />
                                     </IconBadge>
-                                    <BigNumber $color={COLORS.rollouts}>{totalCount}</BigNumber>
+                                    <BigNumber $color={COLORS.rollouts}>{totalRollouts}</BigNumber>
                                     <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                        {t('overview.totalRollouts', 'Total Rollouts')}
+                                        {t('overview.totalRollouts', 'Rollouts')}
                                     </Text>
                                 </Flex>
                             )}
                         </OverviewStatsCard>
+
+                        {/* Active Rollouts */}
                         <OverviewStatsCard
                             $accentColor="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
                             $delay={2}
-                            $pulse={runningCount > 0}
+                            $pulse={runningRollouts > 0}
                             onClick={() => navigate('/rollouts/list?status=running')}
                         >
                             {isLoading ? <Skeleton.Avatar active size={40} /> : (
@@ -195,51 +269,61 @@ const RolloutsOverview: React.FC = () => {
                                     <IconBadge $color="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)">
                                         <PlayCircleOutlined />
                                     </IconBadge>
-                                    <BigNumber $color={ROLLOUT_COLORS.running}>{runningCount}</BigNumber>
+                                    <BigNumber $color={ROLLOUT_COLORS.running}>{runningRollouts}</BigNumber>
                                     <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                        {t('overview.running', 'Running')}
+                                        {t('actions:status.running', 'Running')}
                                     </Text>
                                 </Flex>
                             )}
                         </OverviewStatsCard>
+
+                        {/* Total Actions */}
+                        <OverviewStatsCard
+                            $accentColor="linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)"
+                            $delay={3}
+                            onClick={() => navigate('/actions')}
+                        >
+                            {isLoading ? <Skeleton.Avatar active size={40} /> : (
+                                <Flex vertical align="center" gap={4}>
+                                    <IconBadge $color="linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)">
+                                        <ThunderboltOutlined />
+                                    </IconBadge>
+                                    <BigNumber $color="#6366f1">{totalActions}</BigNumber>
+                                    <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
+                                        {t('common:nav.actions', 'Actions')}
+                                    </Text>
+                                </Flex>
+                            )}
+                        </OverviewStatsCard>
+
+                        {/* Success Rate */}
                         <OverviewStatsCard
                             $accentColor="linear-gradient(135deg, #10b981 0%, #059669 100%)"
-                            $delay={3}
-                            onClick={() => navigate('/rollouts/list?status=finished')}
+                            $delay={4}
+                            onClick={() => navigate('/actions')}
                         >
                             {isLoading ? <Skeleton.Avatar active size={40} /> : (
                                 <Flex vertical align="center" gap={4}>
                                     <IconBadge $color="linear-gradient(135deg, #10b981 0%, #059669 100%)">
                                         <CheckCircleOutlined />
                                     </IconBadge>
-                                    <BigNumber $color={ROLLOUT_COLORS.finished}>{finishedCount}</BigNumber>
-                                    <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                        {t('overview.finished', 'Finished')}
-                                    </Text>
-                                </Flex>
-                            )}
-                        </OverviewStatsCard>
-                        <OverviewStatsCard
-                            $accentColor="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)"
-                            $delay={4}
-                            $pulse={errorCount > 0}
-                            onClick={() => navigate('/rollouts/list?status=stopped')}
-                        >
-                            {isLoading ? <Skeleton.Avatar active size={40} /> : (
-                                <Flex vertical align="center" gap={4}>
-                                    <IconBadge $color="linear-gradient(135deg, #ef4444 0%, #dc2626 100%)">
-                                        <CloseCircleOutlined />
-                                    </IconBadge>
-                                    <BigNumber $color={errorCount > 0 ? ROLLOUT_COLORS.error : '#64748b'}>{errorCount}</BigNumber>
-                                    <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
-                                        {t('overview.errorStopped', 'Error')}
-                                    </Text>
+                                    <BigNumber $color={ACTION_COLORS.finished}>
+                                        {successRate !== null ? `${successRate}%` : '-'}
+                                    </BigNumber>
+                                    <Progress
+                                        percent={successRate ?? 0}
+                                        size="small"
+                                        strokeColor={ACTION_COLORS.finished}
+                                        showInfo={false}
+                                        style={{ width: 60 }}
+                                    />
                                 </Flex>
                             )}
                         </OverviewStatsCard>
                     </KPIGridContainer>
 
                     <ChartsContainer>
+                        {/* Rollout Status Distribution */}
                         <OverviewChartCard
                             $theme="rollouts"
                             title={
@@ -248,8 +332,8 @@ const RolloutsOverview: React.FC = () => {
                                         <RocketOutlined />
                                     </IconBadge>
                                     <Flex vertical gap={0}>
-                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.statusDistribution', 'Status Distribution')}</span>
-                                        <Text type="secondary" style={{ fontSize: 11 }}>{t('overview.rolloutsCount', { count: totalCount })}</Text>
+                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.statusDistribution', 'Rollout Status')}</span>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>{totalRollouts} total</Text>
                                     </Flex>
                                 </Flex>
                             }
@@ -257,19 +341,19 @@ const RolloutsOverview: React.FC = () => {
                         >
                             {isLoading ? (
                                 <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
-                            ) : pieData.length > 0 ? (
+                            ) : rolloutPieData.length > 0 ? (
                                 <Flex vertical style={{ flex: 1 }}>
                                     <ResponsiveContainer width="100%" height={100}>
                                         <PieChart>
-                                            <Pie data={pieData} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
-                                                {pieData.map((entry, index) => (
-                                                    <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
+                                            <Pie data={rolloutPieData} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                                                {rolloutPieData.map((entry, index) => (
+                                                    <Cell key={`rollout-cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
                                                 ))}
                                             </Pie>
                                             <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
                                         </PieChart>
                                     </ResponsiveContainer>
-                                    {renderCustomLegend(pieData.slice(0, 4))}
+                                    {renderCustomLegend(rolloutPieData.slice(0, 4))}
                                 </Flex>
                             ) : (
                                 <Flex justify="center" align="center" style={{ flex: 1 }}>
@@ -278,54 +362,50 @@ const RolloutsOverview: React.FC = () => {
                             )}
                         </OverviewChartCard>
 
+                        {/* Action Status Distribution */}
                         <OverviewChartCard
-                            $theme="rollouts"
+                            $theme="actions"
                             title={
                                 <Flex align="center" gap={10}>
-                                    <IconBadge $color="linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)">
-                                        <ClockCircleOutlined />
+                                    <IconBadge $color="linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)">
+                                        <ThunderboltOutlined />
                                     </IconBadge>
                                     <Flex vertical gap={0}>
-                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.summaryStatus', 'Status Summary')}</span>
-                                        <Text type="secondary" style={{ fontSize: 11 }}>{t('overview.activeCount', { count: runningCount + pausedCount })}</Text>
+                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('actions:overview.statusDistribution', 'Action Status')}</span>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>{totalActions} total</Text>
                                     </Flex>
                                 </Flex>
                             }
                             $delay={6}
                         >
                             {isLoading ? (
-                                <Skeleton active paragraph={{ rows: 3 }} />
+                                <Skeleton.Avatar active size={60} shape="circle" style={{ margin: '8px auto', display: 'block' }} />
+                            ) : actionPieData.length > 0 ? (
+                                <Flex vertical style={{ flex: 1 }}>
+                                    <ResponsiveContainer width="100%" height={100}>
+                                        <PieChart>
+                                            <Pie data={actionPieData} innerRadius={28} outerRadius={42} paddingAngle={3} dataKey="value" strokeWidth={0}>
+                                                {actionPieData.map((entry, index) => (
+                                                    <Cell key={`action-cell-${index}`} fill={entry.color} style={{ filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }} />
+                                                ))}
+                                            </Pie>
+                                            <RechartsTooltip contentStyle={{ borderRadius: 8, border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                    {renderCustomLegend(actionPieData.slice(0, 4))}
+                                </Flex>
                             ) : (
-                                <Flex vertical gap={8} style={{ flex: 1 }}>
-                                    <Flex align="center" justify="space-between" style={{ padding: '8px 12px', background: `${ROLLOUT_COLORS.running}10`, borderRadius: 8 }}>
-                                        <Flex align="center" gap={8}>
-                                            <PlayCircleOutlined style={{ color: ROLLOUT_COLORS.running }} />
-                                            <Text style={{ fontSize: 12 }}>{t('overview.running', 'Running')}</Text>
-                                        </Flex>
-                                        <Text strong style={{ fontSize: 16, color: ROLLOUT_COLORS.running }}>{runningCount}</Text>
-                                    </Flex>
-                                    <Flex align="center" justify="space-between" style={{ padding: '8px 12px', background: `${ROLLOUT_COLORS.paused}10`, borderRadius: 8 }}>
-                                        <Flex align="center" gap={8}>
-                                            <PauseCircleOutlined style={{ color: ROLLOUT_COLORS.paused }} />
-                                            <Text style={{ fontSize: 12 }}>{t('common:status.paused', 'Paused')}</Text>
-                                        </Flex>
-                                        <Text strong style={{ fontSize: 16, color: ROLLOUT_COLORS.paused }}>{pausedCount}</Text>
-                                    </Flex>
-                                    <Flex align="center" justify="space-between" style={{ padding: '8px 12px', background: `${ROLLOUT_COLORS.scheduled}10`, borderRadius: 8 }}>
-                                        <Flex align="center" gap={8}>
-                                            <ClockCircleOutlined style={{ color: ROLLOUT_COLORS.scheduled }} />
-                                            <Text style={{ fontSize: 12 }}>{t('common:status.scheduled', 'Scheduled')}</Text>
-                                        </Flex>
-                                        <Text strong style={{ fontSize: 16, color: ROLLOUT_COLORS.scheduled }}>{scheduledCount}</Text>
-                                    </Flex>
+                                <Flex justify="center" align="center" style={{ flex: 1 }}>
+                                    <Text type="secondary">{t('actions:empty', 'No actions')}</Text>
                                 </Flex>
                             )}
                         </OverviewChartCard>
                     </ChartsContainer>
                 </TopRow>
 
-                {/* Bottom Row: Recent Rollouts */}
+                {/* Bottom Row: Active Rollouts + Active Actions */}
                 <BottomRow>
+                    {/* Active Rollouts List */}
                     <OverviewListCard
                         $theme="rollouts"
                         title={
@@ -334,8 +414,8 @@ const RolloutsOverview: React.FC = () => {
                                     <RocketOutlined />
                                 </IconBadge>
                                 <Flex vertical gap={0}>
-                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('pageTitle', 'Rollouts')}</span>
-                                    <Text type="secondary" style={{ fontSize: 11 }}>{t('overview.rolloutsCount', { count: totalCount })}</Text>
+                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.activeRollouts', 'Active Rollouts')}</span>
+                                    <Text type="secondary" style={{ fontSize: 11 }}>{activeRollouts.length} active</Text>
                                 </Flex>
                             </Flex>
                         }
@@ -348,65 +428,71 @@ const RolloutsOverview: React.FC = () => {
                     >
                         {isLoading ? (
                             <Skeleton active paragraph={{ rows: 5 }} />
-                        ) : rollouts.length > 0 ? (
-                            <Flex vertical gap={8} style={{ flex: 1, overflow: 'auto' }}>
-                                {rollouts.slice(0, 10).map(rollout => (
-                                    <ActivityItem
-                                        key={rollout.id}
-                                        onClick={() => navigate(`/rollouts/${rollout.id}`)}
-                                    >
-                                        <Flex align="center" gap={12} style={{ flex: 1, minWidth: 0 }}>
-                                            <div style={{
-                                                width: 36, height: 36, borderRadius: 8,
-                                                background: rollout.status === 'running'
-                                                    ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%)'
-                                                    : rollout.status === 'finished'
-                                                        ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%)'
-                                                        : 'linear-gradient(135deg, rgba(100, 116, 139, 0.15) 0%, rgba(71, 85, 105, 0.1) 100%)',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                flexShrink: 0
-                                            }}>
-                                                {rollout.status === 'running' ? (
-                                                    <PlayCircleOutlined style={{ fontSize: 18, color: ROLLOUT_COLORS.running }} />
-                                                ) : rollout.status === 'finished' ? (
-                                                    <CheckCircleOutlined style={{ fontSize: 18, color: ROLLOUT_COLORS.finished }} />
-                                                ) : (
-                                                    <RocketOutlined style={{ fontSize: 18, color: '#64748b' }} />
-                                                )}
-                                            </div>
-                                            <Flex vertical gap={0} style={{ flex: 1, minWidth: 0 }}>
-                                                <Flex align="center" gap={8}>
-                                                    <Text strong style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                        {rollout.name}
+                        ) : activeRollouts.length > 0 ? (
+                            <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                                <AirportSlideList
+                                    items={activeRollouts}
+                                    itemHeight={56}
+                                    visibleCount={5}
+                                    interval={4000}
+                                    fullHeight={true}
+                                    renderItem={(rollout: MgmtRolloutResponseBody) => (
+                                        <ActivityItem
+                                            key={rollout.id}
+                                            onClick={() => navigate(`/rollouts/${rollout.id}`)}
+                                        >
+                                            <Flex align="center" gap={12} style={{ flex: 1, minWidth: 0 }}>
+                                                <div style={{
+                                                    width: 36, height: 36, borderRadius: 8,
+                                                    background: rollout.status === 'running'
+                                                        ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%)'
+                                                        : rollout.status === 'paused'
+                                                            ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%)'
+                                                            : 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.1) 100%)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    flexShrink: 0
+                                                }}>
+                                                    {rollout.status === 'running' ? (
+                                                        <SyncOutlined spin style={{ fontSize: 18, color: ROLLOUT_COLORS.running }} />
+                                                    ) : rollout.status === 'paused' ? (
+                                                        <PauseCircleOutlined style={{ fontSize: 18, color: ROLLOUT_COLORS.paused }} />
+                                                    ) : (
+                                                        <ClockCircleOutlined style={{ fontSize: 18, color: ROLLOUT_COLORS.scheduled }} />
+                                                    )}
+                                                </div>
+                                                <Flex vertical gap={0} style={{ flex: 1, minWidth: 0 }}>
+                                                    <Flex align="center" gap={8}>
+                                                        <Text strong style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                                            {rollout.name}
+                                                        </Text>
+                                                        <Tag color={statusColorMap[rollout.status || ''] || 'default'} style={{ margin: 0, fontSize: 10, borderRadius: 999 }}>
+                                                            {getStatusLabel(rollout.status)}
+                                                        </Tag>
+                                                    </Flex>
+                                                    <Text type="secondary" style={{ fontSize: 11 }}>
+                                                        {rollout.totalTargets || 0} targets
                                                     </Text>
-                                                    <Tag color={statusColorMap[rollout.status || ''] || 'default'} style={{ margin: 0, fontSize: 10, borderRadius: 999 }}>
-                                                        {getStatusLabel(rollout.status)}
-                                                    </Tag>
                                                 </Flex>
-                                                <Text type="secondary" style={{ fontSize: 11, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                    {rollout.targetFilterQuery || t('overview.allTargets', 'All targets')}
-                                                </Text>
                                             </Flex>
-                                        </Flex>
-                                        <Progress
-                                            type="circle"
-                                            percent={getRolloutProgress(rollout)}
-                                            size={44}
-                                            strokeColor={
-                                                rollout.status === 'running' ? ROLLOUT_COLORS.running :
-                                                    rollout.status === 'finished' ? ROLLOUT_COLORS.finished :
-                                                        rollout.status === 'error' ? ROLLOUT_COLORS.error :
+                                            <Progress
+                                                type="circle"
+                                                percent={getRolloutProgress(rollout)}
+                                                size={40}
+                                                strokeColor={
+                                                    rollout.status === 'running' ? ROLLOUT_COLORS.running :
+                                                        rollout.status === 'paused' ? ROLLOUT_COLORS.paused :
                                                             '#cbd5e1'
-                                            }
-                                            strokeWidth={8}
-                                        />
-                                    </ActivityItem>
-                                ))}
-                            </Flex>
+                                                }
+                                                strokeWidth={8}
+                                            />
+                                        </ActivityItem>
+                                    )}
+                                />
+                            </div>
                         ) : (
                             <Flex vertical justify="center" align="center" gap={12} style={{ flex: 1 }}>
                                 <RocketOutlined style={{ fontSize: 40, color: '#94a3b8' }} />
-                                <Text type="secondary">{t('overview.noRollouts', 'No rollouts yet')}</Text>
+                                <Text type="secondary">{t('overview.noActiveRollouts', 'No active rollouts')}</Text>
                                 {isAdmin && (
                                     <Button
                                         type="primary"
@@ -421,60 +507,44 @@ const RolloutsOverview: React.FC = () => {
                         )}
                     </OverviewListCard>
 
+                    {/* Active Actions List */}
                     <OverviewListCard
-                        $theme="rollouts"
+                        $theme="actions"
                         title={
                             <Flex align="center" gap={10}>
-                                <IconBadge $color="linear-gradient(135deg, #10b981 0%, #059669 100%)">
-                                    <CheckCircleOutlined />
+                                <IconBadge $color="linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)">
+                                    <ThunderboltOutlined />
                                 </IconBadge>
                                 <Flex vertical gap={0}>
-                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.recentFinished', 'Recent Finished')}</span>
-                                    <Text type="secondary" style={{ fontSize: 11 }}>{t('overview.completedCount', { count: finishedCount })}</Text>
+                                    <span style={{ fontSize: 14, fontWeight: 600 }}>{t('actions:overview.activeActions', 'Active Actions')}</span>
+                                    <Text type="secondary" style={{ fontSize: 11 }}>{activeActions.length} active</Text>
                                 </Flex>
                             </Flex>
+                        }
+                        extra={
+                            <Button type="link" size="small" onClick={() => navigate('/actions')}>
+                                {t('overview.viewAll', 'View All')}
+                            </Button>
                         }
                         $delay={8}
                     >
                         {isLoading ? (
                             <Skeleton active paragraph={{ rows: 5 }} />
-                        ) : finishedCount > 0 ? (
-                            <Flex vertical gap={8} style={{ flex: 1, overflow: 'auto' }}>
-                                {rollouts
-                                    .filter(r => r.status === 'finished')
-                                    .slice(0, 6)
-                                    .map(rollout => (
-                                        <ActivityItem
-                                            key={rollout.id}
-                                            onClick={() => navigate(`/rollouts/${rollout.id}`)}
-                                        >
-                                            <Flex align="center" gap={12} style={{ flex: 1, minWidth: 0 }}>
-                                                <div style={{
-                                                    width: 36, height: 36, borderRadius: 8,
-                                                    background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%)',
-                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                                    flexShrink: 0
-                                                }}>
-                                                    <CheckCircleOutlined style={{ fontSize: 18, color: ROLLOUT_COLORS.finished }} />
-                                                </div>
-                                                <Flex vertical gap={0} style={{ flex: 1, minWidth: 0 }}>
-                                                    <Text strong style={{ fontSize: 13, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                                        {rollout.name}
-                                                    </Text>
-                                                    <Text type="secondary" style={{ fontSize: 11 }}>
-                                                        {rollout.lastModifiedAt ? dayjs(rollout.lastModifiedAt).format('YYYY-MM-DD') : rollout.createdAt ? dayjs(rollout.createdAt).format('YYYY-MM-DD') : '-'}
-                                                    </Text>
-                                                </Flex>
-                                            </Flex>
-                                            <Tag color="green" style={{ margin: 0, fontSize: 10, borderRadius: 999 }}>
-                                                100%
-                                            </Tag>
-                                        </ActivityItem>
-                                    ))}
-                            </Flex>
+                        ) : activeActions.length > 0 ? (
+                            <div style={{ flex: 1, height: '100%', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+                                <ActiveUpdatesCard
+                                    items={activeActions.map(action => ({
+                                        action,
+                                        controllerId: getTargetId(action),
+                                    }))}
+                                    isLoading={false}
+                                    showHistory={true}
+                                    emptyText={t('actions:overview.noActiveActions', 'No active actions')}
+                                />
+                            </div>
                         ) : (
                             <Flex justify="center" align="center" style={{ flex: 1 }}>
-                                <Text type="secondary">{t('overview.noFinishedRollouts', 'No finished rollouts')}</Text>
+                                <Text type="secondary">{t('actions:overview.noActiveActions', 'No active actions')}</Text>
                             </Flex>
                         )}
                     </OverviewListCard>

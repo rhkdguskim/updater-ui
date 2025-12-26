@@ -210,21 +210,21 @@ const RolloutList: React.FC = () => {
                     onAdd={() => setIsCreateModalOpen(true)}
                     canAdd={isAdmin}
                     addLabel={t('createRollout')}
-                    loading={isLoading || isFetching}
+                    loading={isFetching}
                 />
             }
         >
             <DataView
-                loading={isLoading || isFetching}
+                loading={isLoading}
                 error={error as Error}
-                isEmpty={data?.content?.length === 0}
+                isEmpty={!isLoading && data?.content?.length === 0}
                 emptyText={t('empty')}
             >
                 <EnhancedTable<MgmtRolloutResponseBody>
                     dataSource={data?.content || []}
                     columns={columns}
                     rowKey="id"
-                    loading={isLoading || isFetching}
+                    loading={isLoading}
                     pagination={{
                         current: pagination.current,
                         pageSize: pagination.pageSize,

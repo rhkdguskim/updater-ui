@@ -346,7 +346,7 @@ const ActiveUpdateRowComponent: React.FC<{
                     </div>
                     <Flex vertical gap={2} style={{ flex: 1, minWidth: 0 }}>
                         <Flex justify="space-between" align="center">
-                            <Text strong style={{ fontSize: 13, color: '#1e293b' }}>
+                            <Text strong style={{ fontSize: 13 }}>
                                 {item.targetName || item.controllerId || `Action #${item.action.id}`}
                             </Text>
                             <Text type="secondary" style={{ fontSize: 11 }}>

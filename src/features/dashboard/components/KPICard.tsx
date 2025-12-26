@@ -68,6 +68,13 @@ const ValueText = styled.span<{ $size?: string }>`
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+
+    .dark-mode &,
+    [data-theme='dark'] & {
+        background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+        -webkit-background-clip: text;
+        background-clip: text;
+    }
 `;
 
 const TrendBadge = styled.div<{ $isPositive?: boolean; $isNeutral?: boolean }>`

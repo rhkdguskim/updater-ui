@@ -16,7 +16,7 @@ const Targets = React.lazy(() => import('@/features/targets/Targets'));
 const Distributions = React.lazy(() => import('@/features/distributions/Distributions'));
 const Actions = React.lazy(() => import('@/features/actions/Actions'));
 const Rollouts = React.lazy(() => import('@/features/rollouts/Rollouts'));
-const OperationsDashboard = React.lazy(() => import('@/features/jobs/OperationsDashboard'));
+
 const Configuration = React.lazy(() => import('@/features/system/Configuration'));
 const LoginPage = React.lazy(() => import('@/features/auth/LoginPage'));
 const AuthGuard = React.lazy(() => import('@/features/auth/AuthGuard'));
@@ -49,7 +49,7 @@ const AppRouter: React.FC = () => {
                         <Route path="distributions/*" element={<Distributions />} />
                         <Route path="actions/*" element={<Actions />} />
                         <Route path="rollouts/*" element={<Rollouts />} />
-                        <Route path={ROUTES.JOBS} element={<OperationsDashboard />} />
+
                         <Route path="system/config" element={<Configuration />} />
                     </Route>
                 </Route>
