@@ -74,7 +74,10 @@
         "delete": "Delete",
         "clone": "Clone",
         "invalidate": "Invalidate",
-        "deleteSelected": "Delete Selected"
+        "deleteSelected": "Delete Selected",
+        "createSet": "Create Distribution Set",
+        "createModule": "Create Software Module",
+        "edit": "Edit"
     },
     "messages": {
         "deleteSetSuccess": "Distribution Set deleted successfully",

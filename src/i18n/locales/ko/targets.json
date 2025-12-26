@@ -184,7 +184,9 @@
         "refresh": "새로고침",
         "filter": "필터",
         "force": "강제 업데이트",
-        "cancel": "취소"
+        "cancel": "취소",
+        "addTarget": "타겟 추가",
+        "edit": "편집"
     },
     "search": {
         "placeholder": "{{field}} 검색",
@@ -222,8 +224,8 @@
         "no": "아니오"
     },
     "metadata": {
-        "key": "Key",
-        "value": "Value",
+        "key": "키",
+        "value": "값",
         "noMetadata": "메타데이터가 없습니다",
         "add": "메타데이터 추가",
         "edit": "메타데이터 수정",

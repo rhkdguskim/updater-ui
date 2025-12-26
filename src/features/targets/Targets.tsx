@@ -2,7 +2,6 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import TargetList from './TargetList';
 import TargetDetail from './TargetDetail';
-import TagsAndTypes from './TagsAndTypes';
 import TargetsOverview from './TargetsOverview';
 
 
@@ -11,7 +10,6 @@ const Targets: React.FC = () => {
         <Routes>
             <Route index element={<TargetsOverview />} />
             <Route path="list" element={<TargetList />} />
-            <Route path="tags-types" element={<TagsAndTypes />} />
             <Route path=":id" element={<TargetDetail />} />
             <Route path="*" element={<Navigate to="/targets" replace />} />
         </Routes>

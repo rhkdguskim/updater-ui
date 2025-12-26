@@ -74,7 +74,10 @@
         "delete": "삭제",
         "clone": "복제",
         "invalidate": "무효화",
-        "deleteSelected": "선택 삭제"
+        "deleteSelected": "선택 삭제",
+        "createSet": "배포 세트 생성",
+        "createModule": "소프트웨어 모듈 생성",
+        "edit": "편집"
     },
     "messages": {
         "deleteSetSuccess": "배포 세트가 성공적으로 삭제되었습니다.",

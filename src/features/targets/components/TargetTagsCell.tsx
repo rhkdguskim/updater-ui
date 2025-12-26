@@ -146,7 +146,11 @@ export const TargetTagsCell: React.FC<TargetTagsCellProps> = ({ controllerId }) 
                         onOpenChange={handleOpenChange}
                     >
                         <Tag
-                            style={{ cursor: 'pointer', borderStyle: 'dashed' }}
+                            style={{
+                                cursor: 'pointer',
+                                background: 'transparent',
+                                border: '1px solid var(--ant-color-border, #d9d9d9)',
+                            }}
                             icon={currentTags?.length ? <EditOutlined /> : <PlusOutlined />}
                         >
                             {currentTags?.length ? '' : t('list.addTag')}

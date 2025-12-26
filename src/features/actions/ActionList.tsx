@@ -385,7 +385,7 @@ const ActionList: React.FC = () => {
                     selectedRowKeys={selectedActionIds}
                     onSelectionChange={handleSelectionChange}
                     selectionActions={selectionActions}
-                    selectionLabel="개 선택됨"
+                    selectionLabel={t('common:filter.selected')}
                     onRow={(record) => ({
                         onClick: () => navigate(`/actions/${record.id}`),
                         style: { cursor: 'pointer' },

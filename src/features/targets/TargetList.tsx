@@ -1,5 +1,6 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { message, Space, Tag, Tooltip, Typography, Button } from 'antd';
+import { EditableCell } from '@/components/common';
 import {
     EyeOutlined,
     EditOutlined,
@@ -31,6 +32,7 @@ import {
     useGetTargets,
     useDeleteTarget,
     useCreateTargets,
+    useUpdateTarget,
     usePostAssignedDistributionSet,
     getGetTargetsQueryKey,
 } from '@/api/generated/targets/targets';
@@ -355,6 +357,29 @@ const TargetList: React.FC = () => {
         return id ? { id, label: label || id } : undefined;
     };
 
+    // Update mutation for inline editing
+    const updateTargetMutation = useUpdateTarget({
+        mutation: {
+            onSuccess: () => {
+                message.success(t('messages.updateSuccess', { defaultValue: 'Target updated' }));
+                queryClient.invalidateQueries({ queryKey: getGetTargetsQueryKey() });
+            },
+            onError: (error) => {
+                message.error((error as Error).message || t('messages.updateFailed', { defaultValue: 'Failed to update target' }));
+            },
+        },
+    });
+
+    const handleInlineUpdate = useCallback(async (controllerId: string, newName: string) => {
+        await updateTargetMutation.mutateAsync({
+            targetId: controllerId,
+            data: {
+                controllerId,
+                name: newName,
+            },
+        });
+    }, [updateTargetMutation]);
+
     // Column definitions with unified action buttons
     const columns: ColumnsType<MgmtTarget> = [
         {
@@ -365,7 +390,11 @@ const TargetList: React.FC = () => {
             width: 200,
             render: (_: string, record) => (
                 <Space direction="vertical" size={0}>
-                    <Text strong style={{ fontSize: 12 }}>{record.name || record.controllerId}</Text>
+                    <EditableCell
+                        value={record.name || record.controllerId || ''}
+                        onSave={(val) => handleInlineUpdate(record.controllerId!, val)}
+                        editable={isAdmin}
+                    />
                     {record.ipAddress && (
                         <Text type="secondary" style={{ fontSize: 11 }}>
                             {record.ipAddress}
@@ -518,7 +547,7 @@ const TargetList: React.FC = () => {
                     selectedRowKeys={selectedTargetIds}
                     onSelectionChange={(keys) => setSelectedTargetIds(keys)}
                     selectionActions={selectionActions}
-                    selectionLabel="개 선택됨"
+                    selectionLabel={t('filter.selected', { ns: 'common' })}
                     pagination={{
                         current: pagination.current,
                         pageSize: pagination.pageSize,

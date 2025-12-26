@@ -185,7 +185,11 @@ export const DistributionSetTagsCell: React.FC<DistributionSetTagsCellProps> = (
                         onOpenChange={handleOpenChange}
                     >
                         <Tag
-                            style={{ cursor: 'pointer', borderStyle: 'dashed' }}
+                            style={{
+                                cursor: 'pointer',
+                                background: 'transparent',
+                                border: '1px solid var(--ant-color-border, #d9d9d9)',
+                            }}
                             icon={assignedTags.length ? <EditOutlined /> : <PlusOutlined />}
                         >
                             {assignedTags.length ? '' : t('list.addTag')}

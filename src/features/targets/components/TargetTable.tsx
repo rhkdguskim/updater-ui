@@ -439,7 +439,7 @@ const TargetTable: React.FC<TargetTableProps> = ({
                 selectedCount={selectedCount}
                 actions={selectionActions}
                 onClearSelection={onClearSelection}
-                selectionLabel="개 선택됨"
+                selectionLabel={t('filter.selected', { ns: 'common' })}
             />
             <Table<MgmtTarget>
                 columns={columns}

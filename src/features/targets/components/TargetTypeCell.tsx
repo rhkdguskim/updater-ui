@@ -171,10 +171,14 @@ export const TargetTypeCell: React.FC<TargetTypeCellProps> = ({
                     </Tag>
                 ) : (
                     <Tag
-                        style={{ cursor: 'pointer', borderStyle: 'dashed' }}
-                        icon={<PlusOutlined />}
+                        style={{
+                            cursor: 'pointer',
+                            background: 'transparent',
+                            border: '1px solid var(--ant-color-border, #d9d9d9)',
+                        }}
+                        icon={currentTypeName ? <EditOutlined /> : <PlusOutlined />}
                     >
-                        {t('list.addType')}
+                        {currentTypeName ? '' : t('list.addType')}
                     </Tag>
                 )}
             </Popover>

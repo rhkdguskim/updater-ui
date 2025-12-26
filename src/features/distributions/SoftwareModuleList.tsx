@@ -1,17 +1,20 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
 import { EyeOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
+import { EditableCell } from '@/components/common';
 import { useNavigate } from 'react-router-dom';
 import {
     useGetSoftwareModules,
     useDeleteSoftwareModule,
+    useUpdateSoftwareModule,
+    getGetSoftwareModulesQueryKey,
 } from '@/api/generated/software-modules/software-modules';
 import type { MgmtSoftwareModule } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
 import CreateSoftwareModuleModal from './components/CreateSoftwareModuleModal';
 import { format } from 'date-fns';
 import { useTranslation } from 'react-i18next';
-import { keepPreviousData } from '@tanstack/react-query';
+import { keepPreviousData, useQueryClient } from '@tanstack/react-query';
 import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import { useServerTable } from '@/hooks/useServerTable';
 import { DataView, EnhancedTable, FilterBuilder, type ToolbarAction, type FilterValue, type FilterField } from '@/components/patterns';
@@ -23,6 +26,7 @@ const { Text } = Typography;
 const SoftwareModuleList: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
 
@@ -150,6 +154,26 @@ const SoftwareModuleList: React.FC = () => {
         return actions;
     }, [t, isAdmin, handleBulkDelete]);
 
+    // Update mutation for inline editing
+    const updateMutation = useUpdateSoftwareModule({
+        mutation: {
+            onSuccess: () => {
+                message.success(t('messages.updateSuccess', { defaultValue: 'Updated' }));
+                queryClient.invalidateQueries({ queryKey: getGetSoftwareModulesQueryKey() });
+            },
+            onError: (error) => {
+                message.error((error as Error).message || t('common:messages.error'));
+            },
+        },
+    });
+
+    const handleInlineUpdate = useCallback(async (id: number, field: 'vendor' | 'description', value: string) => {
+        await updateMutation.mutateAsync({
+            softwareModuleId: id,
+            data: { [field]: value },
+        });
+    }, [updateMutation]);
+
     const columns: ColumnsType<MgmtSoftwareModule> = [
         {
             title: t('list.columns.name'),
@@ -183,14 +207,27 @@ const SoftwareModuleList: React.FC = () => {
             dataIndex: 'vendor',
             key: 'vendor',
             width: 120,
-            render: (text) => <Text style={{ fontSize: 12 }}>{text || '-'}</Text>,
+            render: (text, record) => (
+                <EditableCell
+                    value={text || ''}
+                    onSave={(val) => handleInlineUpdate(record.id, 'vendor', val)}
+                    editable={isAdmin}
+                />
+            ),
         },
         {
             title: t('list.columns.description'),
             dataIndex: 'description',
             key: 'description',
             ellipsis: true,
-            render: (text) => <Text type="secondary" style={{ fontSize: 12 }}>{text || '-'}</Text>,
+            render: (text, record) => (
+                <EditableCell
+                    value={text || ''}
+                    onSave={(val) => handleInlineUpdate(record.id, 'description', val)}
+                    editable={isAdmin}
+                    secondary
+                />
+            ),
         },
         {
             title: t('list.columns.lastModified'),
@@ -280,7 +317,7 @@ const SoftwareModuleList: React.FC = () => {
                     selectedRowKeys={selectedModuleIds}
                     onSelectionChange={(keys) => setSelectedModuleIds(keys)}
                     selectionActions={selectionActions}
-                    selectionLabel="개 선택됨"
+                    selectionLabel={t('common:filter.selected')}
                     scroll={{ x: 1000 }}
                 />
             </DataView>

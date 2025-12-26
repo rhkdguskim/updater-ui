@@ -1,10 +1,13 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { Tag, Tooltip, Space, Button, message, Modal, Typography } from 'antd';
 import { EyeOutlined, DeleteOutlined, TagOutlined, EditOutlined } from '@ant-design/icons';
+import { EditableCell } from '@/components/common';
 import { useNavigate } from 'react-router-dom';
 import {
     useGetDistributionSets,
     useDeleteDistributionSet,
+    useUpdateDistributionSet,
+    getGetDistributionSetsQueryKey,
 } from '@/api/generated/distribution-sets/distribution-sets';
 import type { MgmtDistributionSet } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -12,8 +15,9 @@ import CreateDistributionSetWizard from './components/CreateDistributionSetWizar
 import { format } from 'date-fns';
 import { DistributionSetTagsCell } from './components/DistributionSetTagsCell';
 import { useTranslation } from 'react-i18next';
-import { keepPreviousData } from '@tanstack/react-query';
+import { keepPreviousData, useQueryClient } from '@tanstack/react-query';
 import BulkManageSetTagsModal from './components/BulkManageSetTagsModal';
+import BulkDeleteDistributionSetModal from './components/BulkDeleteDistributionSetModal';
 import { StandardListLayout } from '@/components/layout/StandardListLayout';
 import { useServerTable } from '@/hooks/useServerTable';
 import { DataView, EnhancedTable, FilterBuilder, type ToolbarAction, type FilterValue, type FilterField } from '@/components/patterns';
@@ -25,6 +29,7 @@ const { Text } = Typography;
 const DistributionSetList: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
     const navigate = useNavigate();
+    const queryClient = useQueryClient();
     const { role } = useAuthStore();
     const isAdmin = role === 'Admin';
 
@@ -39,6 +44,7 @@ const DistributionSetList: React.FC = () => {
     const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
     const [selectedSetIds, setSelectedSetIds] = useState<React.Key[]>([]);
     const [bulkTagsModalOpen, setBulkTagsModalOpen] = useState(false);
+    const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
     const [filters, setFilters] = useState<FilterValue[]>([]);
 
     // Filter fields
@@ -129,14 +135,46 @@ const DistributionSetList: React.FC = () => {
     }, [resetPagination]);
 
     // Selection toolbar actions
-    const selectionActions: ToolbarAction[] = useMemo(() => [
-        {
-            key: 'manageTags',
-            label: t('bulkAssignment.manageTags'),
-            icon: <TagOutlined />,
-            onClick: () => setBulkTagsModalOpen(true),
+    const selectionActions: ToolbarAction[] = useMemo(() => {
+        const actions: ToolbarAction[] = [
+            {
+                key: 'manageTags',
+                label: t('bulkAssignment.manageTags'),
+                icon: <TagOutlined />,
+                onClick: () => setBulkTagsModalOpen(true),
+            },
+        ];
+        if (isAdmin) {
+            actions.push({
+                key: 'delete',
+                label: t('common:actions.delete'),
+                icon: <DeleteOutlined />,
+                onClick: () => setBulkDeleteModalOpen(true),
+                danger: true,
+            });
+        }
+        return actions;
+    }, [t, isAdmin]);
+
+    // Update mutation for inline editing
+    const updateMutation = useUpdateDistributionSet({
+        mutation: {
+            onSuccess: () => {
+                message.success(t('messages.updateSuccess', { defaultValue: 'Updated' }));
+                queryClient.invalidateQueries({ queryKey: getGetDistributionSetsQueryKey() });
+            },
+            onError: (error) => {
+                message.error((error as Error).message || t('common:messages.error'));
+            },
         },
-    ], [t]);
+    });
+
+    const handleInlineUpdate = useCallback(async (id: number, field: 'name' | 'description', value: string) => {
+        await updateMutation.mutateAsync({
+            distributionSetId: id,
+            data: { [field]: value },
+        });
+    }, [updateMutation]);
 
     const columns: ColumnsType<MgmtDistributionSet> = [
         {
@@ -146,9 +184,11 @@ const DistributionSetList: React.FC = () => {
             sorter: true,
             width: 200,
             render: (text, record) => (
-                <Text strong style={{ fontSize: 12 }}>
-                    <a onClick={() => navigate(`/distributions/sets/${record.id}`)}>{text}</a>
-                </Text>
+                <EditableCell
+                    value={text || ''}
+                    onSave={(val) => handleInlineUpdate(record.id, 'name', val)}
+                    editable={isAdmin}
+                />
             ),
         },
         {
@@ -171,7 +211,14 @@ const DistributionSetList: React.FC = () => {
             dataIndex: 'description',
             key: 'description',
             ellipsis: true,
-            render: (text) => <Text type="secondary" style={{ fontSize: 12 }}>{text || '-'}</Text>,
+            render: (text, record) => (
+                <EditableCell
+                    value={text || ''}
+                    onSave={(val) => handleInlineUpdate(record.id, 'description', val)}
+                    editable={isAdmin}
+                    secondary
+                />
+            ),
         },
         {
             title: t('list.columns.completeness'),
@@ -277,7 +324,7 @@ const DistributionSetList: React.FC = () => {
                     selectedRowKeys={selectedSetIds}
                     onSelectionChange={(keys) => setSelectedSetIds(keys)}
                     selectionActions={selectionActions}
-                    selectionLabel="개 선택됨"
+                    selectionLabel={t('common:filter.selected')}
                     scroll={{ x: 1000 }}
                 />
             </DataView>
@@ -295,6 +342,17 @@ const DistributionSetList: React.FC = () => {
                 onCancel={() => setBulkTagsModalOpen(false)}
                 onSuccess={() => {
                     setBulkTagsModalOpen(false);
+                    setSelectedSetIds([]);
+                    refetch();
+                }}
+            />
+            <BulkDeleteDistributionSetModal
+                open={bulkDeleteModalOpen}
+                setIds={selectedSetIds as number[]}
+                setNames={(data?.content || []).filter(ds => selectedSetIds.includes(ds.id)).map(ds => `${ds.name} v${ds.version}`)}
+                onCancel={() => setBulkDeleteModalOpen(false)}
+                onSuccess={() => {
+                    setBulkDeleteModalOpen(false);
                     setSelectedSetIds([]);
                     refetch();
                 }}

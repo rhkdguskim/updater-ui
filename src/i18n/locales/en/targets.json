@@ -174,7 +174,9 @@
         "refresh": "Refresh",
         "filter": "Filter",
         "force": "Force Update",
-        "cancel": "Cancel"
+        "cancel": "Cancel",
+        "addTarget": "Add Target",
+        "edit": "Edit"
     },
     "search": {
         "placeholder": "Search by {{field}}",
