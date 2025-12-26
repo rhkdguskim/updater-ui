@@ -1,5 +1,8 @@
 {
     "pageTitle": "Rollouts",
+    "list": {
+        "title": "Rollouts"
+    },
     "subtitle": "Monitor rollout status and progress at a glance",
     "empty": "No rollouts found",
     "overview": {

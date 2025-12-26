@@ -1,9 +1,7 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import {
-    Card,
     Descriptions,
-
     Button,
     Space,
     Typography,
@@ -16,9 +14,9 @@ import {
     Row,
     Col,
     Statistic,
+    Breadcrumb,
 } from 'antd';
 import {
-    ArrowLeftOutlined,
     PlayCircleOutlined,
     PauseCircleOutlined,
     CaretRightOutlined,
@@ -44,26 +42,10 @@ import { useQueryClient } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import type { TableProps } from 'antd';
 import { useTranslation } from 'react-i18next';
-import { PageContainer, HeaderRow } from '@/components/layout/PageLayout';
-import { StatusTag } from '@/components/common';
-import styled from 'styled-components';
+import { PageContainer, SectionCard } from '@/components/layout/PageLayout';
+import { DetailPageHeader, StatusTag } from '@/components/common';
 
-const { Title, Text } = Typography;
-
-const TitleGroup = styled.div`
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-`;
-
-const ActionCard = styled(Card)`
-    border-radius: 14px;
-`;
-
-const SectionCard = styled(Card)`
-    border-radius: 14px;
-`;
+const { Text } = Typography;
 
 const RolloutDetail: React.FC = () => {
     const { t } = useTranslation(['rollouts', 'common']);
@@ -245,7 +227,7 @@ const RolloutDetail: React.FC = () => {
 
     if (error || !rolloutData) {
         return (
-            <div style={{ padding: 24 }}>
+            <PageContainer>
                 <Alert
                     type="error"
                     message={t('detail.notFound')}
@@ -256,7 +238,7 @@ const RolloutDetail: React.FC = () => {
                         </Button>
                     }
                 />
-            </div>
+            </PageContainer>
         );
     }
 
@@ -326,113 +308,118 @@ const RolloutDetail: React.FC = () => {
         },
     ];
 
+    const headerActions = (
+        <Space wrap>
+            {canStart && (
+                <Popconfirm
+                    title={t('detail.controls.startConfirm')}
+                    onConfirm={handleStart}
+                >
+                    <Button
+                        type="primary"
+                        icon={<PlayCircleOutlined />}
+                        loading={startMutation.isPending}
+                    >
+                        {t('detail.controls.start')}
+                    </Button>
+                </Popconfirm>
+            )}
+            {canPause && (
+                <Popconfirm
+                    title={t('detail.controls.pauseConfirm')}
+                    onConfirm={handlePause}
+                >
+                    <Button
+                        icon={<PauseCircleOutlined />}
+                        loading={pauseMutation.isPending}
+                    >
+                        {t('detail.controls.pause')}
+                    </Button>
+                </Popconfirm>
+            )}
+            {canResume && (
+                <Button
+                    icon={<CaretRightOutlined />}
+                    onClick={handleResume}
+                    loading={resumeMutation.isPending}
+                >
+                    {t('detail.controls.resume')}
+                </Button>
+            )}
+            {canApprove && (
+                <>
+                    <Button
+                        type="primary"
+                        icon={<CheckCircleOutlined />}
+                        onClick={handleApprove}
+                        loading={approveMutation.isPending}
+                    >
+                        {t('detail.controls.approve')}
+                    </Button>
+                    <Button
+                        danger
+                        icon={<CloseCircleOutlined />}
+                        onClick={handleDeny}
+                        loading={denyMutation.isPending}
+                    >
+                        {t('detail.controls.deny')}
+                    </Button>
+                </>
+            )}
+            {canRetry && (
+                <Popconfirm
+                    title={t('detail.controls.retryConfirm')}
+                    onConfirm={handleRetry}
+                >
+                    <Button
+                        icon={<ReloadOutlined />}
+                        loading={retryMutation.isPending}
+                    >
+                        {t('detail.controls.retry')}
+                    </Button>
+                </Popconfirm>
+            )}
+            {canDelete && (
+                <Popconfirm
+                    title={t('detail.controls.deleteConfirm')}
+                    description={t('detail.controls.deleteDesc')}
+                    onConfirm={handleDelete}
+                >
+                    <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        loading={deleteMutation.isPending}
+                    >
+                        {t('detail.controls.delete')}
+                    </Button>
+                </Popconfirm>
+            )}
+        </Space>
+    );
+
     return (
         <PageContainer>
-            <HeaderRow>
-                <TitleGroup>
-                    <Button
-                        icon={<ArrowLeftOutlined />}
-                        onClick={() => navigate('/rollouts')}
-                    >
-                        {t('detail.back')}
-                    </Button>
-                    <Title level={2} style={{ margin: 0 }}>
-                        {rolloutData.name}
-                    </Title>
-                    <StatusTag status={rolloutData.status} style={{ fontWeight: 600, textTransform: 'uppercase' }} />
-                </TitleGroup>
-                <Space wrap>
-                    {canStart && (
-                        <Popconfirm
-                            title={t('detail.controls.startConfirm')}
-                            onConfirm={handleStart}
-                        >
-                            <Button
-                                type="primary"
-                                icon={<PlayCircleOutlined />}
-                                loading={startMutation.isPending}
-                            >
-                                {t('detail.controls.start')}
-                            </Button>
-                        </Popconfirm>
-                    )}
-                    {canPause && (
-                        <Popconfirm
-                            title={t('detail.controls.pauseConfirm')}
-                            onConfirm={handlePause}
-                        >
-                            <Button
-                                icon={<PauseCircleOutlined />}
-                                loading={pauseMutation.isPending}
-                            >
-                                {t('detail.controls.pause')}
-                            </Button>
-                        </Popconfirm>
-                    )}
-                    {canResume && (
-                        <Button
-                            icon={<CaretRightOutlined />}
-                            onClick={handleResume}
-                            loading={resumeMutation.isPending}
-                        >
-                            {t('detail.controls.resume')}
-                        </Button>
-                    )}
-                    {canApprove && (
-                        <>
-                            <Button
-                                type="primary"
-                                icon={<CheckCircleOutlined />}
-                                onClick={handleApprove}
-                                loading={approveMutation.isPending}
-                            >
-                                {t('detail.controls.approve')}
-                            </Button>
-                            <Button
-                                danger
-                                icon={<CloseCircleOutlined />}
-                                onClick={handleDeny}
-                                loading={denyMutation.isPending}
-                            >
-                                {t('detail.controls.deny')}
-                            </Button>
-                        </>
-                    )}
-                    {canRetry && (
-                        <Popconfirm
-                            title={t('detail.controls.retryConfirm')}
-                            onConfirm={handleRetry}
-                        >
-                            <Button
-                                icon={<ReloadOutlined />}
-                                loading={retryMutation.isPending}
-                            >
-                                {t('detail.controls.retry')}
-                            </Button>
-                        </Popconfirm>
-                    )}
-                    {canDelete && (
-                        <Popconfirm
-                            title={t('detail.controls.deleteConfirm')}
-                            description={t('detail.controls.deleteDesc')}
-                            onConfirm={handleDelete}
-                        >
-                            <Button
-                                danger
-                                icon={<DeleteOutlined />}
-                                loading={deleteMutation.isPending}
-                            >
-                                {t('detail.controls.delete')}
-                            </Button>
-                        </Popconfirm>
-                    )}
-                </Space>
-            </HeaderRow>
+            {/* Breadcrumb */}
+            <Breadcrumb
+                items={[
+                    { title: <Link to="/rollouts">{t('list.title')}</Link> },
+                    { title: rolloutData.name },
+                ]}
+            />
+
+            {/* Header */}
+            <DetailPageHeader
+                title={rolloutData.name}
+                status={rolloutData.status}
+                backLabel={t('detail.back')}
+                onBack={() => navigate('/rollouts')}
+                actions={headerActions}
+            />
 
             {isAdmin && !canStart && !canPause && !canResume && !canApprove && !canRetry && !canDelete && (
-                <ActionCard>
+                <SectionCard>
                     <Text type="secondary">{t('detail.noActions')}</Text>
-                </ActionCard>
+                </SectionCard>
             )}
 
             <SectionCard title={t('detail.overviewTitle')}>

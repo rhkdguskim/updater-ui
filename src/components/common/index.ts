@@ -10,4 +10,5 @@ export { TagFormModal } from './TagFormModal';
 export type { TagFormValues, TagFormModalProps } from './TagFormModal';
 export { EditableCell } from './EditableCell';
 export type { EditableCellProps } from './EditableCell';
-
+export { DetailPageHeader } from './DetailPageHeader';
+export type { DetailPageHeaderProps } from './DetailPageHeader';

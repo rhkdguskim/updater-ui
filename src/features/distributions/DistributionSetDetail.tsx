@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Descriptions, Tabs, Table, Button, message, Space, Tag, Modal } from 'antd';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Descriptions, Tabs, Table, Button, message, Space, Tag, Modal, Breadcrumb } from 'antd';
 import {
-    ArrowLeftOutlined,
     PlusOutlined,
     StopOutlined,
     CopyOutlined
@@ -23,8 +22,9 @@ import SetStatisticsTab from './components/SetStatisticsTab';
 import SetTargetsTab from './components/SetTargetsTab';
 import type { MgmtSoftwareModuleAssignment, MgmtSoftwareModule, MgmtDistributionSetRequestBodyPost } from '@/api/generated/model';
 import type { TableProps } from 'antd';
-
 import { useTranslation } from 'react-i18next';
+import { PageContainer, SectionCard } from '@/components/layout/PageLayout';
+import { DetailPageHeader } from '@/components/common';
 
 const DistributionSetDetail: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -205,50 +205,66 @@ const DistributionSetDetail: React.FC = () => {
         </Space>
     );
 
+    const titleExtra = setData?.version ? (
+        <Tag color="blue">{setData.version}</Tag>
+    ) : undefined;
+
+    const headerActions = isAdmin ? (
+        <>
+            <Button
+                icon={<CopyOutlined />}
+                onClick={handleClone}
+                loading={createDsMutation.isPending}
+            >
+                {t('actions.clone') || 'Clone'}
+            </Button>
+            <Button
+                danger
+                icon={<StopOutlined />}
+                onClick={handleInvalidate}
+                loading={invalidateMutation.isPending}
+            >
+                {t('actions.invalidate') || 'Invalidate'}
+            </Button>
+        </>
+    ) : undefined;
+
     return (
-        <Card
-            title={
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-                    <Space>
-                        <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/distributions/sets')} type="text" />
-                        {setData?.name} <Tag color="blue">{setData?.version}</Tag>
-                    </Space>
-                    {isAdmin && (
-                        <Space>
-                            <Button
-                                icon={<CopyOutlined />}
-                                onClick={handleClone}
-                                loading={createDsMutation.isPending}
-                            >
-                                {t('actions.clone') || 'Clone'}
-                            </Button>
-                            <Button
-                                danger
-                                icon={<StopOutlined />}
-                                onClick={handleInvalidate}
-                                loading={invalidateMutation.isPending}
-                            >
-                                {t('actions.invalidate') || 'Invalidate'}
-                            </Button>
-                        </Space>
-                    )}
-                </div>
-            }
-            loading={isSetLoading}
-        >
-            <Tabs
-                activeKey={activeTab}
-                onChange={setActiveTab}
+        <PageContainer>
+            {/* Breadcrumb */}
+            <Breadcrumb
                 items={[
-                    { key: 'overview', label: t('detail.overview'), children: overviewTab },
-                    { key: 'modules', label: t('detail.assignedModules'), children: modulesTab },
-                    { key: 'metadata', label: t('detail.metadata'), children: <SetMetadataTab distributionSetId={distributionSetId} isAdmin={isAdmin} /> },
-                    { key: 'tags', label: t('detail.tags'), children: <SetTagsTab distributionSetId={distributionSetId} isAdmin={isAdmin} /> },
-                    { key: 'statistics', label: t('detail.statistics') || 'Statistics', children: <SetStatisticsTab distributionSetId={distributionSetId} /> },
-                    { key: 'targets', label: t('detail.targets') || 'Targets', children: <SetTargetsTab distributionSetId={distributionSetId} /> },
+                    { title: <Link to="/distributions/sets">{t('sets.title')}</Link> },
+                    { title: setData?.name || id },
                 ]}
             />
-        </Card>
+
+            {/* Header */}
+            <DetailPageHeader
+                title={setData?.name}
+                backLabel={t('common:actions.back')}
+                onBack={() => navigate('/distributions/sets')}
+                loading={isSetLoading}
+                extra={titleExtra}
+                actions={headerActions}
+            />
+
+            {/* Tabs */}
+            <SectionCard loading={isSetLoading}>
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={setActiveTab}
+                    items={[
+                        { key: 'overview', label: t('detail.overview'), children: overviewTab },
+                        { key: 'modules', label: t('detail.assignedModules'), children: modulesTab },
+                        { key: 'metadata', label: t('detail.metadata'), children: <SetMetadataTab distributionSetId={distributionSetId} isAdmin={isAdmin} /> },
+                        { key: 'tags', label: t('detail.tags'), children: <SetTagsTab distributionSetId={distributionSetId} isAdmin={isAdmin} /> },
+                        { key: 'statistics', label: t('detail.statistics') || 'Statistics', children: <SetStatisticsTab distributionSetId={distributionSetId} /> },
+                        { key: 'targets', label: t('detail.targets') || 'Targets', children: <SetTargetsTab distributionSetId={distributionSetId} /> },
+                    ]}
+                />
+            </SectionCard>
+        </PageContainer>
     );
 };
 

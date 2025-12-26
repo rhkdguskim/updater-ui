@@ -1,5 +1,11 @@
 {
     "pageTitle": "Distributions Management",
+    "sets": {
+        "title": "Distribution Sets"
+    },
+    "modules": {
+        "title": "Software Modules"
+    },
     "overview": {
         "title": "Distribution Management",
         "subtitle": "Distribution sets and software modules overview",

@@ -1,5 +1,8 @@
 {
     "pageTitle": "롤아웃",
+    "list": {
+        "title": "롤아웃 목록"
+    },
     "subtitle": "롤아웃 상태와 진행 상황을 한눈에 확인하세요",
     "empty": "롤아웃이 없습니다",
     "createRollout": "롤아웃 생성",

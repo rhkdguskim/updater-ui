@@ -1,17 +1,11 @@
 import React, { useState, useCallback } from 'react';
 import {
-    Typography,
     Tabs,
     Button,
-    Space,
     Breadcrumb,
-    Card,
-    Alert,
     message,
-    Skeleton,
 } from 'antd';
 import {
-    ArrowLeftOutlined,
     EditOutlined,
     DeleteOutlined,
     SendOutlined,
@@ -61,30 +55,9 @@ import { useGetDistributionSets } from '@/api/generated/distribution-sets/distri
 import type { MgmtDistributionSetAssignment, MgmtDistributionSetAssignments, MgmtMetadata } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useQueryClient } from '@tanstack/react-query';
-import styled from 'styled-components';
 import { useTranslation } from 'react-i18next';
-
-const { Title, Text } = Typography;
-
-const PageContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-`;
-
-const HeaderRow = styled.div`
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 16px;
-`;
-
-const HeaderInfo = styled.div`
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-`;
+import { PageContainer, SectionCard } from '@/components/layout/PageLayout';
+import { DetailPageHeader } from '@/components/common';
 
 const TargetDetail: React.FC = () => {
     const { id: targetId } = useParams<{ id: string }>();
@@ -411,16 +384,10 @@ const TargetDetail: React.FC = () => {
     if (targetError) {
         return (
             <PageContainer>
-                <Alert
-                    type="error"
-                    message={t('detail.notFoundTitle')}
-                    description={t('detail.notFoundDesc')}
-                    showIcon
-                    action={
-                        <Button type="primary" onClick={() => navigate('/targets')}>
-                            {t('detail.backToTargets')}
-                        </Button>
-                    }
+                <DetailPageHeader
+                    title={t('detail.notFoundTitle')}
+                    backLabel={t('detail.backToTargets')}
+                    onBack={() => navigate('/targets')}
                 />
             </PageContainer>
         );
@@ -522,6 +489,34 @@ const TargetDetail: React.FC = () => {
             : []),
     ];
 
+    const headerActions = (
+        <>
+            <Button
+                icon={<SendOutlined />}
+                onClick={() => setAssignModalOpen(true)}
+            >
+                {t('detail.assignDS')}
+            </Button>
+            {isAdmin && (
+                <>
+                    <Button
+                        icon={<EditOutlined />}
+                        onClick={() => setEditModalOpen(true)}
+                    >
+                        {t('actions.edit', { ns: 'common' })}
+                    </Button>
+                    <Button
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={() => setDeleteModalOpen(true)}
+                    >
+                        {t('actions.delete', { ns: 'common' })}
+                    </Button>
+                </>
+            )}
+        </>
+    );
+
     return (
         <PageContainer>
             {/* Breadcrumb */}
@@ -533,66 +528,24 @@ const TargetDetail: React.FC = () => {
             />
 
             {/* Header */}
-            <HeaderRow>
-                <HeaderInfo>
-                    <Space>
-                        <Button
-                            icon={<ArrowLeftOutlined />}
-                            onClick={() => navigate('/targets')}
-                        >
-                            {t('actions.back', { ns: 'common' })}
-                        </Button>
-                        {targetLoading ? (
-                            <Skeleton.Input active size="large" style={{ width: 200 }} />
-                        ) : (
-                            <Title level={3} style={{ margin: 0 }}>
-                                {targetData?.name || targetId}
-                            </Title>
-                        )}
-                    </Space>
-                    {targetData?.description && (
-                        <Text type="secondary" style={{ marginLeft: 44 }}>
-                            {targetData.description}
-                        </Text>
-                    )}
-                </HeaderInfo>
-
-                <Space>
-                    <Button
-                        icon={<SendOutlined />}
-                        onClick={() => setAssignModalOpen(true)}
-                    >
-                        {t('detail.assignDS')}
-                    </Button>
-                    {isAdmin && (
-                        <>
-                            <Button
-                                icon={<EditOutlined />}
-                                onClick={() => setEditModalOpen(true)}
-                            >
-                                {t('actions.edit', { ns: 'common' })}
-                            </Button>
-                            <Button
-                                danger
-                                icon={<DeleteOutlined />}
-                                onClick={() => setDeleteModalOpen(true)}
-                            >
-                                {t('actions.delete', { ns: 'common' })}
-                            </Button>
-                        </>
-                    )}
-                </Space>
-            </HeaderRow>
+            <DetailPageHeader
+                title={targetData?.name || targetId}
+                description={targetData?.description}
+                backLabel={t('actions.back', { ns: 'common' })}
+                onBack={() => navigate('/targets')}
+                loading={targetLoading}
+                actions={headerActions}
+            />
 
             {/* Tabs */}
-            <Card>
+            <SectionCard>
                 <Tabs
                     activeKey={activeTab}
                     onChange={setActiveTab}
                     items={tabItems}
                     size="large"
                 />
-            </Card>
+            </SectionCard>
 
             {/* Modals */}
             <DeleteTargetModal

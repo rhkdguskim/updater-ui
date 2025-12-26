@@ -1,5 +1,11 @@
 {
     "pageTitle": "배포 관리",
+    "sets": {
+        "title": "배포 세트"
+    },
+    "modules": {
+        "title": "소프트웨어 모듈"
+    },
     "overview": {
         "title": "배포 관리",
         "subtitle": "배포 세트 및 소프트웨어 모듈 개요",

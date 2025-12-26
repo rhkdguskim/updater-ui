@@ -1,7 +1,7 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Descriptions, Tabs, Table, Button, Upload, message, Modal, Space, Tag, Tooltip, List, Badge } from 'antd';
-import { ArrowLeftOutlined, DeleteOutlined, DownloadOutlined, FileOutlined, InboxOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { Descriptions, Tabs, Table, Button, Upload, message, Modal, Space, Tag, Tooltip, List, Badge, Breadcrumb } from 'antd';
+import { DeleteOutlined, DownloadOutlined, FileOutlined, InboxOutlined, InfoCircleOutlined } from '@ant-design/icons';
 import {
     useGetSoftwareModule,
     useGetArtifacts,
@@ -13,9 +13,10 @@ import { axiosInstance } from '@/api/axios-instance';
 import { format } from 'date-fns';
 import type { MgmtArtifact } from '@/api/generated/model';
 import ModuleMetadataTab from './components/ModuleMetadataTab';
-
 import { useTranslation } from 'react-i18next';
 import type { RcFile } from 'antd/es/upload';
+import { PageContainer, SectionCard } from '@/components/layout/PageLayout';
+import { DetailPageHeader } from '@/components/common';
 
 const SoftwareModuleDetail: React.FC = () => {
     const { t } = useTranslation(['distributions', 'common']);
@@ -294,26 +295,43 @@ const SoftwareModuleDetail: React.FC = () => {
         </Space>
     );
 
+    const titleExtra = moduleData?.version ? (
+        <Tag color="blue">{moduleData.version}</Tag>
+    ) : undefined;
+
     return (
-        <Card
-            title={
-                <Space>
-                    <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/distributions/modules')} type="text" />
-                    {moduleData?.name} <Tag color="blue">{moduleData?.version}</Tag>
-                </Space>
-            }
-            loading={isModuleLoading}
-        >
-            <Tabs
-                activeKey={activeTab}
-                onChange={setActiveTab}
+        <PageContainer>
+            {/* Breadcrumb */}
+            <Breadcrumb
                 items={[
-                    { key: 'overview', label: t('detail.overview'), children: overviewTab },
-                    { key: 'artifacts', label: t('detail.artifacts'), children: artifactsTab },
-                    { key: 'metadata', label: t('detail.metadata'), children: <ModuleMetadataTab softwareModuleId={softwareModuleId} isAdmin={isAdmin} /> },
+                    { title: <Link to="/distributions/modules">{t('modules.title')}</Link> },
+                    { title: moduleData?.name || id },
                 ]}
             />
-        </Card>
+
+            {/* Header */}
+            <DetailPageHeader
+                title={moduleData?.name}
+                backLabel={t('common:actions.back')}
+                onBack={() => navigate('/distributions/modules')}
+                loading={isModuleLoading}
+                extra={titleExtra}
+                status={moduleData?.locked ? 'locked' : undefined}
+            />
+
+            {/* Tabs */}
+            <SectionCard loading={isModuleLoading}>
+                <Tabs
+                    activeKey={activeTab}
+                    onChange={setActiveTab}
+                    items={[
+                        { key: 'overview', label: t('detail.overview'), children: overviewTab },
+                        { key: 'artifacts', label: t('detail.artifacts'), children: artifactsTab },
+                        { key: 'metadata', label: t('detail.metadata'), children: <ModuleMetadataTab softwareModuleId={softwareModuleId} isAdmin={isAdmin} /> },
+                    ]}
+                />
+            </SectionCard>
+        </PageContainer>
     );
 };
 

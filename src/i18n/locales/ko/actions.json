@@ -1,5 +1,8 @@
 {
     "pageTitle": "액션",
+    "list": {
+        "title": "액션 목록"
+    },
     "subtitle": "디바이스 액션과 상태 변경을 한눈에 확인하세요",
     "refresh": "새로고침",
     "columns": {

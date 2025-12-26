@@ -1,14 +1,15 @@
 import styled from 'styled-components';
+import { Card } from 'antd';
 
 export const PageContainer = styled.div`
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     flex: 1;
     min-height: 0;
     height: 100%;
-    /* Remove rigid height to allow parent flex to control it, or for it to grow */
-    padding-bottom: 24px;
+    overflow-y: auto;
+    padding: 0 4px 24px 4px;
 `;
 
 
@@ -17,6 +18,31 @@ export const HeaderRow = styled.div`
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 4px 0;
+    gap: 12px;
+    padding: 8px 0;
+`;
+
+export const SectionCard = styled(Card)`
+    border-radius: 14px;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    
+    .ant-card-head {
+        padding: 16px 24px;
+        min-height: auto;
+    }
+    
+    .ant-card-head-title {
+        font-size: 16px;
+        font-weight: 600;
+    }
+    
+    .ant-card-body {
+        flex: 1;
+        min-height: 0;
+        overflow-y: auto;
+        padding: 24px;
+    }
 `;

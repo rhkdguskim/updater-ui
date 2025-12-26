@@ -1,5 +1,8 @@
 {
     "pageTitle": "Actions",
+    "list": {
+        "title": "Actions"
+    },
     "subtitle": "Track device actions and status updates",
     "refresh": "Refresh",
     "columns": {
