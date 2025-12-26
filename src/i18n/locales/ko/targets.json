@@ -168,7 +168,10 @@
         "percentOfDevices": "전체 기기의 {{percent}}%",
         "noDescription": "설명 없음",
         "deviceGrid": "디바이스 상태",
-        "targetTypeDistribution": "타겟 유형 분포"
+        "targetTypeDistribution": "타겟 유형 분포",
+        "percentOnline": "{{percent}}% 온라인",
+        "typesCount": "{{count}}개 유형",
+        "devicesCount": "{{count}}개 기기"
     },
     "status": {
         "inSync": "동기화됨",

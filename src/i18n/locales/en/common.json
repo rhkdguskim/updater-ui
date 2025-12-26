@@ -154,7 +154,10 @@
         "endsWith": "ends with",
         "before": "before",
         "after": "after",
-        "selected": "selected"
+        "sameDay": "the same day",
+        "selected": "selected",
+        "selectField": "Select Field",
+        "condition": "Condition"
     },
     "yes": "Yes",
     "no": "No",

@@ -57,7 +57,7 @@ const LogoContainer = styled.div`
   .logo-icon {
     width: 26px;
     height: 26px;
-    background: var(--ant-color-primary, linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%));
+    background: var(--ant-color-primary);
     border-radius: 6px;
     display: flex;
     align-items: center;
@@ -134,8 +134,8 @@ const UserRole = styled(Text)`
 `;
 
 const StyledAvatar = styled(Avatar)`
-    background: var(--ant-color-primary, linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%));
-    box-shadow: 0 2px 8px var(--ant-color-primary-hover, rgba(99, 102, 241, 0.25));
+    background: var(--ant-color-primary);
+    box-shadow: 0 2px 8px var(--ant-color-primary-hover);
     font-size: 14px;
 `;
 
@@ -184,7 +184,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
                 {
                     key: '/targets/overview',
                     icon: <MdOutlineDashboard />,
-                    label: t('nav.overview', '개요'),
+                    label: t('nav.overview'),
                     onClick: () => navigate('/targets'),
                 },
                 {
@@ -204,7 +204,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
                 {
                     key: '/distributions/overview',
                     icon: <MdOutlineDashboard />,
-                    label: t('nav.overview', '개요'),
+                    label: t('nav.overview'),
                     onClick: () => navigate('/distributions'),
                 },
                 {
@@ -230,7 +230,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
                 {
                     key: '/rollouts/overview',
                     icon: <MdOutlineDashboard />,
-                    label: t('nav.rolloutOverview', '개요'),
+                    label: t('nav.rolloutOverview'),
                     onClick: () => navigate('/rollouts'),
                 },
                 {
@@ -272,7 +272,7 @@ const AppHeader: React.FC<AppHeaderProps> = () => {
                     <div className="logo-icon">
                         <MdRocketLaunch />
                     </div>
-                    <span className="logo-text">{import.meta.env.VITE_APP_TITLE || t('common:appName', 'Updater UI')}</span>
+                    <span className="logo-text">{t('common:appName')}</span>
                 </LogoContainer>
 
                 <StyledMenu

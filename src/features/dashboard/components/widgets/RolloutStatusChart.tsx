@@ -3,7 +3,7 @@ import { Skeleton, Flex, Typography } from 'antd';
 import { PlayCircleOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
-import { ChartCard, ChartLegendItem, COLORS, IconBadge } from '../DashboardStyles';
+import { ChartCard, ChartLegendItem, IconBadge } from '../DashboardStyles';
 
 const { Text } = Typography;
 
@@ -24,24 +24,24 @@ export const RolloutStatusChart: React.FC<RolloutStatusChartProps> = ({
     const total = activeRolloutCount + finishedRolloutCount + errorRolloutCount;
 
     const rolloutStatusData = useMemo(() => [
-        { name: t('common:status.running', 'Running'), value: activeRolloutCount, color: '#8b5cf6' },
-        { name: t('common:status.finished', 'Finished'), value: finishedRolloutCount, color: '#10b981' },
-        { name: t('common:status.error', 'Error'), value: errorRolloutCount, color: COLORS.error },
+        { name: t('common:status.running'), value: activeRolloutCount, color: 'var(--ant-color-primary)' },
+        { name: t('common:status.finished'), value: finishedRolloutCount, color: 'var(--ant-color-success)' },
+        { name: t('common:status.error'), value: errorRolloutCount, color: 'var(--ant-color-error)' },
     ].filter(d => d.value > 0), [activeRolloutCount, finishedRolloutCount, errorRolloutCount, t]);
 
 
 
     return (
         <ChartCard
-            $theme="rollout"
+            $theme="rollouts"
             title={
                 <Flex align="center" gap={10}>
-                    <IconBadge $theme="rollout">
+                    <IconBadge $theme="rollouts">
                         <PlayCircleOutlined />
                     </IconBadge>
                     <Flex vertical gap={0}>
-                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('chart.rolloutStatus', 'Rollout')}</span>
-                        <Text type="secondary" style={{ fontSize: 11 }}>{total} total rollouts</Text>
+                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('chart.rolloutStatus')}</span>
+                        <Text type="secondary" style={{ fontSize: 11 }}>{t('chart.totalRollouts', { count: total })}</Text>
                     </Flex>
                 </Flex>
             }

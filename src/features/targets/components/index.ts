@@ -12,3 +12,4 @@ export { default as BulkAssignTypeModal } from './BulkAssignTypeModal';
 export { default as BulkDeleteTargetModal } from './BulkDeleteTargetModal';
 export { TargetTagsCell } from './TargetTagsCell';
 export { TargetTypeCell } from './TargetTypeCell';
+export { ImportTargetsModal } from './ImportTargetsModal';

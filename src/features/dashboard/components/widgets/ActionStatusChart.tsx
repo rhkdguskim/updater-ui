@@ -3,7 +3,7 @@ import { Skeleton, Flex, Typography } from 'antd';
 import { SyncOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } from 'recharts';
-import { ChartCard, ChartLegendItem, COLORS, IconBadge } from '../DashboardStyles';
+import { ChartCard, ChartLegendItem, IconBadge } from '../DashboardStyles';
 
 const { Text } = Typography;
 
@@ -24,9 +24,9 @@ export const ActionStatusChart: React.FC<ActionStatusChartProps> = ({
     const total = pendingCount + finishedCount + errorCount;
 
     const actionStatusData = useMemo(() => [
-        { name: t('common:status.running', 'Running'), value: pendingCount, color: '#f59e0b' },
-        { name: t('common:status.finished', 'Finished'), value: finishedCount, color: '#10b981' },
-        { name: t('common:status.error', 'Error'), value: errorCount, color: COLORS.error },
+        { name: t('common:status.running'), value: pendingCount, color: 'var(--ant-color-warning)' },
+        { name: t('common:status.finished'), value: finishedCount, color: 'var(--ant-color-success)' },
+        { name: t('common:status.error'), value: errorCount, color: 'var(--ant-color-error)' },
     ].filter(d => d.value > 0), [pendingCount, finishedCount, errorCount, t]);
 
     const renderCustomLegend = (data: { name: string; value: number; color: string }[]) => (
@@ -41,7 +41,7 @@ export const ActionStatusChart: React.FC<ActionStatusChartProps> = ({
                             background: entry.color,
                             boxShadow: `0 1px 3px ${entry.color}40`
                         }} />
-                        <Text style={{ fontSize: 11, color: '#475569' }}>{entry.name}</Text>
+                        <Text style={{ fontSize: 11, color: 'var(--ant-color-text-description)' }}>{entry.name}</Text>
                     </Flex>
                     <Text strong style={{ fontSize: 12, color: entry.color }}>{entry.value}</Text>
                 </ChartLegendItem>
@@ -51,15 +51,15 @@ export const ActionStatusChart: React.FC<ActionStatusChartProps> = ({
 
     return (
         <ChartCard
-            $theme="action"
+            $theme="actions"
             title={
                 <Flex align="center" gap={10}>
-                    <IconBadge $theme="action">
+                    <IconBadge $theme="actions">
                         <SyncOutlined />
                     </IconBadge>
                     <Flex vertical gap={0}>
-                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('chart.actionStatus', 'Actions')}</span>
-                        <Text type="secondary" style={{ fontSize: 11 }}>{total} recent actions</Text>
+                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('chart.actionStatus')}</span>
+                        <Text type="secondary" style={{ fontSize: 11 }}>{t('chart.recentActions', { count: total })}</Text>
                     </Flex>
                 </Flex>
             }

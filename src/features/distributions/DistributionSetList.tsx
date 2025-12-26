@@ -204,7 +204,7 @@ const DistributionSetList: React.FC = () => {
             dataIndex: 'typeName',
             key: 'typeName',
             width: 120,
-            render: (text) => <Tag color="blue">{text || t('common:notSelected', { defaultValue: '선택되지 않음' })}</Tag>,
+            render: (text) => <Tag color="blue">{text || t('common:notSelected')}</Tag>,
         },
         {
             title: t('list.columns.description'),

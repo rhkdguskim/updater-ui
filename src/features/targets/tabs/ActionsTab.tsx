@@ -18,8 +18,8 @@ import { useGetActionStatusList } from '@/api/generated/targets/targets';
 import styled from 'styled-components';
 
 const Label = styled(Tag)`
-    background: rgba(59, 130, 246, 0.15);
-    color: #1d4ed8;
+    background: var(--ant-color-info-bg);
+    color: var(--ant-color-info);
     font-weight: 600;
 `;
 
@@ -38,16 +38,16 @@ interface ActionsTabProps {
 const getStatusIcon = (status?: string) => {
     switch (status) {
         case 'finished':
-            return <CheckCircleOutlined style={{ color: '#52c41a' }} />;
+            return <CheckCircleOutlined style={{ color: 'var(--ant-color-success)' }} />;
         case 'error':
-            return <CloseCircleOutlined style={{ color: '#ff4d4f' }} />;
+            return <CloseCircleOutlined style={{ color: 'var(--ant-color-error)' }} />;
         case 'running':
-            return <SyncOutlined spin style={{ color: '#1890ff' }} />;
+            return <SyncOutlined spin style={{ color: 'var(--ant-color-info)' }} />;
         case 'pending':
         case 'waiting':
-            return <ClockCircleOutlined style={{ color: '#faad14' }} />;
+            return <ClockCircleOutlined style={{ color: 'var(--ant-color-warning)' }} />;
         case 'canceled':
-            return <StopOutlined style={{ color: '#8c8c8c' }} />;
+            return <StopOutlined style={{ color: 'var(--ant-color-text-quaternary)' }} />;
         default:
             return <ClockCircleOutlined />;
     }
@@ -142,15 +142,15 @@ const ActionsTab: React.FC<ActionsTabProps> = ({
     const getToneColor = (tone: string) => {
         switch (tone) {
             case 'error':
-                return '#ef4444';
+                return 'var(--ant-color-error)';
             case 'success':
-                return '#10b981';
+                return 'var(--ant-color-success)';
             case 'processing':
-                return '#3b82f6';
+                return 'var(--ant-color-info)';
             case 'warning':
-                return '#f59e0b';
+                return 'var(--ant-color-warning)';
             default:
-                return '#94a3b8';
+                return 'var(--ant-color-text-quaternary)';
         }
     };
 
@@ -173,12 +173,12 @@ const ActionsTab: React.FC<ActionsTabProps> = ({
                     width: 20,
                     height: 20,
                     borderRadius: 999,
-                    background: `${color}1a`,
+                    background: `var(--ant-color-primary-bg)`,
                     color,
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    border: `1px solid ${color}33`,
+                    border: `1px solid var(--ant-color-border-secondary)`,
                 }}
             >
                 {icon}

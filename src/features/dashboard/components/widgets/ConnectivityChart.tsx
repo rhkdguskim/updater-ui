@@ -34,8 +34,8 @@ export const ConnectivityChart: React.FC<ConnectivityChartProps> = ({ isLoading,
                         <ApiOutlined />
                     </IconBadge>
                     <Flex vertical gap={0}>
-                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('chart.connectivityStatus', 'Connectivity')}</span>
-                        <Text type="secondary" style={{ fontSize: 11 }}>{onlinePercent}% Online</Text>
+                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('chart.connectivityStatus')}</span>
+                        <Text type="secondary" style={{ fontSize: 11 }}>{t('overview.percentOnline', { percent: onlinePercent })}</Text>
                     </Flex>
                 </Flex>
             }

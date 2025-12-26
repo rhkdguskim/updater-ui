@@ -11,9 +11,9 @@ const Container = styled.div<{ $withBackground?: boolean }>`
     flex-wrap: wrap;
     gap: 16px;
     padding: ${props => props.$withBackground ? '16px' : '0'};
-    background: ${props => props.$withBackground ? 'var(--ant-color-bg-container, #ffffff)' : 'transparent'};
+    background: ${props => props.$withBackground ? 'var(--ant-color-bg-container)' : 'transparent'};
     border-radius: ${props => props.$withBackground ? '12px' : '0'};
-    box-shadow: ${props => props.$withBackground ? 'var(--ant-box-shadow-tertiary, 0 1px 2px 0 rgba(0, 0, 0, 0.03))' : 'none'};
+    box-shadow: ${props => props.$withBackground ? 'var(--ant-box-shadow-tertiary)' : 'none'};
 `;
 
 const SearchGroup = styled(Space)`

@@ -46,7 +46,7 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     const currentTheme = resolvedTheme === 'dark' ? darkTheme : lightTheme;
 
     return (
-        <ConfigProvider theme={currentTheme}>
+        <ConfigProvider theme={{ ...currentTheme, cssVar: true }}>
             {children}
         </ConfigProvider>
     );

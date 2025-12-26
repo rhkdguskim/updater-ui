@@ -23,7 +23,6 @@ const TableWrapper = styled.div`
     min-height: 0;
     display: flex;
     flex-direction: column;
-    overflow: auto;
 
     /* Table should not stretch rows - only use content height */
     .ant-table-wrapper {

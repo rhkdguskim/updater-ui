@@ -19,11 +19,11 @@ const ColorBox = styled.div<{ $color: string; $size: number }>`
 const HexCode = styled.span`
     font-size: var(--ant-font-size-sm);
     font-family: monospace;
-    color: #666;
+    color: var(--ant-color-text-secondary);
 `;
 
 const EmptyPlaceholder = styled.span`
-    color: #999;
+    color: var(--ant-color-text-quaternary);
 `;
 
 export interface ColorSwatchProps {

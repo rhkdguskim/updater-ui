@@ -158,7 +158,10 @@
         "percentOfDevices": "{{percent}}% of devices",
         "noDescription": "No description",
         "deviceGrid": "Device Status",
-        "targetTypeDistribution": "Target Type Distribution"
+        "targetTypeDistribution": "Target Type Distribution",
+        "percentOnline": "{{percent}}% online",
+        "typesCount": "{{count}} types",
+        "devicesCount": "{{count}} devices"
     },
     "status": {
         "inSync": "In Sync",

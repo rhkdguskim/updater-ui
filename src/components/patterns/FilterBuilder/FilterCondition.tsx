@@ -33,10 +33,10 @@ export interface FilterOperator {
 }
 
 const textOperators: FilterOperator[] = [
-    { value: 'contains', label: '포함' },
-    { value: 'equals', label: '같음' },
-    { value: 'startsWith', label: '로 시작' },
-    { value: 'endsWith', label: '로 끝남' },
+    { value: 'contains', label: 'filter.contains' },
+    { value: 'equals', label: 'filter.equals' },
+    { value: 'startsWith', label: 'filter.startsWith' },
+    { value: 'endsWith', label: 'filter.endsWith' },
 ];
 
 const numberOperators: FilterOperator[] = [
@@ -48,14 +48,14 @@ const numberOperators: FilterOperator[] = [
 ];
 
 const selectOperators: FilterOperator[] = [
-    { value: 'equals', label: '같음' },
-    { value: 'notEquals', label: '같지 않음' },
+    { value: 'equals', label: 'filter.equals' },
+    { value: 'notEquals', label: 'filter.notEquals' },
 ];
 
 const dateOperators: FilterOperator[] = [
-    { value: 'equals', label: '같은 날' },
-    { value: 'before', label: '이전' },
-    { value: 'after', label: '이후' },
+    { value: 'equals', label: 'filter.sameDay' },
+    { value: 'before', label: 'filter.before' },
+    { value: 'after', label: 'filter.after' },
 ];
 
 export interface FilterConditionValue {
@@ -149,7 +149,7 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
             case 'select':
                 return (
                     <StyledSelect
-                        placeholder={t('actions.select', { defaultValue: '선택' })}
+                        placeholder={t('actions.select')}
                         size="small"
                         style={{ width: 150 }}
                         value={value as string}
@@ -172,7 +172,7 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
             case 'boolean':
                 return (
                     <StyledSelect
-                        placeholder={t('actions.select', { defaultValue: '선택' })}
+                        placeholder={t('actions.select')}
                         size="small"
                         style={{ width: 100 }}
                         value={value as string}
@@ -192,7 +192,7 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
         <ConditionContainer onKeyDown={handleKeyDown}>
             <Space size="small">
                 <StyledSelect
-                    placeholder={t('actions.select', { defaultValue: '필드 선택' })}
+                    placeholder={t('filter.selectField')}
                     size="small"
                     value={selectedField}
                     onChange={(v) => {
@@ -208,11 +208,11 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
                 />
                 {selectedField && (
                     <StyledSelect
-                        placeholder={t('filter.equals', { defaultValue: '조건' })}
+                        placeholder={t('filter.condition')}
                         size="small"
                         value={selectedOperator}
                         onChange={(v) => setSelectedOperator(v as string)}
-                        options={getOperators()}
+                        options={getOperators().map(op => ({ ...op, label: t(op.label) }))}
                     />
                 )}
                 {selectedOperator && renderValueInput()}

@@ -64,7 +64,7 @@ const ValueText = styled.span<{ $size?: string }>`
     font-weight: 700;
     line-height: 1.2;
     letter-spacing: -0.02em;
-    color: var(--ant-color-text, #1e293b);
+    color: var(--ant-color-text);
 `;
 
 const TrendBadge = styled.div<{ $isPositive?: boolean; $isNeutral?: boolean }>`
@@ -77,10 +77,10 @@ const TrendBadge = styled.div<{ $isPositive?: boolean; $isNeutral?: boolean }>`
     font-weight: 600;
     background: ${props =>
         props.$isNeutral
-            ? 'rgba(148, 163, 184, 0.15)'
+            ? 'var(--ant-color-fill-secondary)'
             : props.$isPositive
-                ? 'rgba(16, 185, 129, 0.15)'
-                : 'rgba(239, 68, 68, 0.15)'
+                ? 'rgba(var(--ant-color-success-rgb), 0.15)'
+                : 'rgba(var(--ant-color-error-rgb), 0.15)'
     };
     color: ${props =>
         props.$isNeutral
@@ -91,10 +91,10 @@ const TrendBadge = styled.div<{ $isPositive?: boolean; $isNeutral?: boolean }>`
     };
     border: 1px solid ${props =>
         props.$isNeutral
-            ? 'rgba(148, 163, 184, 0.3)'
+            ? 'var(--ant-color-border-secondary)'
             : props.$isPositive
-                ? 'rgba(16, 185, 129, 0.3)'
-                : 'rgba(239, 68, 68, 0.3)'
+                ? 'var(--ant-color-success-border)'
+                : 'var(--ant-color-error-border)'
     };
 `;
 
@@ -156,11 +156,11 @@ const variantColors: Record<StatusVariant, string> = {
 };
 
 const variantSolidColors: Record<StatusVariant, string> = {
-    default: '#6366f1',
-    success: '#10b981',
-    warning: '#f59e0b',
-    danger: '#ef4444',
-    info: '#3b82f6',
+    default: 'var(--ant-color-primary)',
+    success: 'var(--ant-color-success)',
+    warning: 'var(--ant-color-warning)',
+    danger: 'var(--ant-color-error)',
+    info: 'var(--ant-color-info)',
 };
 
 export const KPICard: React.FC<KPICardProps> = ({

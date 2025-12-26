@@ -121,7 +121,7 @@ const DeviceCardGrid: React.FC<DeviceCardGridProps> = ({
     const animationDuration = totalScrollDistance / scrollSpeed;
 
     const viewPortHeight = (rowHeight * rows) + (gap * (rows - 1));
-    const resolvedTitle = title || t('deviceGrid.title', '디바이스 상태 그리드');
+    const resolvedTitle = title || t('deviceGrid.title');
 
     return (
         <ChartCard

@@ -191,16 +191,16 @@ const TargetsOverview: React.FC = () => {
                 <TopRow>
                     <KPIGridContainer>
                         <OverviewStatsCard
-                            $accentColor="linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)"
+                            $accentColor="linear-gradient(135deg, var(--ant-color-primary) 0%, var(--ant-color-primary-hover) 100%)"
                             $delay={1}
                             onClick={() => navigate('/targets/list')}
                         >
                             {isLoading ? <Skeleton.Avatar active size={40} /> : (
                                 <Flex vertical align="center" gap={4}>
-                                    <IconBadge $color="linear-gradient(135deg, #3b82f6 0%, #6366f1 100%)">
+                                    <IconBadge $color="linear-gradient(135deg, var(--ant-color-primary) 0%, var(--ant-color-primary-hover) 100%)">
                                         <AppstoreOutlined />
                                     </IconBadge>
-                                    <BigNumber $color="#3b82f6">{totalDevices}</BigNumber>
+                                    <BigNumber $color="var(--ant-color-primary)">{totalDevices}</BigNumber>
                                     <Text type="secondary" style={{ fontSize: 11, textAlign: 'center' }}>
                                         {t('overview.totalDevices', 'Total Devices')}
                                     </Text>
@@ -271,8 +271,8 @@ const TargetsOverview: React.FC = () => {
                                         <ApiOutlined />
                                     </IconBadge>
                                     <Flex vertical gap={0}>
-                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.connectivityStatus', 'Connectivity')}</span>
-                                        <Text type="secondary" style={{ fontSize: 11 }}>{onlinePercent}% online</Text>
+                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.connectivityStatus')}</span>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>{t('overview.percentOnline', { percent: onlinePercent })}</Text>
                                     </Flex>
                                 </Flex>
                             }
@@ -309,8 +309,8 @@ const TargetsOverview: React.FC = () => {
                                         <TagsOutlined />
                                     </IconBadge>
                                     <Flex vertical gap={0}>
-                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.targetTypeDistribution', 'Target Types')}</span>
-                                        <Text type="secondary" style={{ fontSize: 11 }}>{targetTypePieData.length} types</Text>
+                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.targetTypeDistribution')}</span>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>{t('overview.typesCount', { count: targetTypePieData.length })}</Text>
                                     </Flex>
                                 </Flex>
                             }
@@ -347,8 +347,8 @@ const TargetsOverview: React.FC = () => {
                                         <SyncOutlined />
                                     </IconBadge>
                                     <Flex vertical gap={0}>
-                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.updateStatusDistribution', 'Update Status')}</span>
-                                        <Text type="secondary" style={{ fontSize: 11 }}>{targets.length} devices</Text>
+                                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.updateStatusDistribution')}</span>
+                                        <Text type="secondary" style={{ fontSize: 11 }}>{t('overview.devicesCount', { count: targets.length })}</Text>
                                     </Flex>
                                 </Flex>
                             }

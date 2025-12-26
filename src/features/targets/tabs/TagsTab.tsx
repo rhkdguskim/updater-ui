@@ -28,12 +28,12 @@ const TagsTab: React.FC<TagsTabProps> = ({ data, loading }) => {
                     <Card
                         size="small"
                         style={{
-                            borderLeft: `4px solid ${tag.colour || '#1890ff'}`,
+                            borderLeft: `4px solid ${tag.colour || 'var(--ant-color-primary)'}`,
                         }}
                     >
                         <Space direction="vertical" size="small" style={{ width: '100%' }}>
                             <Space>
-                                <TagOutlined style={{ color: tag.colour || '#1890ff' }} />
+                                <TagOutlined style={{ color: tag.colour || 'var(--ant-color-primary)' }} />
                                 <Text strong>{tag.name}</Text>
                             </Space>
                             {tag.description && (

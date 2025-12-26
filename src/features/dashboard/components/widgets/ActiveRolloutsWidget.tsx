@@ -26,9 +26,9 @@ const statusColorMap: Record<string, string> = {
 };
 
 const ROLLOUT_COLORS = {
-    running: '#3b82f6',
-    paused: '#f59e0b',
-    scheduled: '#8b5cf6',
+    running: 'var(--ant-color-primary)',
+    paused: 'var(--ant-color-warning)',
+    scheduled: 'var(--ant-color-info)',
 };
 
 const ActivityItem = styled.div`
@@ -87,21 +87,21 @@ export const ActiveRolloutsWidget: React.FC<ActiveRolloutsWidgetProps> = ({
 
     return (
         <ListCard
-            $theme="rollout"
+            $theme="rollouts"
             title={
                 <Flex align="center" gap={10}>
-                    <IconBadge $theme="rollout">
+                    <IconBadge $theme="rollouts">
                         <RocketOutlined />
                     </IconBadge>
                     <Flex vertical gap={0}>
-                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.activeRollouts', 'Active Rollouts')}</span>
-                        <Text type="secondary" style={{ fontSize: 11 }}>{activeRollouts.length} active</Text>
+                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('overview.activeRollouts')}</span>
+                        <Text type="secondary" style={{ fontSize: 11 }}>{t('overview.activeCount', { count: activeRollouts.length })}</Text>
                     </Flex>
                 </Flex>
             }
             extra={
                 <Button type="link" size="small" onClick={() => navigate('/rollouts')}>
-                    {t('overview.viewAll', 'View All')}
+                    {t('overview.viewAll')}
                 </Button>
             }
             $delay={7}
@@ -122,10 +122,10 @@ export const ActiveRolloutsWidget: React.FC<ActiveRolloutsWidgetProps> = ({
                                     <div style={{
                                         width: 32, height: 32, borderRadius: 8,
                                         background: rollout.status === 'running'
-                                            ? 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.1) 100%)'
+                                            ? 'rgba(var(--ant-color-primary-rgb), 0.15)'
                                             : rollout.status === 'paused'
-                                                ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.1) 100%)'
-                                                : 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.1) 100%)',
+                                                ? 'rgba(var(--ant-color-warning-rgb), 0.15)'
+                                                : 'rgba(var(--ant-color-info-rgb), 0.15)',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                                         flexShrink: 0
                                     }}>
@@ -147,7 +147,7 @@ export const ActiveRolloutsWidget: React.FC<ActiveRolloutsWidgetProps> = ({
                                             </Tag>
                                         </Flex>
                                         <Text type="secondary" style={{ fontSize: 10 }}>
-                                            {rollout.totalTargets || 0} targets
+                                            {t('overview.targetsCount', { count: rollout.totalTargets || 0 })}
                                         </Text>
                                     </Flex>
                                 </Flex>
@@ -158,7 +158,7 @@ export const ActiveRolloutsWidget: React.FC<ActiveRolloutsWidgetProps> = ({
                                     strokeColor={
                                         rollout.status === 'running' ? ROLLOUT_COLORS.running :
                                             rollout.status === 'paused' ? ROLLOUT_COLORS.paused :
-                                                '#cbd5e1'
+                                                'var(--ant-color-text-quaternary)'
                                     }
                                     strokeWidth={8}
                                 />
@@ -168,11 +168,11 @@ export const ActiveRolloutsWidget: React.FC<ActiveRolloutsWidgetProps> = ({
                 </div>
             ) : (
                 <Flex vertical justify="center" align="center" gap={12} style={{ flex: 1 }}>
-                    <RocketOutlined style={{ fontSize: 32, color: '#94a3b8' }} />
-                    <Text type="secondary" style={{ fontSize: 12 }}>{t('overview.noActiveRollouts', 'No active rollouts')}</Text>
+                    <RocketOutlined style={{ fontSize: 32, color: 'var(--ant-color-text-quaternary)' }} />
+                    <Text type="secondary" style={{ fontSize: 12 }}>{t('overview.noActiveRollouts')}</Text>
                     {isAdmin && onCreateClick && (
                         <Button type="primary" size="small" icon={<PlusOutlined />} onClick={onCreateClick}>
-                            {t('overview.createRollout', 'Create')}
+                            {t('overview.createRollout')}
                         </Button>
                     )}
                 </Flex>

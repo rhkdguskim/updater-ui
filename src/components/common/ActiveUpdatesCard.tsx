@@ -117,23 +117,23 @@ const IconBadge = styled.div<{ $status?: string }>`
     background: ${props => {
         switch (props.$status) {
             case 'finished':
-                return 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.1) 100%)';
+                return 'rgba(var(--ant-color-success-rgb), 0.15)';
             case 'error':
             case 'canceled':
-                return 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.1) 100%)';
+                return 'rgba(var(--ant-color-error-rgb), 0.15)';
             default:
-                return 'linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(99, 102, 241, 0.1) 100%)';
+                return 'rgba(var(--ant-color-info-rgb), 0.15)';
         }
     }};
     color: ${props => {
         switch (props.$status) {
             case 'finished':
-                return '#10b981';
+                return 'var(--ant-color-success)';
             case 'error':
             case 'canceled':
-                return '#ef4444';
+                return 'var(--ant-color-error)';
             default:
-                return '#3b82f6';
+                return 'var(--ant-color-info)';
         }
     }};
     font-size: 1.1rem;
@@ -155,8 +155,8 @@ const ExpandButton = styled.div`
     transition: all 0.2s;
 
     &:hover {
-        background: var(--ant-color-item-hover, rgba(0, 0, 0, 0.04));
-        color: var(--ant-color-primary, #3b82f6);
+        background: var(--ant-color-item-hover);
+        color: var(--ant-color-primary);
     }
 `;
 
@@ -301,12 +301,12 @@ const ActiveUpdateRowComponent: React.FC<{
         <div style={{ maxWidth: 320, maxHeight: 300, overflow: 'auto' }}>
             <Flex vertical gap={4}>
                 <Text strong style={{ fontSize: 'var(--ant-font-size-sm)', marginBottom: 4 }}>
-                    {t('activeUpdates.statusHistory', 'Status History')}
+                    {t('activeUpdates.statusHistory')}
                 </Text>
                 {messages.slice().reverse().slice(0, 8).map((msg: string, idx: number) => (
                     <Flex key={idx} gap={8} align="flex-start" style={{ padding: '4px 0', borderBottom: idx < 7 && idx < messages.length - 1 ? '1px solid var(--ant-color-border-secondary, rgba(0,0,0,0.06))' : 'none' }}>
                         <Tag color={idx === 0 ? 'blue' : 'default'} style={{ fontSize: 10, margin: 0, flexShrink: 0 }}>
-                            {idx === 0 ? t('common:status.current', 'Current') : `#${messages.length - idx}`}
+                            {idx === 0 ? t('common:status.current') : `#${messages.length - idx}`}
                         </Tag>
                         <Text style={{ fontSize: 'var(--ant-font-size-sm)', wordBreak: 'break-word' }} type={idx === 0 ? undefined : 'secondary'}>
                             {msg}
@@ -315,7 +315,7 @@ const ActiveUpdateRowComponent: React.FC<{
                 ))}
                 {messages.length > 8 && (
                     <Text type="secondary" style={{ fontSize: 10, textAlign: 'center', marginTop: 4 }}>
-                        +{messages.length - 8} {t('common:more', 'more')}...
+                        +{messages.length - 8} {t('common:more')}...
                     </Text>
                 )}
             </Flex>
@@ -383,7 +383,7 @@ const ActiveUpdateRowComponent: React.FC<{
             {/* Progress bar if available */}
             {progress !== undefined && progress > 0 && progress < 100 && (
                 <ProgressBar>
-                    <Progress percent={progress} size="small" strokeColor="#3b82f6" />
+                    <Progress percent={progress} size="small" strokeColor="var(--ant-color-info)" />
                 </ProgressBar>
             )}
 
@@ -397,7 +397,7 @@ const ActiveUpdateRowComponent: React.FC<{
                                 <Flex vertical gap={2}>
                                     <Flex align="center" gap={8}>
                                         <Tag style={{ fontSize: 10, margin: 0 }}>
-                                            {idx === 0 ? t('common:status.current', 'Current') : `Step ${messages.length - idx}`}
+                                            {idx === 0 ? t('common:status.current') : `${t('common:pagination.step')} ${messages.length - idx}`}
                                         </Tag>
                                     </Flex>
                                     <Text type="secondary" style={{ fontSize: 'var(--ant-font-size-sm)' }}>
@@ -468,7 +468,7 @@ export const ActiveUpdatesCard: React.FC<ActiveUpdatesCardProps> = ({
                         image={Empty.PRESENTED_IMAGE_SIMPLE}
                         description={
                             <Text type="secondary">
-                                {emptyText || t('activeUpdates.empty', 'No active updates')}
+                                {emptyText || t('activeUpdates.empty')}
                             </Text>
                         }
                     />

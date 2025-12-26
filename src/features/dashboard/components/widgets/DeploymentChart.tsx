@@ -28,8 +28,8 @@ export const DeploymentChart: React.FC<DeploymentChartProps> = ({
                         <ThunderboltOutlined />
                     </IconBadge>
                     <Flex vertical gap={0}>
-                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('chart.deploymentRate', 'Deployment')}</span>
-                        <Text type="secondary" style={{ fontSize: 11 }}>Completion rate</Text>
+                        <span style={{ fontSize: 14, fontWeight: 600 }}>{t('chart.deploymentRate')}</span>
+                        <Text type="secondary" style={{ fontSize: 11 }}>{t('chart.completionRate', 'Completion rate')}</Text>
                     </Flex>
                 </Flex>
             }
@@ -42,7 +42,7 @@ export const DeploymentChart: React.FC<DeploymentChartProps> = ({
                     <div style={{
                         fontSize: 48,
                         fontWeight: 800,
-                        background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                        background: 'var(--ant-color-primary)',
                         WebkitBackgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
                         lineHeight: 1
@@ -50,12 +50,12 @@ export const DeploymentChart: React.FC<DeploymentChartProps> = ({
                         {deploymentRate !== null ? `${deploymentRate}%` : '-'}
                     </div>
                     <Text type="secondary" style={{ fontSize: 12 }}>
-                        {t('chart.deploymentRateDesc', 'Target completion')}
+                        {t('chart.targetCompletion', 'Target completion')}
                     </Text>
                     <div style={{ width: '85%' }}>
-                        <ProgressBar $progress={deploymentRate ?? 0} $color="linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)" />
+                        <ProgressBar $progress={deploymentRate ?? 0} $color="var(--ant-color-primary)" />
                     </div>
-                    <Text style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>
+                    <Text style={{ fontSize: 12, color: 'var(--ant-color-text-description)', marginTop: 4 }}>
                         {deploymentRateLabel}
                     </Text>
                 </Flex>

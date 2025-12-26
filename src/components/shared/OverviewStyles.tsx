@@ -447,7 +447,7 @@ export const ProgressBar = styled.div<{ $progress: number; $color?: string }>`
         left: 0;
         height: 100%;
         width: ${props => props.$progress}%;
-        background: ${props => props.$color || 'linear-gradient(90deg, #3b82f6 0%, #2563eb 100%)'};
+        background: ${props => props.$color || 'var(--ant-color-primary)'};
         border-radius: 3px;
         transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -455,21 +455,21 @@ export const ProgressBar = styled.div<{ $progress: number; $color?: string }>`
 
 export const COLORS = {
     // Update Status Colors
-    inSync: '#10b981',
-    pending: '#3b82f6',
-    error: '#ef4444',
-    unknown: '#94a3b8',
+    inSync: 'var(--ant-color-success, #10b981)',
+    pending: 'var(--ant-color-info, #3b82f6)',
+    error: 'var(--ant-color-error, #ef4444)',
+    unknown: 'var(--ant-color-text-quaternary, #94a3b8)',
     // Connectivity Colors
-    online: '#10b981',
-    offline: '#f59e0b',
+    online: 'var(--ant-color-success, #10b981)',
+    offline: 'var(--ant-color-warning, #f59e0b)',
     // General
-    success: '#10b981',
-    running: '#3b82f6',
-    finished: '#10b981',
-    canceled: '#94a3b8',
+    success: 'var(--ant-color-success, #10b981)',
+    running: 'var(--ant-color-info, #3b82f6)',
+    finished: 'var(--ant-color-success, #10b981)',
+    canceled: 'var(--ant-color-text-quaternary, #94a3b8)',
     // Theme
-    targets: '#10b981',
-    distributions: '#6366f1',
-    actions: '#3b82f6',
-    rollouts: '#f59e0b',
+    targets: 'var(--ant-color-success, #10b981)',
+    distributions: 'var(--ant-color-primary, #6366f1)',
+    actions: 'var(--ant-color-info, #3b82f6)',
+    rollouts: 'var(--ant-color-warning, #f59e0b)',
 };

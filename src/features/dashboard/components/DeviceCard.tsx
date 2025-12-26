@@ -28,17 +28,17 @@ const DeviceCardWrapper = styled.div<{ $isOnline?: boolean; $updateStatus?: stri
     border-radius: 14px;
     background: ${props => {
         const status = props.$updateStatus?.toLowerCase();
-        if (status === 'pending') return 'linear-gradient(145deg, rgba(59, 130, 246, 0.05) 0%, rgba(255, 255, 255, 0.98) 30%)';
-        if (status === 'error') return 'linear-gradient(145deg, rgba(239, 68, 68, 0.05) 0%, rgba(255, 255, 255, 0.98) 30%)';
-        if (status === 'in_sync') return 'linear-gradient(145deg, rgba(16, 185, 129, 0.05) 0%, rgba(255, 255, 255, 0.98) 30%)';
-        return 'linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%)';
+        if (status === 'pending') return 'linear-gradient(145deg, rgba(var(--ant-color-info-rgb), 0.05) 0%, var(--ant-color-bg-container) 30%)';
+        if (status === 'error') return 'linear-gradient(145deg, rgba(var(--ant-color-error-rgb), 0.05) 0%, var(--ant-color-bg-container) 30%)';
+        if (status === 'in_sync') return 'linear-gradient(145deg, rgba(var(--ant-color-success-rgb), 0.05) 0%, var(--ant-color-bg-container) 30%)';
+        return 'var(--ant-color-bg-container)';
     }};
     border: 1px solid ${props => {
         const status = props.$updateStatus?.toLowerCase();
-        if (status === 'pending') return 'rgba(59, 130, 246, 0.15)';
-        if (status === 'error') return 'rgba(239, 68, 68, 0.15)';
-        if (status === 'in_sync') return 'rgba(16, 185, 129, 0.15)';
-        return 'rgba(0, 0, 0, 0.04)';
+        if (status === 'pending') return 'var(--ant-color-info-border)';
+        if (status === 'error') return 'var(--ant-color-error-border)';
+        if (status === 'in_sync') return 'var(--ant-color-success-border)';
+        return 'var(--ant-color-border-secondary)';
     }};
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
     transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -57,43 +57,31 @@ const DeviceCardWrapper = styled.div<{ $isOnline?: boolean; $updateStatus?: stri
         width: 3px;
         height: 100%;
         background: ${props => {
-        // Prioritize target type color if available
         if (props.$targetTypeColor) {
-            return `linear-gradient(180deg, ${props.$targetTypeColor} 0%, ${props.$targetTypeColor}cc 100%)`;
+            return props.$targetTypeColor;
         }
         const status = props.$updateStatus?.toLowerCase();
-        if (status === 'pending') return 'linear-gradient(180deg, #3b82f6 0%, #2563eb 100%)';
-        if (status === 'error') return 'linear-gradient(180deg, #ef4444 0%, #dc2626 100%)';
-        if (status === 'in_sync') return 'linear-gradient(180deg, #10b981 0%, #059669 100%)';
-        return 'linear-gradient(180deg, #94a3b8 0%, #64748b 100%)';
+        if (status === 'pending') return 'var(--ant-color-info)';
+        if (status === 'error') return 'var(--ant-color-error)';
+        if (status === 'in_sync') return 'var(--ant-color-success)';
+        return 'var(--ant-color-text-quaternary)';
     }};
         border-radius: 14px 0 0 14px;
     }
 
-    &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        border-color: ${props => {
-        const status = props.$updateStatus?.toLowerCase();
-        if (status === 'pending') return 'rgba(59, 130, 246, 0.4)';
-        if (status === 'error') return 'rgba(239, 68, 68, 0.4)';
-        if (status === 'in_sync') return 'rgba(16, 185, 129, 0.4)';
-        return 'rgba(0, 0, 0, 0.12)';
-    }};
-    }
-
+    [data-theme='dark'] &,
     .dark-mode & {
         background: ${props => {
         const status = props.$updateStatus?.toLowerCase();
-        if (status === 'pending') return 'linear-gradient(145deg, rgba(59, 130, 246, 0.1) 0%, rgba(9, 9, 11, 0.98) 30%)';
-        if (status === 'error') return 'linear-gradient(145deg, rgba(239, 68, 68, 0.1) 0%, rgba(9, 9, 11, 0.98) 30%)';
-        if (status === 'in_sync') return 'linear-gradient(145deg, rgba(16, 185, 129, 0.1) 0%, rgba(9, 9, 11, 0.98) 30%)';
-        return 'linear-gradient(145deg, rgba(24, 24, 27, 0.95) 0%, rgba(9, 9, 11, 0.9) 100%)';
+        if (status === 'pending') return 'linear-gradient(145deg, rgba(var(--ant-color-info-rgb), 0.1) 0%, var(--ant-color-bg-container) 30%)';
+        if (status === 'error') return 'linear-gradient(145deg, rgba(var(--ant-color-error-rgb), 0.1) 0%, var(--ant-color-bg-container) 30%)';
+        if (status === 'in_sync') return 'linear-gradient(145deg, rgba(var(--ant-color-success-rgb), 0.1) 0%, var(--ant-color-bg-container) 30%)';
+        return 'var(--ant-color-bg-container)';
     }};
-        border: 1px solid rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--ant-color-border-secondary);
         
         &:hover {
-            border-color: rgba(255, 255, 255, 0.15);
+            border-color: var(--ant-color-primary);
         }
     }
 `;
@@ -199,11 +187,11 @@ const getStatusIcon = (status?: string) => {
 
 const getStatusLabel = (status?: string, t?: any) => {
     const s = status?.toLowerCase();
-    if (s === 'in_sync') return t('status.inSync', '동기화됨');
-    if (s === 'pending') return t('status.pending', '대기중');
-    if (s === 'error') return t('status.error', '오류');
-    if (s === 'registered') return t('status.registered', '등록됨');
-    return t('status.unknown', '알수없음');
+    if (s === 'in_sync') return t('status.inSync');
+    if (s === 'pending') return t('status.pending');
+    if (s === 'error') return t('status.error');
+    if (s === 'registered') return t('status.registered');
+    return t('status.unknown');
 };
 
 const getActionIcon = (status?: string) => {
@@ -285,7 +273,7 @@ const DeviceCard: React.FC<DeviceCardProps> = ({ target, recentAction, targetTyp
                 {/* Footer: Last Seen */}
                 {lastSeen && (
                     <Text type="secondary" style={{ fontSize: '0.75rem' }}>
-                        {isOnline ? '활성' : ''} {lastSeen}
+                        {isOnline ? t('common:status.active') : ''} {lastSeen}
                     </Text>
                 )}
             </Flex>

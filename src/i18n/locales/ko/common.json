@@ -154,7 +154,10 @@
         "endsWith": "로 끝남",
         "before": "이전",
         "after": "이후",
-        "selected": "개 선택됨"
+        "sameDay": "같은 날",
+        "selected": "개 선택됨",
+        "selectField": "필드 선택",
+        "condition": "조건"
     },
     "yes": "예",
     "no": "아니오",

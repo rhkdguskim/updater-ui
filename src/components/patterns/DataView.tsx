@@ -5,7 +5,8 @@ import styled from 'styled-components';
 const Container = styled.div`
   flex: 1;
   min-height: 0;
-  overflow: auto;
+  display: flex;
+  flex-direction: column;
 `;
 
 

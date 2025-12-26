@@ -37,7 +37,7 @@ const TableContainer = styled.div`
         transition: background-color 0.15s ease;
 
         &:hover {
-            background-color: var(--ant-color-primary-bg, #e6f4ff) !important;
+            background-color: var(--ant-color-primary-bg) !important;
         }
 
         /* Show checkbox on hover */
@@ -54,7 +54,7 @@ const TableContainer = styled.div`
 
     /* Selected row style */
     .ant-table-tbody > tr.ant-table-row-selected {
-        background-color: var(--ant-color-primary-bg-hover, #bae0ff) !important;
+        background-color: var(--ant-color-primary-bg-hover) !important;
 
         > td {
             background: transparent !important;
@@ -112,7 +112,7 @@ const TableContainer = styled.div`
         position: sticky;
         top: 0;
         z-index: 2;
-        background: var(--ant-color-bg-container, #fff);
+        background: var(--ant-color-bg-container);
     }
 `;
 

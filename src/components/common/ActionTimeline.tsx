@@ -65,27 +65,27 @@ const StepNode = styled.div<{
         switch (props.$status) {
             case 'completed':
                 return css`
-                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    background: var(--ant-color-success);
                     color: white;
-                    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4);
+                    box-shadow: 0 2px 8px rgba(var(--ant-color-success-rgb), 0.4);
                 `;
             case 'active':
                 return css`
-                    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+                    background: var(--ant-color-info);
                     color: white;
-                    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+                    box-shadow: 0 2px 8px rgba(var(--ant-color-info-rgb), 0.4);
                     animation: ${pulse} 1.5s ease-in-out infinite, ${glow} 2s ease-in-out infinite;
                 `;
             case 'error':
                 return css`
-                    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                    background: var(--ant-color-error);
                     color: white;
-                    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+                    box-shadow: 0 2px 8px rgba(var(--ant-color-error-rgb), 0.4);
                 `;
             default:
                 return css`
-                    background: #e5e7eb;
-                    color: #9ca3af;
+                    background: var(--ant-color-fill-secondary);
+                    color: var(--ant-color-text-quaternary);
                     box-shadow: none;
                 `;
         }
@@ -101,8 +101,8 @@ const StepConnector = styled.div<{ $active?: boolean; $isAnimated?: boolean }>`
     overflow: hidden;
     
     background: ${props => props.$active
-        ? 'linear-gradient(90deg, #10b981 0%, #3b82f6 50%, #10b981 100%)'
-        : '#e5e7eb'};
+        ? 'linear-gradient(90deg, var(--ant-color-success) 0%, var(--ant-color-info) 50%, var(--ant-color-success) 100%)'
+        : 'var(--ant-color-fill-secondary)'};
     
     ${props => props.$isAnimated && css`
         background-size: 200% 100%;
@@ -163,16 +163,16 @@ export const ActionTimeline: React.FC<ActionTimelineProps> = ({ action }) => {
 
     const getTooltip = (step: number) => {
         switch (step) {
-            case 1: return t('timeline.queued', 'Queued');
+            case 1: return t('timeline.queued');
             case 2: {
                 // Show the actual detailStatus message from the server directly
                 // This contains messages like "Disabling service recovery", "업데이트 프로세스 시작", etc.
                 if (state === 'running' && detail) {
                     return detail;
                 }
-                return t('timeline.processing', 'Processing');
+                return t('timeline.processing');
             }
-            case 3: return state === 'error' ? t('timeline.failed', 'Failed') : t('timeline.completed', 'Completed');
+            case 3: return state === 'error' ? t('timeline.failed') : t('timeline.completed');
             default: return '';
         }
     };

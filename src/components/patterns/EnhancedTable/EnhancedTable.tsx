@@ -72,12 +72,18 @@ const TableContainer = styled.div`
     .ant-table-wrapper {
         flex: 1;
         min-height: 0;
-        overflow: auto;
+        display: flex;
+        flex-direction: column;
     }
 
-    /* Table content area */
-    .ant-table-content {
-        overflow: auto !important;
+    .ant-table {
+        flex: 1;
+        min-height: 0;
+    }
+
+    /* Ant Design's internal scroll container */
+    .ant-table-body {
+        flex: 1;
     }
 
     /* Prevent tbody rows from stretching - rows should only be as tall as their content */
@@ -85,14 +91,6 @@ const TableContainer = styled.div`
         & > tr {
             height: auto !important;
         }
-    }
-
-    /* Sticky header */
-    .ant-table-thead > tr > th {
-        position: sticky;
-        top: 0;
-        z-index: 2;
-        background: var(--ant-color-bg-container, #fff);
     }
 
     /* Compact select dropdowns in cells */
@@ -147,6 +145,12 @@ export function EnhancedTable<T extends object>({
         }
         : undefined;
 
+    // Use internal scroll if not provided, allowing table to fill its container
+    const scroll = {
+        y: '100%',
+        ...tableProps.scroll
+    };
+
     return (
         <TableContainer>
             <SelectionToolbar
@@ -160,6 +164,8 @@ export function EnhancedTable<T extends object>({
                 rowSelection={rowSelection}
                 rowKey={(tableProps.rowKey as string) || rowKeyField}
                 size="small"
+                scroll={scroll}
+                sticky
             />
         </TableContainer>
     );

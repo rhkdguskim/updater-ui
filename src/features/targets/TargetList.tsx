@@ -11,6 +11,8 @@ import {
     ExclamationCircleOutlined,
     TagOutlined,
     AppstoreOutlined,
+    DownloadOutlined,
+    UploadOutlined,
 } from '@ant-design/icons';
 import { useNavigate, Link } from 'react-router-dom';
 import { StandardListLayout } from '@/components/layout/StandardListLayout';
@@ -25,6 +27,7 @@ import {
     SavedFiltersModal,
     TargetTagsCell,
     TargetTypeCell,
+    ImportTargetsModal,
 } from './components';
 import type { AssignPayload } from './components';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +43,7 @@ import { useGetDistributionSets } from '@/api/generated/distribution-sets/distri
 import type { MgmtTarget, MgmtDistributionSetAssignments, MgmtDistributionSetAssignment } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { keepPreviousData, useQueryClient } from '@tanstack/react-query';
+import Papa from 'papaparse';
 import { useGetTargetTags } from '@/api/generated/target-tags/target-tags';
 import { useGetTargetTypes } from '@/api/generated/target-types/target-types';
 import type { MgmtTag, MgmtTargetType } from '@/api/generated/model';
@@ -74,6 +78,7 @@ const TargetList: React.FC = () => {
     const [bulkTypeModalOpen, setBulkTypeModalOpen] = useState(false);
     const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
     const [savedFiltersOpen, setSavedFiltersOpen] = useState(false);
+    const [importModalOpen, setImportModalOpen] = useState(false);
 
     // Modal States
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -292,6 +297,32 @@ const TargetList: React.FC = () => {
         },
         [targetToAssign, assignDSMutation]
     );
+
+    // Export Logic
+    const handleExport = useCallback(() => {
+        if (!targetsData?.content) return;
+
+        const csvData = targetsData.content.map(t => ({
+            controllerId: t.controllerId,
+            name: t.name,
+            description: t.description,
+            ipAddress: t.ipAddress,
+            targetType: t.targetTypeName,
+            lastModifiedAt: t.lastModifiedAt ? dayjs(t.lastModifiedAt).format('YYYY-MM-DD HH:mm:ss') : '',
+            status: t.pollStatus?.overdue ? 'offline' : 'online'
+        }));
+
+        const csv = Papa.unparse(csvData);
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `targets_export_${dayjs().format('YYYYMMDD_HHmm')}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }, [targetsData]);
 
     // Selection toolbar actions
     const selectionActions: ToolbarAction[] = useMemo(() => {
@@ -531,6 +562,24 @@ const TargetList: React.FC = () => {
                     canAdd={isAdmin}
                     addLabel={t('actions.addTarget')}
                     loading={targetsLoading || targetsFetching}
+                    extra={
+                        <>
+                            <Button
+                                icon={<UploadOutlined />}
+                                onClick={() => setImportModalOpen(true)}
+                                disabled={!isAdmin}
+                            >
+                                {t('actions.import', { defaultValue: 'Import' })}
+                            </Button>
+                            <Button
+                                icon={<DownloadOutlined />}
+                                onClick={handleExport}
+                                disabled={!targetsData?.content?.length}
+                            >
+                                {t('actions.export', { defaultValue: 'Export' })}
+                            </Button>
+                        </>
+                    }
                 />
             }
         >
@@ -654,6 +703,12 @@ const TargetList: React.FC = () => {
                     setSavedFiltersOpen(false);
                 }}
                 onClose={() => setSavedFiltersOpen(false)}
+            />
+
+            <ImportTargetsModal
+                open={importModalOpen}
+                onCancel={() => setImportModalOpen(false)}
+                onSuccess={() => setImportModalOpen(false)}
             />
         </StandardListLayout>
     );
