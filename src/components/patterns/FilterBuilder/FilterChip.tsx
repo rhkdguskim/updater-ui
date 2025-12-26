@@ -1,13 +1,13 @@
 import React from 'react';
-import { Tag } from 'antd';
+import { Tag, Button } from 'antd';
 import styled from 'styled-components';
-import { CloseOutlined } from '@ant-design/icons';
+import { MinusCircleOutlined } from '@ant-design/icons';
 
 const ChipContainer = styled(Tag)`
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 8px;
+    padding: 4px 8px 4px 10px;
     border-radius: 6px;
     font-size: 12px;
     margin: 2px;
@@ -26,14 +26,24 @@ const ChipContainer = styled(Tag)`
     .filter-value {
         font-weight: 600;
     }
+`;
 
-    .close-icon {
-        cursor: pointer;
-        opacity: 0.6;
-        transition: opacity 0.2s;
-
+const RemoveButton = styled(Button)`
+    &.ant-btn {
+        padding: 0;
+        width: 18px;
+        height: 18px;
+        min-width: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--ant-color-error, #ff4d4f);
+        border: none;
+        background: transparent;
+        
         &:hover {
-            opacity: 1;
+            color: var(--ant-color-error-hover, #ff7875);
+            background: var(--ant-color-error-bg, #fff2f0);
         }
     }
 `;
@@ -56,7 +66,12 @@ export const FilterChip: React.FC<FilterChipProps> = ({
             <span className="filter-field">{field}</span>
             <span className="filter-operator">{operator}</span>
             <span className="filter-value">{value}</span>
-            <CloseOutlined className="close-icon" onClick={onRemove} />
+            <RemoveButton
+                type="text"
+                size="small"
+                icon={<MinusCircleOutlined style={{ fontSize: 14 }} />}
+                onClick={onRemove}
+            />
         </ChipContainer>
     );
 };

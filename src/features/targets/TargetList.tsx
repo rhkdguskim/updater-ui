@@ -130,23 +130,20 @@ const TargetList: React.FC = () => {
 
         const conditions = filters.map(f => {
             let field = f.field;
-            let op: '==' | '!=' | '=like=' = '==';
 
-            // Map filter fields to RSQL fields
-            if (f.field === 'targetType') field = 'targettype.name';
-            if (f.field === 'tag') field = 'tag.name';
-
-            // Map operators
-            if (f.operator === 'contains') op = '=like=';
-            else if (f.operator === 'startsWith') op = '=like=';
-            else if (f.operator === 'endsWith') op = '=like=';
-            else if (f.operator === 'equals') op = '==';
-            else if (f.operator === 'notEquals') op = '!=';
+            // Map filter fields to RSQL fields (HawkBit field names)
+            if (f.field === 'targetType') field = 'targetTypeName';
+            if (f.field === 'tag') field = 'tag';
 
             let val = String(f.value);
+
+            // For contains/startsWith/endsWith, use wildcards with == operator
             if (f.operator === 'contains') val = `*${val}*`;
-            if (f.operator === 'startsWith') val = `${val}*`;
-            if (f.operator === 'endsWith') val = `*${val}`;
+            else if (f.operator === 'startsWith') val = `${val}*`;
+            else if (f.operator === 'endsWith') val = `*${val}`;
+
+            // HawkBit uses == for all comparisons including wildcards
+            const op: '==' | '!=' = f.operator === 'notEquals' ? '!=' : '==';
 
             return buildCondition({ field, operator: op, value: val });
         });

@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
-import { Select, Input, InputNumber, DatePicker, Space } from 'antd';
+import React, { useState, useCallback } from 'react';
+import { Select, Input, InputNumber, DatePicker, Space, Button } from 'antd';
+import { CheckOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import type { Dayjs } from 'dayjs';
 
 const ConditionContainer = styled.div`
@@ -71,6 +73,7 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
     fields,
     onApply,
 }) => {
+    const { t } = useTranslation('common');
     const [selectedField, setSelectedField] = useState<string | undefined>();
     const [selectedOperator, setSelectedOperator] = useState<string | undefined>();
     const [value, setValue] = useState<string | number | Dayjs | null>(null);
@@ -89,8 +92,10 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
         }
     };
 
-    const handleApply = () => {
-        if (selectedField && selectedOperator && value !== null) {
+    const canApply = selectedField && selectedOperator && value !== null && value !== '';
+
+    const handleApply = useCallback(() => {
+        if (selectedField && selectedOperator && value !== null && value !== '') {
             const finalValue = typeof value === 'object' && 'format' in value
                 ? value.format('YYYY-MM-DD')
                 : value;
@@ -99,6 +104,18 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
                 operator: selectedOperator,
                 value: finalValue as string | number | boolean,
             });
+            // Reset form
+            setSelectedField(undefined);
+            setSelectedOperator(undefined);
+            setValue(null);
+        }
+    }, [selectedField, selectedOperator, value, onApply]);
+
+    // Handle keyboard events
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && canApply) {
+            e.preventDefault();
+            handleApply();
         }
     };
 
@@ -109,33 +126,39 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
             case 'text':
                 return (
                     <Input
-                        placeholder="값 입력"
+                        placeholder={t('actions.search')}
                         size="small"
                         style={{ width: 150 }}
                         value={value as string}
                         onChange={(e) => setValue(e.target.value)}
                         onPressEnter={handleApply}
+                        autoFocus
                     />
                 );
             case 'number':
                 return (
                     <InputNumber
-                        placeholder="숫자"
+                        placeholder={t('form.required')}
                         size="small"
                         style={{ width: 100 }}
                         value={value as number}
                         onChange={(v) => setValue(v as number | null)}
+                        onKeyDown={handleKeyDown}
                     />
                 );
             case 'select':
                 return (
                     <StyledSelect
-                        placeholder="선택"
+                        placeholder={t('actions.select', { defaultValue: '선택' })}
                         size="small"
                         style={{ width: 150 }}
                         value={value as string}
                         onChange={(v) => setValue(v as string)}
                         options={currentField.options}
+                        showSearch
+                        filterOption={(input, option) =>
+                            (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                        }
                     />
                 );
             case 'date':
@@ -149,14 +172,14 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
             case 'boolean':
                 return (
                     <StyledSelect
-                        placeholder="선택"
+                        placeholder={t('actions.select', { defaultValue: '선택' })}
                         size="small"
                         style={{ width: 100 }}
                         value={value as string}
                         onChange={(v) => setValue(v as string)}
                         options={[
-                            { value: 'true', label: '예' },
-                            { value: 'false', label: '아니오' },
+                            { value: 'true', label: t('yes') },
+                            { value: 'false', label: t('no') },
                         ]}
                     />
                 );
@@ -166,10 +189,10 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
     };
 
     return (
-        <ConditionContainer>
+        <ConditionContainer onKeyDown={handleKeyDown}>
             <Space size="small">
                 <StyledSelect
-                    placeholder="필드 선택"
+                    placeholder={t('actions.select', { defaultValue: '필드 선택' })}
                     size="small"
                     value={selectedField}
                     onChange={(v) => {
@@ -178,10 +201,14 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
                         setValue(null);
                     }}
                     options={fields.map(f => ({ value: f.key, label: f.label }))}
+                    showSearch
+                    filterOption={(input, option) =>
+                        (option?.label ?? '').toLowerCase().includes(input.toLowerCase())
+                    }
                 />
                 {selectedField && (
                     <StyledSelect
-                        placeholder="조건"
+                        placeholder={t('filter.equals', { defaultValue: '조건' })}
                         size="small"
                         value={selectedOperator}
                         onChange={(v) => setSelectedOperator(v as string)}
@@ -189,6 +216,17 @@ export const FilterCondition: React.FC<FilterConditionProps> = ({
                     />
                 )}
                 {selectedOperator && renderValueInput()}
+                {selectedOperator && (
+                    <Button
+                        type="primary"
+                        size="small"
+                        icon={<CheckOutlined />}
+                        onClick={handleApply}
+                        disabled={!canApply}
+                    >
+                        {t('actions.apply')}
+                    </Button>
+                )}
             </Space>
         </ConditionContainer>
     );

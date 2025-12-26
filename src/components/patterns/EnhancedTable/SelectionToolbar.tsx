@@ -2,6 +2,7 @@ import React from 'react';
 import { Space, Button, Typography, Divider } from 'antd';
 import { CloseOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 
 const { Text } = Typography;
 
@@ -99,15 +100,19 @@ export const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
     selectedCount,
     actions,
     onClearSelection,
-    selectionLabel = '개 선택됨',
+    selectionLabel,
 }) => {
+    const { t } = useTranslation('common');
+
     if (selectedCount === 0) return null;
+
+    const label = selectionLabel || t('filter.selected');
 
     return (
         <ToolbarContainer>
             <SelectionInfo>
                 <Text strong style={{ color: 'white', fontSize: 14 }}>
-                    {selectedCount}{selectionLabel}
+                    {selectedCount} {label}
                 </Text>
                 <Divider type="vertical" style={{ borderColor: 'rgba(255,255,255,0.3)', height: 20 }} />
             </SelectionInfo>
@@ -142,3 +147,4 @@ export const SelectionToolbar: React.FC<SelectionToolbarProps> = ({
 };
 
 export default SelectionToolbar;
+

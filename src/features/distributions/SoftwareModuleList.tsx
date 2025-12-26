@@ -51,18 +51,20 @@ const SoftwareModuleList: React.FC = () => {
         if (filters.length === 0) return undefined;
 
         const conditions = filters.map(f => {
-            let op: '==' | '=like=' = '==';
-            if (f.operator === 'contains') op = '=like=';
-            else if (f.operator === 'equals') op = '==';
-
             let val = String(f.value);
+
+            // For contains, use wildcards with == operator
             if (f.operator === 'contains') val = `*${val}*`;
+
+            // HawkBit uses == for all comparisons including wildcards
+            const op: '==' = '==';
 
             return buildCondition({ field: f.field, operator: op, value: val });
         });
 
         return conditions.reduce((acc, cond) => appendFilter(acc, cond), '');
     }, [filters]);
+
 
     const {
         data,

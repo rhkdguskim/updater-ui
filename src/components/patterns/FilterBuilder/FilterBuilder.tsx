@@ -2,6 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { Button, Popover } from 'antd';
 import { PlusOutlined, ClearOutlined, ReloadOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
+import { useTranslation } from 'react-i18next';
 import { FilterChip } from './FilterChip';
 import { FilterCondition, type FilterField, type FilterConditionValue } from './FilterCondition';
 
@@ -57,20 +58,6 @@ export interface FilterBuilderProps {
     extra?: React.ReactNode;
 }
 
-const operatorLabels: Record<string, string> = {
-    contains: '포함',
-    equals: '=',
-    notEquals: '≠',
-    startsWith: '로 시작',
-    endsWith: '로 끝남',
-    gt: '>',
-    gte: '≥',
-    lt: '<',
-    lte: '≤',
-    before: '이전',
-    after: '이후',
-};
-
 export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     fields,
     filters,
@@ -78,11 +65,26 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
     onRefresh,
     onAdd,
     canAdd = true,
-    addLabel = '추가',
+    addLabel,
     loading = false,
     extra,
 }) => {
+    const { t } = useTranslation('common');
     const [conditionOpen, setConditionOpen] = useState(false);
+
+    const operatorLabels: Record<string, string> = {
+        contains: t('filter.contains'),
+        equals: '=',
+        notEquals: '≠',
+        startsWith: t('filter.startsWith'),
+        endsWith: t('filter.endsWith'),
+        gt: '>',
+        gte: '≥',
+        lt: '<',
+        lte: '≤',
+        before: t('filter.before'),
+        after: t('filter.after'),
+    };
 
     const handleAddFilter = useCallback((condition: FilterConditionValue) => {
         const field = fields.find(f => f.key === condition.field);
@@ -93,7 +95,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
             const option = field.options.find(o => o.value === condition.value);
             displayValue = option?.label || displayValue;
         } else if (field.type === 'boolean') {
-            displayValue = condition.value === 'true' || condition.value === true ? '예' : '아니오';
+            displayValue = condition.value === 'true' || condition.value === true ? t('yes') : t('no');
         }
 
         const newFilter: FilterValue = {
@@ -108,7 +110,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
 
         onFiltersChange([...filters, newFilter]);
         setConditionOpen(false);
-    }, [fields, filters, onFiltersChange]);
+    }, [fields, filters, onFiltersChange, operatorLabels, t]);
 
     const handleRemoveFilter = useCallback((id: string) => {
         onFiltersChange(filters.filter(f => f.id !== id));
@@ -136,11 +138,18 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
                     <Button
                         icon={<PlusOutlined />}
                         size="small"
-                        type={filters.length === 0 ? 'default' : 'text'}
+                        type="default"
+                        style={{
+                            borderColor: 'var(--ant-color-primary, #1677ff)',
+                            color: 'var(--ant-color-primary, #1677ff)',
+                            fontWeight: 500,
+                        }}
                     >
-                        {filters.length === 0 ? '필터 추가' : ''}
+                        {t('filter.addFilter')}
                     </Button>
                 </Popover>
+
+
 
                 {filters.length > 0 && (
                     <>
@@ -161,7 +170,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
                             icon={<ClearOutlined />}
                             onClick={handleClearAll}
                         >
-                            초기화
+                            {t('filter.clear')}
                         </Button>
                     </>
                 )}
@@ -184,7 +193,7 @@ export const FilterBuilder: React.FC<FilterBuilderProps> = ({
                         onClick={onAdd}
                         size="small"
                     >
-                        {addLabel}
+                        {addLabel || t('actions.add')}
                     </Button>
                 )}
             </ActionsSection>

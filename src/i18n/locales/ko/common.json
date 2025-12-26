@@ -141,6 +141,19 @@
     "validation": {
         "required": "필수 항목입니다."
     },
+    "filter": {
+        "addFilter": "필터 추가",
+        "clear": "초기화",
+        "contains": "포함",
+        "equals": "같음",
+        "notEquals": "같지 않음",
+        "startsWith": "로 시작",
+        "endsWith": "로 끝남",
+        "before": "이전",
+        "after": "이후",
+        "selected": "개 선택됨"
+    },
     "yes": "예",
-    "no": "아니오"
+    "no": "아니오",
+    "notSelected": "선택되지 않음"
 }

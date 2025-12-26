@@ -143,5 +143,20 @@
     },
     "validation": {
         "required": "This field is required."
-    }
+    },
+    "filter": {
+        "addFilter": "Add Filter",
+        "clear": "Clear",
+        "contains": "contains",
+        "equals": "equals",
+        "notEquals": "not equals",
+        "startsWith": "starts with",
+        "endsWith": "ends with",
+        "before": "before",
+        "after": "after",
+        "selected": "selected"
+    },
+    "yes": "Yes",
+    "no": "No",
+    "notSelected": "Not selected"
 }
