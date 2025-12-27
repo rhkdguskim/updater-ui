@@ -7,3 +7,4 @@
 export * from './shared';
 export * from './target';
 export * from './distribution';
+export * from './action';

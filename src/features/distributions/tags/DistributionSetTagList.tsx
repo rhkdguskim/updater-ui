@@ -10,7 +10,7 @@ import {
 } from '@/api/generated/distribution-set-tags/distribution-set-tags';
 import type { MgmtTag } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { ColorSwatch, TagFormModal } from '@/components/common';
 import type { TagFormValues } from '@/components/common';
@@ -156,7 +156,7 @@ const DistributionSetTagList: React.FC = () => {
             key: 'lastModifiedAt',
             width: 180,
             sorter: (a, b) => (a.lastModifiedAt ?? 0) - (b.lastModifiedAt ?? 0),
-            render: (val: number) => (val ? format(val, 'yyyy-MM-dd HH:mm') : '-'),
+            render: (val: number) => (val ? dayjs(val).format('YYYY-MM-DD HH:mm') : '-'),
         },
         {
             title: t('common:table.actions'),

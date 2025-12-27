@@ -29,7 +29,7 @@ import {
 import type { MgmtActionStatus } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useQueryClient } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { PageContainer, SectionCard } from '@/components/layout/PageLayout';
 import { DetailPageHeader, StatusTag } from '@/components/common';
@@ -312,12 +312,12 @@ const ActionDetail: React.FC = () => {
                     </Descriptions.Item>
                     <Descriptions.Item label={t('detail.labels.createdAt')}>
                         {actionData.createdAt
-                            ? format(actionData.createdAt, 'yyyy-MM-dd HH:mm:ss')
+                            ? dayjs(actionData.createdAt).format('YYYY-MM-DD HH:mm:ss')
                             : '-'}
                     </Descriptions.Item>
                     <Descriptions.Item label={t('detail.labels.lastModified')}>
                         {actionData.lastModifiedAt
-                            ? format(actionData.lastModifiedAt, 'yyyy-MM-dd HH:mm:ss')
+                            ? dayjs(actionData.lastModifiedAt).format('YYYY-MM-DD HH:mm:ss')
                             : '-'}
                     </Descriptions.Item>
                     <Descriptions.Item label={t('detail.labels.target')}>
@@ -341,7 +341,7 @@ const ActionDetail: React.FC = () => {
                         items={statusData.content.map((status: MgmtActionStatus) => ({
                             color: status.type === 'finished' ? 'green' : status.type === 'error' ? 'red' : 'blue',
                             label: status.reportedAt
-                                ? format(status.reportedAt, 'yyyy-MM-dd HH:mm:ss')
+                                ? dayjs(status.reportedAt).format('YYYY-MM-DD HH:mm:ss')
                                 : '',
                             children: (
                                 <div>

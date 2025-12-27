@@ -9,6 +9,12 @@ export const AXIOS_INSTANCE = axios.create({
     },
 });
 
+declare module 'axios' {
+    export interface AxiosRequestConfig {
+        skipGlobalError?: boolean;
+    }
+}
+
 export const axiosInstance = <T>(
     config: AxiosRequestConfig,
     options?: AxiosRequestConfig,
@@ -100,17 +106,25 @@ AXIOS_INSTANCE.interceptors.response.use(
             if (displayMessage) {
                 // Overwrite the error message so downstream components display the localized text
                 error.message = displayMessage;
-                message.error(displayMessage);
+
+                // Only show global error message if not explicitly skipped
+                if (!error.config?.skipGlobalError) {
+                    message.error(displayMessage);
+                }
             }
         } else if (error.request) {
             // Network or Timeout errors
             const timeoutMsg = i18n.t('common:apiErrors.TIMEOUT');
             error.message = timeoutMsg;
-            message.error(timeoutMsg);
+            if (!error.config?.skipGlobalError) {
+                message.error(timeoutMsg);
+            }
         } else {
             const unknownMsg = i18n.t('common:apiErrors.generic.unknown');
             error.message = unknownMsg;
-            message.error(unknownMsg);
+            if (!error.config?.skipGlobalError) {
+                message.error(unknownMsg);
+            }
         }
 
         return Promise.reject(error);

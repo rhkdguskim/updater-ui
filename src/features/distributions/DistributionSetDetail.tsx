@@ -14,7 +14,7 @@ import {
     useCreateDistributionSets,
 } from '@/api/generated/distribution-sets/distribution-sets';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import AssignModuleModal from './components/AssignModuleModal';
 import SetMetadataTab from './components/SetMetadataTab';
 import SetTagsTab from './components/SetTagsTab';
@@ -142,11 +142,11 @@ const DistributionSetDetail: React.FC = () => {
             </Descriptions.Item>
             <Descriptions.Item label={t('detail.labels.createdBy')}>{setData?.createdBy}</Descriptions.Item>
             <Descriptions.Item label={t('detail.labels.createdAt')}>
-                {setData?.createdAt ? format(setData.createdAt, 'yyyy-MM-dd HH:mm:ss') : '-'}
+                {setData?.createdAt ? dayjs(setData.createdAt).format('YYYY-MM-DD HH:mm:ss') : '-'}
             </Descriptions.Item>
             <Descriptions.Item label={t('detail.labels.lastModifiedBy')}>{setData?.lastModifiedBy}</Descriptions.Item>
             <Descriptions.Item label={t('detail.labels.lastModifiedAt')}>
-                {setData?.lastModifiedAt ? format(setData.lastModifiedAt, 'yyyy-MM-dd HH:mm:ss') : '-'}
+                {setData?.lastModifiedAt ? dayjs(setData.lastModifiedAt).format('YYYY-MM-DD HH:mm:ss') : '-'}
             </Descriptions.Item>
         </Descriptions>
     );

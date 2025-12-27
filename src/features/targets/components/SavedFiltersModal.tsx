@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Button, Form, Input, Modal, Popconfirm, Space, Table, Tag, Typography, message, Select, Switch, InputNumber, Divider } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import {
     useCreateFilter,
     useDeleteFilter,
@@ -241,7 +241,7 @@ const SavedFiltersModal: React.FC<SavedFiltersModalProps> = ({
             dataIndex: 'lastModifiedAt',
             key: 'lastModifiedAt',
             render: (value: number | undefined) =>
-                value ? format(value, 'yyyy-MM-dd HH:mm') : '-',
+                value ? dayjs(value).format('YYYY-MM-DD HH:mm') : '-',
         },
         {
             title: t('savedFilters.columns.actions'),

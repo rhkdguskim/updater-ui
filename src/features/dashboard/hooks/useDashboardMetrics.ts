@@ -9,44 +9,45 @@ import { useGetTargetTypes } from '@/api/generated/target-types/target-types';
 import { useGetDistributionSets } from '@/api/generated/distribution-sets/distribution-sets';
 import { useGetSoftwareModules } from '@/api/generated/software-modules/software-modules';
 import type { MgmtDistributionSet, MgmtSoftwareModule, MgmtRolloutResponseBody } from '@/api/generated/model';
-import type { MgmtAction } from '@/api/generated/model';
+
+import { isTargetOnline, isActionErrored } from '@/entities';
 
 dayjs.extend(relativeTime);
 
 export const useDashboardMetrics = () => {
     const { t } = useTranslation(['dashboard', 'common']);
 
-    // Queries
+    // Queries with differentiated polling intervals
     const { data: targetsData, isLoading: targetsLoading, refetch: refetchTargets, dataUpdatedAt } = useGetTargets(
         { limit: 1000 },
-        { query: { staleTime: 2000, refetchInterval: 2000 } }
+        { query: { staleTime: 5000, refetchInterval: 5000 } }
     );
     const { data: actionsData, isLoading: actionsLoading, refetch: refetchActions } = useGetActions(
         { limit: 100 },
-        { query: { staleTime: 2000, refetchInterval: 2000 } }
+        { query: { staleTime: 5000, refetchInterval: 10000 } }
     );
     const { data: rolloutsData, isLoading: rolloutsLoading, refetch: refetchRollouts } = useGetRollouts(
         { limit: 100 },
-        { query: { staleTime: 2000, refetchInterval: 2000 } }
+        { query: { staleTime: 5000, refetchInterval: 10000 } }
     );
     const { data: targetTypesData } = useGetTargetTypes(
         { limit: 100 },
-        { query: { staleTime: 30000 } }
+        { query: { staleTime: 60000 } } // Master data, slow
     );
     const { data: distributionSetsData, isLoading: dsLoading, refetch: refetchDS } = useGetDistributionSets(
         { limit: 500 },
-        { query: { staleTime: 5000, refetchInterval: 10000 } }
+        { query: { staleTime: 30000, refetchInterval: 60000 } } // Less frequent
     );
     const { data: softwareModulesData, isLoading: smLoading, refetch: refetchSM } = useGetSoftwareModules(
         { limit: 500 },
-        { query: { staleTime: 5000, refetchInterval: 10000 } }
+        { query: { staleTime: 30000, refetchInterval: 60000 } } // Less frequent
     );
 
     const isLoading = targetsLoading || actionsLoading || rolloutsLoading || dsLoading || smLoading;
     const refetch = () => { refetchTargets(); refetchActions(); refetchRollouts(); refetchDS(); refetchSM(); };
     const lastUpdated = dataUpdatedAt ? dayjs(dataUpdatedAt).fromNow() : '-';
 
-    const targets = targetsData?.content || [];
+    const targets = useMemo(() => targetsData?.content || [], [targetsData]);
     const totalDevices = targetsData?.total ?? 0;
 
     // Build target type name to color map
@@ -60,45 +61,30 @@ export const useDashboardMetrics = () => {
         return map;
     }, [targetTypesData]);
 
-    // Helper Functions
-    const isOverdueByExpectedTime = (pollStatus?: { nextExpectedRequestAt?: number }) => {
-        if (!pollStatus?.nextExpectedRequestAt) return false;
-        return Date.now() > pollStatus.nextExpectedRequestAt;
-    };
-
-    const isActionErrored = (action: MgmtAction) => {
-        const status = action.status?.toLowerCase() || '';
-        const detail = action.detailStatus?.toLowerCase() || '';
-        const hasErrorStatus = status === 'error' || status === 'failed';
-        const hasErrorDetail = detail.includes('error') || detail.includes('failed');
-        const hasErrorCode = typeof action.lastStatusCode === 'number' && action.lastStatusCode >= 400;
-        return hasErrorStatus || hasErrorDetail || hasErrorCode;
-    };
 
     // Metrics Calculation
 
     // 1. Device Connectivity
     const onlineCount = targets.filter(t =>
         t.pollStatus?.lastRequestAt !== undefined &&
-        !t.pollStatus?.overdue &&
-        !isOverdueByExpectedTime(t.pollStatus)
+        isTargetOnline(t as any)
     ).length;
     const offlineCount = targets.filter(t =>
         t.pollStatus?.lastRequestAt !== undefined &&
-        (t.pollStatus?.overdue || isOverdueByExpectedTime(t.pollStatus))
+        !isTargetOnline(t as any)
     ).length;
 
     // 2. Rollouts Stats
-    const rollouts = rolloutsData?.content || [];
-    const activeRolloutCount = rollouts.filter(r =>
+    const rollouts = useMemo(() => rolloutsData?.content || [], [rolloutsData]);
+    const activeRolloutCount = useMemo(() => rollouts.filter(r =>
         ['running', 'starting'].includes(r.status?.toLowerCase() || '')
-    ).length;
-    const finishedRolloutCount = rollouts.filter(r =>
+    ).length, [rollouts]);
+    const finishedRolloutCount = useMemo(() => rollouts.filter(r =>
         r.status?.toLowerCase() === 'finished'
-    ).length;
-    const errorRolloutCount = rollouts.filter(r =>
+    ).length, [rollouts]);
+    const errorRolloutCount = useMemo(() => rollouts.filter(r =>
         ['error', 'stopped'].includes(r.status?.toLowerCase() || '')
-    ).length;
+    ).length, [rollouts]);
 
     // 3. Actions Stats (Latest 100)
     const actions = actionsData?.content || [];
@@ -107,10 +93,10 @@ export const useDashboardMetrics = () => {
     const recentActions = [...actions].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
     const pendingCount = recentActions.filter(a =>
         ['scheduled', 'pending', 'retrieving', 'running', 'waiting_for_confirmation'].includes(a.status?.toLowerCase() || '') &&
-        !isActionErrored(a)
+        !isActionErrored(a as any)
     ).length;
-    const finishedCount = recentActions.filter(a => a.status?.toLowerCase() === 'finished' && !isActionErrored(a)).length;
-    const errorCount = recentActions.filter(isActionErrored).length;
+    const finishedCount = recentActions.filter(a => a.status?.toLowerCase() === 'finished' && !isActionErrored(a as any)).length;
+    const errorCount = recentActions.filter(a => isActionErrored(a as any)).length;
 
     // 4. Success Rate
     const successRate = finishedCount + errorCount > 0
@@ -147,7 +133,7 @@ export const useDashboardMetrics = () => {
         const activeActions = [...actions]
             .filter(a => {
                 const status = a.status?.toLowerCase() || '';
-                return activeStatuses.includes(status) && !isActionErrored(a);
+                return activeStatuses.includes(status) && !isActionErrored(a as any);
             })
             .sort((a, b) => (b.lastModifiedAt || b.createdAt || 0) - (a.lastModifiedAt || a.createdAt || 0))
             .slice(0, 10);
@@ -203,11 +189,11 @@ export const useDashboardMetrics = () => {
     };
 
     // 9. Distribution Sets Metrics
-    const distributionSets = distributionSetsData?.content || [];
+    const distributionSets = useMemo(() => distributionSetsData?.content || [], [distributionSetsData]);
     const distributionSetsCount = distributionSetsData?.total ?? 0;
     const softwareModulesCount = softwareModulesData?.total ?? 0;
-    const completeSetsCount = distributionSets.filter(ds => ds.complete).length;
-    const incompleteSetsCount = distributionSets.length - completeSetsCount;
+    const completeSetsCount = useMemo(() => distributionSets.filter(ds => ds.complete).length, [distributionSets]);
+    const incompleteSetsCount = useMemo(() => distributionSets.length - completeSetsCount, [distributionSets, completeSetsCount]);
 
     const completenessData = useMemo(() => [
         { name: 'Complete', value: completeSetsCount, color: '#10b981' },

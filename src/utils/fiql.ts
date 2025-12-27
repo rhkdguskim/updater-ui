@@ -25,7 +25,7 @@ export const escapeValue = (value: string): string => {
 
     // Check if reliable Double Quote escaping is needed
     // Standard RSQL: "value"
-    let escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+    const escaped = value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
     return `"${escaped}"`;
 };
 

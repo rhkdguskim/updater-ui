@@ -12,7 +12,7 @@ import {
 import type { MgmtSoftwareModule } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
 import CreateSoftwareModuleModal from './components/CreateSoftwareModuleModal';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import { keepPreviousData, useQueryClient } from '@tanstack/react-query';
 import { StandardListLayout } from '@/components/layout/StandardListLayout';
@@ -236,7 +236,7 @@ const SoftwareModuleList: React.FC = () => {
             sorter: true,
             width: 130,
             render: (val: number) => (
-                <Text style={{ fontSize: 12 }}>{val ? format(val, 'yyyy-MM-dd HH:mm') : '-'}</Text>
+                <Text style={{ fontSize: 12 }}>{val ? dayjs(val).format('YYYY-MM-DD HH:mm') : '-'}</Text>
             ),
         },
         {

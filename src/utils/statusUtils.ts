@@ -36,7 +36,7 @@ export const getStatusColor = (status?: string): string => {
         case 'timeout':
         case 'wait_for_confirmation':
         case 'waiting_for_confirmation':
-            return 'warning'; // or purple/gold depending on preference, existing code used purple for wait
+            return 'warning';
         case 'ready':
             return 'cyan';
         case 'creating':
@@ -56,7 +56,18 @@ export const getStatusColor = (status?: string): string => {
     }
 };
 
-export const getStatusLabel = (status: string, t: (key: string, options?: any) => string): string => {
+/**
+ * Standard interface for HawkBit translation options
+ */
+interface StatusLabelOptions {
+    defaultValue?: string;
+    [key: string]: string | number | boolean | undefined;
+}
+
+export const getStatusLabel = (
+    status: string | undefined,
+    t: (key: string, options?: StatusLabelOptions) => string
+): string => {
     if (!status) return t('common:status.unknown', { defaultValue: 'UNKNOWN' });
     const key = status.toLowerCase();
     return t(`common:status.${key}`, { defaultValue: status.replace(/_/g, ' ').toUpperCase() });

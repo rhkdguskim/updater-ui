@@ -39,7 +39,7 @@ import {
 import type { MgmtRolloutGroup } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useQueryClient } from '@tanstack/react-query';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import type { TableProps } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { PageContainer, SectionCard } from '@/components/layout/PageLayout';
@@ -449,12 +449,12 @@ const RolloutDetail: React.FC = () => {
                     </Descriptions.Item>
                     <Descriptions.Item label={t('detail.labels.createdAt')}>
                         {rolloutData.createdAt
-                            ? format(rolloutData.createdAt, 'yyyy-MM-dd HH:mm:ss')
+                            ? dayjs(rolloutData.createdAt).format('YYYY-MM-DD HH:mm:ss')
                             : '-'}
                     </Descriptions.Item>
                     <Descriptions.Item label={t('detail.labels.lastModified')}>
                         {rolloutData.lastModifiedAt
-                            ? format(rolloutData.lastModifiedAt, 'yyyy-MM-dd HH:mm:ss')
+                            ? dayjs(rolloutData.lastModifiedAt).format('YYYY-MM-DD HH:mm:ss')
                             : '-'}
                     </Descriptions.Item>
                     {rolloutData.description && (

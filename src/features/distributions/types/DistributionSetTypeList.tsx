@@ -8,7 +8,7 @@ import {
 } from '@/api/generated/distribution-set-types/distribution-set-types';
 import type { MgmtDistributionSetType } from '@/api/generated/model';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import { useTranslation } from 'react-i18next';
 import DistributionSetTypeDialog from './DistributionSetTypeDialog';
 
@@ -129,7 +129,7 @@ const DistributionSetTypeList: React.FC = () => {
             dataIndex: 'lastModifiedAt',
             key: 'lastModifiedAt',
             width: 180,
-            render: (val: number) => (val ? format(val, 'yyyy-MM-dd HH:mm') : '-'),
+            render: (val: number) => (val ? dayjs(val).format('YYYY-MM-DD HH:mm') : '-'),
         },
         {
             title: t('common:table.actions'),

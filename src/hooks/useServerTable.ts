@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { TableProps } from 'antd';
+import type { SorterResult, TablePaginationConfig, FilterValue } from 'antd/es/table/interface';
 import { useSearchParams } from 'react-router-dom';
 
 interface UseServerTableProps {
@@ -67,9 +68,9 @@ export function useServerTable<T>({
     const offset = (pagination.current - 1) * pagination.pageSize;
 
     const handleTableChange: TableProps<T>['onChange'] = useCallback((
-        newPagination: any,
-        _filters: any,
-        sorter: any
+        newPagination: TablePaginationConfig,
+        _filters: Record<string, FilterValue | null>,
+        sorter: SorterResult<T> | SorterResult<T>[]
     ) => {
         setPagination((prev) => ({
             ...prev,

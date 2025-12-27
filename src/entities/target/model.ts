@@ -17,7 +17,15 @@ import type { UpdateStatus } from '../shared';
  */
 export const isTargetOnline = (target: Target): boolean => {
     if (!target.pollStatus) return false;
-    return target.pollStatus.overdue === false;
+    return target.pollStatus.overdue === false && !isOverdueByExpectedTime(target.pollStatus);
+};
+
+/**
+ * Checks if target is overdue based on nextExpectedRequestAt.
+ */
+export const isOverdueByExpectedTime = (pollStatus?: { nextExpectedRequestAt?: number }): boolean => {
+    if (!pollStatus?.nextExpectedRequestAt) return false;
+    return Date.now() > pollStatus.nextExpectedRequestAt;
 };
 
 /**

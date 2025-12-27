@@ -20,48 +20,47 @@ export const shimmer = keyframes`
 // Color Theme Definitions - Combined from Dashboard & Feature Overviews
 export const OVERVIEW_THEMES = {
     targets: {
-        gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-        accentLight: 'rgba(16, 185, 129, 0.08)',
-        accentBorder: 'rgba(16, 185, 129, 0.2)',
-        iconBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-        color: 'var(--ant-color-success, #10b981)',
+        gradient: 'linear-gradient(135deg, var(--ant-color-success) 0%, var(--ant-color-success-active) 100%)',
+        accentLight: 'var(--ant-color-success-bg)',
+        accentBorder: 'var(--ant-color-success-border)',
+        iconBg: 'linear-gradient(135deg, var(--ant-color-success) 0%, var(--ant-color-success-active) 100%)',
+        color: 'var(--ant-color-success)',
     },
     distributions: {
-        gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-        accentLight: 'rgba(99, 102, 241, 0.08)',
-        accentBorder: 'rgba(99, 102, 241, 0.2)',
-        iconBg: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-        color: 'var(--ant-color-primary, #6366f1)',
+        gradient: 'linear-gradient(135deg, var(--ant-color-primary) 0%, var(--ant-color-primary-active) 100%)',
+        accentLight: 'var(--ant-color-primary-bg)',
+        accentBorder: 'var(--ant-color-primary-border)',
+        iconBg: 'linear-gradient(135deg, var(--ant-color-primary) 0%, var(--ant-color-primary-active) 100%)',
+        color: 'var(--ant-color-primary)',
     },
     actions: {
-        gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-        accentLight: 'rgba(59, 130, 246, 0.08)',
-        accentBorder: 'rgba(59, 130, 246, 0.2)',
-        iconBg: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-        color: 'var(--ant-color-info, #3b82f6)',
+        gradient: 'linear-gradient(135deg, var(--ant-color-info) 0%, var(--ant-color-info-active) 100%)',
+        accentLight: 'var(--ant-color-info-bg)',
+        accentBorder: 'var(--ant-color-info-border)',
+        iconBg: 'linear-gradient(135deg, var(--ant-color-info) 0%, var(--ant-color-info-active) 100%)',
+        color: 'var(--ant-color-info)',
     },
     rollouts: {
-        gradient: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-        accentLight: 'rgba(245, 158, 11, 0.08)',
-        accentBorder: 'rgba(245, 158, 11, 0.2)',
-        iconBg: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-        color: 'var(--ant-color-warning, #f59e0b)',
+        gradient: 'linear-gradient(135deg, var(--ant-color-warning) 0%, var(--ant-color-warning-active) 100%)',
+        accentLight: 'var(--ant-color-warning-bg)',
+        accentBorder: 'var(--ant-color-warning-border)',
+        iconBg: 'linear-gradient(135deg, var(--ant-color-warning) 0%, var(--ant-color-warning-active) 100%)',
+        color: 'var(--ant-color-warning)',
     },
-    // Dashboard Specific / Additional Themes
     connectivity: {
-        gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-        accentLight: 'rgba(16, 185, 129, 0.08)',
-        accentBorder: 'rgba(16, 185, 129, 0.2)',
-        iconBg: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+        gradient: 'linear-gradient(135deg, var(--ant-color-success) 0%, var(--ant-color-success-active) 100%)',
+        accentLight: 'var(--ant-color-success-bg)',
+        accentBorder: 'var(--ant-color-success-border)',
+        iconBg: 'linear-gradient(135deg, var(--ant-color-success) 0%, var(--ant-color-success-active) 100%)',
     },
     deployment: {
-        gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-        accentLight: 'rgba(59, 130, 246, 0.08)',
-        accentBorder: 'rgba(59, 130, 246, 0.2)',
-        iconBg: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+        gradient: 'linear-gradient(135deg, var(--ant-color-primary) 0%, var(--ant-color-primary-active) 100%)',
+        accentLight: 'var(--ant-color-primary-bg)',
+        accentBorder: 'var(--ant-color-primary-border)',
+        iconBg: 'linear-gradient(135deg, var(--ant-color-primary) 0%, var(--ant-color-primary-active) 100%)',
     },
     fragmentation: {
-        gradient: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+        gradient: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)', // Still semi-hardcoded as there is no 'pink' in default antd tokens easily available like this
         accentLight: 'rgba(236, 72, 153, 0.08)',
         accentBorder: 'rgba(236, 72, 153, 0.2)',
         iconBg: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
@@ -127,17 +126,10 @@ export const GradientTitle = styled(Typography.Title) <{ $theme?: keyof typeof O
         margin: 0;
         background: ${props => {
         const theme = props.$theme ? OVERVIEW_THEMES[props.$theme] : null;
-        return theme ? theme.gradient : 'linear-gradient(135deg, #1e293b 0%, #475569 100%)';
+        return theme ? theme.gradient : 'linear-gradient(135deg, var(--ant-color-text) 0%, var(--ant-color-text-description) 100%)';
     }};
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    [data-theme='dark'] &,
-    .dark-mode & {
-        background: linear-gradient(135deg, #f8fafc 0%, #cbd5e1 100%);
-        -webkit-background-clip: text;
         background-clip: text;
     }
 `;
@@ -175,9 +167,9 @@ export const ChartsContainer = styled.div`
 export const OverviewStatsCard = styled(Card) <{ $accentColor?: string; $delay?: number; $pulse?: boolean }>`
     border: none;
     border-radius: 16px;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
+    background: var(--ant-color-bg-container);
     backdrop-filter: blur(20px);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--ant-shadow-tertiary);
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
     overflow: hidden;
@@ -205,8 +197,7 @@ export const OverviewStatsCard = styled(Card) <{ $accentColor?: string; $delay?:
 
     [data-theme='dark'] &,
     .dark-mode & {
-        background: linear-gradient(145deg, rgba(24, 24, 27, 0.95) 0%, rgba(9, 9, 11, 0.9) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--ant-color-border-secondary);
     }
 
     .ant-card-body {
@@ -225,11 +216,11 @@ export const OverviewChartCard = styled(Card) <{ $delay?: number; $theme?: keyof
     background: ${props => {
         const theme = props.$theme ? OVERVIEW_THEMES[props.$theme] : null;
         return theme
-            ? `linear-gradient(145deg, ${theme.accentLight} 0%, rgba(255, 255, 255, 0.98) 30%, rgba(255, 255, 255, 0.95) 100%)`
-            : 'linear-gradient(145deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%)';
+            ? `linear-gradient(145deg, ${theme.accentLight} 0%, var(--ant-color-bg-container) 30%, var(--ant-color-bg-container) 100%)`
+            : 'var(--ant-color-bg-container)';
     }};
     backdrop-filter: blur(20px);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--ant-shadow-tertiary);
     animation: ${fadeInUp} 0.5s ease-out;
     animation-delay: ${props => (props.$delay || 0) * 0.1}s;
     animation-fill-mode: both;
@@ -289,11 +280,10 @@ export const OverviewChartCard = styled(Card) <{ $delay?: number; $theme?: keyof
 
     [data-theme='dark'] &,
     .dark-mode & {
-        background: linear-gradient(145deg, rgba(24, 24, 27, 0.95) 0%, rgba(9, 9, 11, 0.9) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--ant-color-border-secondary);
         
         .ant-card-head {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            border-bottom: 1px solid var(--ant-color-border-secondary);
         }
     }
 `;
@@ -365,10 +355,10 @@ export const ChartLegendItem = styled.div`
 
     [data-theme='dark'] &,
     .dark-mode & {
-        background: linear-gradient(135deg, rgba(24, 24, 27, 0.8) 0%, rgba(9, 9, 11, 0.6) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        background: var(--ant-color-bg-container-secondary, rgba(255, 255, 255, 0.04));
+        border: 1px solid var(--ant-color-border-secondary);
         
-        span { color: var(--ant-color-text-description, #94a3b8) !important; }
+        span { color: var(--ant-color-text-description) !important; }
     }
 `;
 
@@ -393,8 +383,8 @@ export const ActivityItem = styled.div`
 
     [data-theme='dark'] &,
     .dark-mode & {
-        background: linear-gradient(135deg, rgba(24, 24, 27, 0.8) 0%, rgba(9, 9, 11, 0.6) 100%);
-        border: 1px solid rgba(255, 255, 255, 0.03);
+        background: var(--ant-color-bg-container-secondary, rgba(255, 255, 255, 0.04));
+        border: 1px solid var(--ant-color-border-secondary);
     }
 `;
 

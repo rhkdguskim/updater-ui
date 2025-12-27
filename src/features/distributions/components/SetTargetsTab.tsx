@@ -3,7 +3,7 @@ import { useGetAssignedTargets1, useGetInstalledTargets } from '@/api/generated/
 import { Table, Typography, Segmented, Space } from 'antd';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 
 const { Text } = Typography;
 
@@ -56,7 +56,7 @@ const SetTargetsTab: React.FC<SetTargetsTabProps> = ({ distributionSetId }) => {
             title: t('targets:table.lastControllerRequest'),
             dataIndex: 'lastContact',
             key: 'lastContact',
-            render: (val: number) => val ? format(val, 'yyyy-MM-dd HH:mm:ss') : '-'
+            render: (val: number) => val ? dayjs(val).format('YYYY-MM-DD HH:mm:ss') : '-'
         }
     ];
 

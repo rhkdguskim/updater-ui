@@ -10,7 +10,7 @@ import {
 } from '@/api/generated/software-modules/software-modules';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { axiosInstance } from '@/api/axios-instance';
-import { format } from 'date-fns';
+import dayjs from 'dayjs';
 import type { MgmtArtifact } from '@/api/generated/model';
 import ModuleMetadataTab from './components/ModuleMetadataTab';
 import { useTranslation } from 'react-i18next';
@@ -182,11 +182,11 @@ const SoftwareModuleDetail: React.FC = () => {
             <Descriptions.Item label={t('detail.labels.description')}>{moduleData?.description}</Descriptions.Item>
             <Descriptions.Item label={t('detail.labels.createdBy')}>{moduleData?.createdBy}</Descriptions.Item>
             <Descriptions.Item label={t('detail.labels.createdAt')}>
-                {moduleData?.createdAt ? format(moduleData.createdAt, 'yyyy-MM-dd HH:mm:ss') : '-'}
+                {moduleData?.createdAt ? dayjs(moduleData.createdAt).format('YYYY-MM-DD HH:mm:ss') : '-'}
             </Descriptions.Item>
             <Descriptions.Item label={t('detail.labels.lastModifiedBy')}>{moduleData?.lastModifiedBy}</Descriptions.Item>
             <Descriptions.Item label={t('detail.labels.lastModifiedAt')}>
-                {moduleData?.lastModifiedAt ? format(moduleData.lastModifiedAt, 'yyyy-MM-dd HH:mm:ss') : '-'}
+                {moduleData?.lastModifiedAt ? dayjs(moduleData.lastModifiedAt).format('YYYY-MM-DD HH:mm:ss') : '-'}
             </Descriptions.Item>
         </Descriptions>
     );
